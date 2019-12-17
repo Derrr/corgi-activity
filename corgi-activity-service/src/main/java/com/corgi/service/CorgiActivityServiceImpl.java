@@ -25,7 +25,7 @@ public class CorgiActivityServiceImpl implements CorgiActivityService {
     @Override
     public CorgiActivity addCorgiActivity(CorgiActivity corgiActivity) {
         ActivityMongo activityMongo = corgiActivityDao.addActivity(corgiActivity);
-        log.info(activityMongo.getId());
+        log.info(activityMongo.getId()+"..."+activityMongo.getMongoId());
         return activityMongo;
     }
 

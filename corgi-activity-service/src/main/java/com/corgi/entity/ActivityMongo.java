@@ -54,5 +54,9 @@ public class ActivityMongo extends CorgiActivity {
         super.setId(id);
     }
 
+    public String getMongoId(){
+        return this.id;
+    }
+
 
 }
