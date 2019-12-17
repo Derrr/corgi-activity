@@ -44,19 +44,9 @@ public class ActivityMongo extends CorgiActivity {
         this.location = new GeoJsonPoint(activity.getLng(), activity.getLat());
     }
 
-    @Override
-    public String getId() {
-        return super.getId();
-    }
-
-    @Override
-    public void setId(String id) {
+    public ActivityMongo initId(){
         super.setId(id);
+        return this;
     }
-
-    public String getMongoId(){
-        return this.id;
-    }
-
 
 }
