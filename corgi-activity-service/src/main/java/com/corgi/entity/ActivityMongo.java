@@ -4,6 +4,8 @@ import com.corgi.activity.entity.CorgiActivity;
 import lombok.Data;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.geo.GeoJsonPoint;
+import org.springframework.data.mongodb.core.index.CompoundIndex;
+import org.springframework.data.mongodb.core.index.CompoundIndexes;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 
@@ -12,6 +14,10 @@ import org.springframework.data.mongodb.core.mapping.Document;
  */
 @Data
 @Document(collection = "CorgiActivity")
+@CompoundIndexes(
+        {
+                @CompoundIndex(name = "activity_location",def = "{'location':'2dsphere'}")
+        })
 public class ActivityMongo extends CorgiActivity {
     @Id
     private String id;
