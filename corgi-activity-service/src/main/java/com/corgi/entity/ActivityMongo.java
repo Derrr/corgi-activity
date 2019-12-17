@@ -2,11 +2,11 @@ package com.corgi.entity;
 
 import com.corgi.activity.entity.CorgiActivity;
 import lombok.Data;
-import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.geo.GeoJsonPoint;
 import org.springframework.data.mongodb.core.index.CompoundIndex;
 import org.springframework.data.mongodb.core.index.CompoundIndexes;
 import org.springframework.data.mongodb.core.mapping.Document;
+import org.springframework.data.mongodb.core.mapping.MongoId;
 
 
 /**
@@ -19,7 +19,7 @@ import org.springframework.data.mongodb.core.mapping.Document;
                 @CompoundIndex(name = "activity_location",def = "{'location':'2dsphere'}")
         })
 public class ActivityMongo extends CorgiActivity {
-    @Id
+    @MongoId
     private String id;
 
     private GeoJsonPoint location;

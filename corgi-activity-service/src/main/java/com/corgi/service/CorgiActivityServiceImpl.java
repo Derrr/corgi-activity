@@ -5,6 +5,7 @@ import com.corgi.activity.api.CorgiActivityService;
 import com.corgi.activity.entity.CorgiActivity;
 import com.corgi.dao.CorgiActivityDao;
 import com.corgi.entity.ActivityMongo;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -14,6 +15,7 @@ import java.util.List;
 /**
  * @author tairanliu
  */
+@Slf4j
 @Service(interfaceClass = CorgiActivityService.class)
 @Component
 public class CorgiActivityServiceImpl implements CorgiActivityService {
@@ -22,7 +24,9 @@ public class CorgiActivityServiceImpl implements CorgiActivityService {
 
     @Override
     public CorgiActivity addCorgiActivity(CorgiActivity corgiActivity) {
-        return corgiActivityDao.addActivity(corgiActivity);
+        ActivityMongo activityMongo = corgiActivityDao.addActivity(corgiActivity);
+        log.info(activityMongo.getId());
+        return activityMongo;
     }
 
     @Override

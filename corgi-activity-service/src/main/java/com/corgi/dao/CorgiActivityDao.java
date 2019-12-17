@@ -23,7 +23,7 @@ public class CorgiActivityDao {
     @Autowired
     MongoTemplate mongoTemplate;
 
-    public CorgiActivity addActivity(CorgiActivity corgiActivity) {
+    public ActivityMongo addActivity(CorgiActivity corgiActivity) {
         return mongoTemplate.insert(new ActivityMongo(corgiActivity));
     }
 
