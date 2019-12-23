@@ -13,6 +13,8 @@ import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Component;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -23,13 +25,23 @@ public class CorgiActivityDao {
     @Autowired
     MongoTemplate mongoTemplate;
 
+    private SimpleDateFormat sdf = new SimpleDateFormat("yyyy/MM/dd HH:mm");
+
+    private SimpleDateFormat created_sdf = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
+
+
     public ActivityMongo addActivity(CorgiActivity corgiActivity) {
-        return mongoTemplate.insert(new ActivityMongo(corgiActivity));
+        ActivityMongo activity = new ActivityMongo(corgiActivity);
+        activity.setCreateTime(created_sdf.format(new Date()));
+        activity.setStatus(CorgiActivity.CREATED);
+        return mongoTemplate.insert(activity);
     }
 
     public List<ActivityMongo> getNearActivities(double lng, double lat, double range) {
-        Criteria criteria = Criteria.where("location").withinSphere(new Circle(new Point(lng, lat), new Distance(range, Metrics.KILOMETERS)));
-        Query query = new Query(criteria);
+
+        Criteria criteriaLocation = Criteria.where("location").withinSphere(new Circle(new Point(lng, lat), new Distance(range, Metrics.KILOMETERS)));
+        Criteria criteriaSignUpTime = Criteria.where("signUpTime").gte(sdf.format(new Date()));
+        Query query = new Query(new Criteria().andOperator(criteriaLocation, criteriaSignUpTime));
         List<ActivityMongo> corgiActivities = mongoTemplate.find(query, ActivityMongo.class);
         return corgiActivities;
     }
