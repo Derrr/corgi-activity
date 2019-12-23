@@ -17,7 +17,7 @@ import org.springframework.data.mongodb.core.mapping.MongoId;
 @CompoundIndexes(
         {
                 @CompoundIndex(name = "activity_location",def = "{'location':'2dsphere'}"),
-                @CompoundIndex(name = "activity_creator", def = "{'userId':'1'}")
+                @CompoundIndex(name = "activity_creator", def = "{'userId':1}")
         })
 public class ActivityMongo extends CorgiActivity {
     @MongoId
