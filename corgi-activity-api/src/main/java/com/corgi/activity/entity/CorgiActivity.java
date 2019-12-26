@@ -11,6 +11,7 @@ import java.util.List;
 @Data
 public class CorgiActivity implements Serializable {
     public static final String CREATED = "created";
+    public static final String DELETED = "deleted";
 
     private String id;
     private String title;
@@ -25,6 +26,7 @@ public class CorgiActivity implements Serializable {
     private String payType;
     private Integer budget;
     private String createTime;
+    private String updateTime;
     private String status;
     private List<String> pics;
 }

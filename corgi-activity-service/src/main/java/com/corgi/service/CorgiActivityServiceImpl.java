@@ -38,4 +38,18 @@ public class CorgiActivityServiceImpl implements CorgiActivityService {
         }
         return result;
     }
+
+    @Override
+    public CorgiActivity updateCorgiActivity(CorgiActivity corgiActivity) {
+        ActivityMongo activityMongo = corgiActivityDao.updateActivity(corgiActivity);
+        activityMongo.initId();
+        return activityMongo;
+    }
+
+    @Override
+    public CorgiActivity deleteCorgiActivity(String activityId) {
+        ActivityMongo activityMongo = corgiActivityDao.deleteActivityById(activityId);
+        activityMongo.initId();
+        return activityMongo;
+    }
 }

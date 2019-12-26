@@ -11,4 +11,8 @@ public interface CorgiActivityService {
     CorgiActivity addCorgiActivity(CorgiActivity corgiActivity);
 
     List<CorgiActivity> getCorgiActivityByRange(double lng,double lat,double range);
+
+    CorgiActivity updateCorgiActivity(CorgiActivity corgiActivity);
+
+    CorgiActivity deleteCorgiActivity(String activityId);
 }
