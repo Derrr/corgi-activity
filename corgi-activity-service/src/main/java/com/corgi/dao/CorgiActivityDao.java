@@ -65,6 +65,7 @@ public class CorgiActivityDao {
         Criteria criteriaStatus = Criteria.where("status").ne(CorgiActivity.DELETED);
         Query query = new Query(new Criteria().andOperator(criteriaLocation, criteriaSignUpTime, criteriaStatus));
         List<ActivityMongo> corgiActivities = mongoTemplate.find(query, ActivityMongo.class);
+        System.out.println("..." + corgiActivities);
         return corgiActivities;
     }
 }
