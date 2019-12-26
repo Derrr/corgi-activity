@@ -34,6 +34,7 @@ public class CorgiActivityServiceImpl implements CorgiActivityService {
         List<CorgiActivity> result = new ArrayList<>();
         List<ActivityMongo> find = corgiActivityDao.getNearActivities(lng, lat, range);
         for (ActivityMongo activityMongo : find) {
+            System.out.println("id == " + activityMongo.getId());
             result.add(activityMongo.initId());
         }
         return result;
