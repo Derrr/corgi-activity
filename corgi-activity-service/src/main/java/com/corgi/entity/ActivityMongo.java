@@ -2,6 +2,8 @@ package com.corgi.entity;
 
 import com.corgi.activity.entity.CorgiActivity;
 import lombok.Data;
+import org.bson.types.ObjectId;
+import org.springframework.beans.BeanUtils;
 import org.springframework.data.mongodb.core.geo.GeoJsonPoint;
 import org.springframework.data.mongodb.core.index.CompoundIndex;
 import org.springframework.data.mongodb.core.index.CompoundIndexes;
@@ -23,7 +25,7 @@ import java.lang.reflect.Method;
         })
 public class ActivityMongo extends CorgiActivity {
     @MongoId
-    private String id;
+    private ObjectId mongoId;
 
     private GeoJsonPoint location;
 
@@ -48,9 +50,13 @@ public class ActivityMongo extends CorgiActivity {
         this.location = new GeoJsonPoint(activity.getLng(), activity.getLat());
     }
 
-    public ActivityMongo initId() {
-        super.setId(id);
-        return this;
+    public CorgiActivity getActivity() {
+        CorgiActivity activity = new CorgiActivity();
+        BeanUtils.copyProperties(this, activity);
+        if (this.mongoId != null) {
+            activity.setId(this.mongoId.toString());
+        }
+        return activity;
     }
 
 }

@@ -3,6 +3,7 @@ package com.corgi.dao;
 
 import com.corgi.activity.entity.CorgiActivity;
 import com.corgi.entity.ActivityMongo;
+import com.corgi.util.ActivityUtil;
 import org.bson.types.ObjectId;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,16 +38,14 @@ public class CorgiActivityDao {
     }
 
     public ActivityMongo addActivity(CorgiActivity corgiActivity) {
-        ActivityMongo activity = new ActivityMongo(corgiActivity);
-        BeanUtils.copyProperties(corgiActivity, activity);
+        ActivityMongo activity = ActivityUtil.getMongo(corgiActivity);
         activity.setCreateTime(created_sdf.format(new Date()));
         activity.setStatus(CorgiActivity.CREATED);
         return mongoTemplate.insert(activity);
     }
 
     public ActivityMongo updateActivity(CorgiActivity corgiActivity) {
-        ActivityMongo activity = new ActivityMongo(corgiActivity);
-        BeanUtils.copyProperties(corgiActivity, activity);
+        ActivityMongo activity = ActivityUtil.getMongo(corgiActivity);
         activity.setUpdateTime(created_sdf.format(new Date()));
         return mongoTemplate.save(activity);
     }
@@ -65,7 +64,6 @@ public class CorgiActivityDao {
         Criteria criteriaStatus = Criteria.where("status").ne(CorgiActivity.DELETED);
         Query query = new Query(new Criteria().andOperator(criteriaLocation, criteriaSignUpTime, criteriaStatus));
         List<ActivityMongo> corgiActivities = mongoTemplate.find(query, ActivityMongo.class);
-        System.out.println("..." + corgiActivities);
         return corgiActivities;
     }
 }

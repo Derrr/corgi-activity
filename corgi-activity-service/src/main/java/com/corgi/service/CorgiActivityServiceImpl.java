@@ -25,8 +25,7 @@ public class CorgiActivityServiceImpl implements CorgiActivityService {
     @Override
     public CorgiActivity addCorgiActivity(CorgiActivity corgiActivity) {
         ActivityMongo activityMongo = corgiActivityDao.addActivity(corgiActivity);
-        activityMongo.initId();
-        return activityMongo;
+        return activityMongo.getActivity();
     }
 
     @Override
@@ -34,8 +33,7 @@ public class CorgiActivityServiceImpl implements CorgiActivityService {
         List<CorgiActivity> result = new ArrayList<>();
         List<ActivityMongo> find = corgiActivityDao.getNearActivities(lng, lat, range);
         for (ActivityMongo activityMongo : find) {
-            System.out.println("id == " + activityMongo.getId());
-            result.add(activityMongo.initId());
+            result.add(activityMongo.getActivity());
         }
         return result;
     }
@@ -43,14 +41,12 @@ public class CorgiActivityServiceImpl implements CorgiActivityService {
     @Override
     public CorgiActivity updateCorgiActivity(CorgiActivity corgiActivity) {
         ActivityMongo activityMongo = corgiActivityDao.updateActivity(corgiActivity);
-        activityMongo.initId();
-        return activityMongo;
+        return activityMongo.getActivity();
     }
 
     @Override
     public CorgiActivity deleteCorgiActivity(String activityId) {
         ActivityMongo activityMongo = corgiActivityDao.deleteActivityById(activityId);
-        activityMongo.initId();
-        return activityMongo;
+        return activityMongo.getActivity();
     }
 }
