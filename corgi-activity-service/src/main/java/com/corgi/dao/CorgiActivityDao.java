@@ -16,6 +16,7 @@ import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.CriteriaExtensionsKt;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -34,36 +35,82 @@ public class CorgiActivityDao {
     private SimpleDateFormat created_sdf = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
 
     public ActivityMongo getActivityById(String activityId) {
-        return mongoTemplate.findById(new ObjectId(activityId), ActivityMongo.class);
+        ActivityMongo mongo = mongoTemplate.findById(new ObjectId(activityId), ActivityMongo.class);
+        mongo.setCreateTime(sdf.format(new Date()));
+        return mongo;
+    }
+
+    public List<ActivityMongo> getActivityByIds(List<ObjectId> activityIds) {
+        Query query = new Query(Criteria.where("_id").in(activityIds));
+        List<ActivityMongo> activityMongoList = mongoTemplate.find(query, ActivityMongo.class);
+        if (activityMongoList != null) {
+            for (ActivityMongo mongo : activityMongoList) {
+                mongo.setCreateTime(sdf.format(new Date()));
+            }
+        }
+        return activityMongoList;
     }
 
     public ActivityMongo addActivity(CorgiActivity corgiActivity) {
         ActivityMongo activity = ActivityUtil.getMongo(corgiActivity);
         activity.setCreateTime(created_sdf.format(new Date()));
         activity.setStatus(CorgiActivity.CREATED);
-        return mongoTemplate.insert(activity);
+        ActivityMongo mongo = mongoTemplate.insert(activity);
+        mongo.setCreateTime(sdf.format(new Date()));
+        return mongo;
     }
 
     public ActivityMongo updateActivity(CorgiActivity corgiActivity) {
         ActivityMongo activity = ActivityUtil.getMongo(corgiActivity);
         activity.setUpdateTime(created_sdf.format(new Date()));
-        return mongoTemplate.save(activity);
+        ActivityMongo mongo = mongoTemplate.save(activity);
+        mongo.setCreateTime(sdf.format(new Date()));
+        return mongo;
     }
 
     public ActivityMongo deleteActivityById(String activityId) {
         ActivityMongo activity = mongoTemplate.findById(new ObjectId(activityId), ActivityMongo.class);
         activity.setUpdateTime(created_sdf.format(new Date()));
         activity.setStatus(CorgiActivity.DELETED);
-        return mongoTemplate.save(activity);
+        activity.setCreateTime(sdf.format(new Date()));
+        return activity;
     }
 
-    public List<ActivityMongo> getNearActivities(double lng, double lat, double range) {
-
+    public List<ActivityMongo> getNearActivities(double lng, double lat, double range, String type) {
         Criteria criteriaLocation = Criteria.where("location").withinSphere(new Circle(new Point(lng, lat), new Distance(range, Metrics.KILOMETERS)));
         Criteria criteriaSignUpTime = Criteria.where("signUpTime").gte(sdf.format(new Date()));
         Criteria criteriaStatus = Criteria.where("status").ne(CorgiActivity.DELETED);
-        Query query = new Query(new Criteria().andOperator(criteriaLocation, criteriaSignUpTime, criteriaStatus));
+        Criteria queryCriteria = new Criteria().andOperator(criteriaLocation, criteriaSignUpTime, criteriaStatus);
+        if (!StringUtils.isEmpty(type)) {
+            queryCriteria = queryCriteria.andOperator(Criteria.where("activityType").is(type));
+        }
+        Query query = new Query(queryCriteria);
         List<ActivityMongo> corgiActivities = mongoTemplate.find(query, ActivityMongo.class);
+        return corgiActivities;
+    }
+
+    public List<ActivityMongo> getRunningActivities(String userId) {
+        Criteria userCriteria = Criteria.where("userId").is(userId);
+        Criteria statusCriteria = Criteria.where("status").is(CorgiActivity.CREATED);
+        Criteria signUpCriteria = Criteria.where("signUpTime").gte(sdf.format(new Date()));
+        Query query = new Query(new Criteria().andOperator(userCriteria, statusCriteria, signUpCriteria));
+        List<ActivityMongo> corgiActivities = mongoTemplate.find(query, ActivityMongo.class);
+        return corgiActivities;
+    }
+
+    public List<ActivityMongo> getEndedActivities(String userId) {
+        Criteria userCriteria = Criteria.where("userId").is(userId);
+        Criteria statusCriteria = new Criteria().orOperator(
+                Criteria.where("status").is(CorgiActivity.DELETED),
+                Criteria.where("signUpTime").lt(sdf.format(new Date()))
+        );
+        Query query = new Query(new Criteria().andOperator(userCriteria, statusCriteria));
+        List<ActivityMongo> corgiActivities = mongoTemplate.find(query, ActivityMongo.class);
+        if (corgiActivities != null) {
+            for (ActivityMongo mongo : corgiActivities) {
+                mongo.setCreateTime(sdf.format(new Date()));
+            }
+        }
         return corgiActivities;
     }
 }

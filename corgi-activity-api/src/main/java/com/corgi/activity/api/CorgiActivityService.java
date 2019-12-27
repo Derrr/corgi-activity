@@ -10,7 +10,13 @@ import java.util.List;
 public interface CorgiActivityService {
     CorgiActivity addCorgiActivity(CorgiActivity corgiActivity);
 
-    List<CorgiActivity> getCorgiActivityByRange(double lng,double lat,double range);
+    List<CorgiActivity> getCorgiActivityByRange(double lng, double lat, double range, String type);
+
+    List<CorgiActivity> getUserRunningActivity(String userId);
+
+    List<CorgiActivity> getUserEndedActivity(String userId);
+
+    List<CorgiActivity> getActivityByIds(List<String> activityIds);
 
     CorgiActivity updateCorgiActivity(CorgiActivity corgiActivity);
 

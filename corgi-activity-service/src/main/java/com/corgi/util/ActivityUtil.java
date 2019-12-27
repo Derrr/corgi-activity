@@ -12,6 +12,7 @@ public class ActivityUtil {
         BeanUtils.copyProperties(activity, activityMongo);
         if (!StringUtils.isEmpty(activity.getId())) {
             activityMongo.setMongoId(new ObjectId(activity.getId()));
+            activityMongo.setId(null);
         }
         return activityMongo;
     }
