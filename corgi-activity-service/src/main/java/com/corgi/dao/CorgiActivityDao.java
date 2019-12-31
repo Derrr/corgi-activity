@@ -18,6 +18,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -125,6 +126,9 @@ public class CorgiActivityDao {
         for (int i = 0; i < fields.length; i++) {
             Field field = fields[i];
             field.setAccessible(true);
+            if (Modifier.isStatic(field.getModifiers())) {
+                continue;
+            }
             try {
                 Object value = field.get(activity);
                 if (value != null) {
