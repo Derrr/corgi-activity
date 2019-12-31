@@ -137,6 +137,8 @@ public class CorgiActivityDao {
 
                     if (LIKE_FIELDS.contains(fieldName)) {
                         criteriaList.add(Criteria.where(field.getName()).regex("^.*" + value + ".*$"));
+                    } else if (value instanceof Integer && (Integer) value != 0) {
+                        criteriaList.add(Criteria.where(field.getName()).is(value));
                     } else {
                         criteriaList.add(Criteria.where(field.getName()).is(value));
                     }
