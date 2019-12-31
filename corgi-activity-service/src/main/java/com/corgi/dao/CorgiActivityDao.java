@@ -126,7 +126,7 @@ public class CorgiActivityDao {
         for (int i = 0; i < fields.length; i++) {
             Field field = fields[i];
             field.setAccessible(true);
-            if (Modifier.isStatic(field.getModifiers())) {
+            if (Modifier.isStatic(field.getModifiers()) || field.getType().equals(double.class)) {
                 continue;
             }
             try {

@@ -15,11 +15,11 @@ class CorgiActivityServiceApplicationTests {
 	@Test
 	static void contextLoads() {
 		Field[] fields = CorgiActivity.class.getDeclaredFields();
-		List<Criteria> criteriaList = new ArrayList<>();
 		for (int i = 0; i < fields.length; i++) {
 			Field field = fields[i];
 			field.setAccessible(true);
-			System.out.println(field.getName()+" "+field.getType());
+
+			System.out.println(field.getName()+" "+field.getType() + int.class.equals(field.getType()));
 		}
 	}
 
