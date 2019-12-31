@@ -80,6 +80,7 @@ public class CorgiActivityServiceImpl implements CorgiActivityService {
         List<CorgiActivity> corgiActivities = new ArrayList<>();
         if (activityMongoList != null) {
             for (ActivityMongo mongo : activityMongoList) {
+                log.info("mongo" + mongo);
                 corgiActivities.add(mongo.getActivity());
             }
         }
