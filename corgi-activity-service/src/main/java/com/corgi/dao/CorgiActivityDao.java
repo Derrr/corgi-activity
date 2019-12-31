@@ -4,6 +4,7 @@ package com.corgi.dao;
 import com.corgi.activity.entity.CorgiActivity;
 import com.corgi.entity.ActivityMongo;
 import com.corgi.util.ActivityUtil;
+import lombok.extern.slf4j.Slf4j;
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.geo.Circle;
@@ -26,6 +27,7 @@ import java.util.List;
 /**
  * @author tairanliu
  */
+@Slf4j
 @Component
 public class CorgiActivityDao {
     @Autowired
@@ -127,6 +129,8 @@ public class CorgiActivityDao {
                 Object value = field.get(activity);
                 if (value != null) {
                     String fieldName = field.getName();
+                    log.info("field " + fieldName + " value=" + value);
+
                     if (LIKE_FIELDS.contains(fieldName)) {
                         criteriaList.add(Criteria.where(field.getName()).regex("^.*" + value + ".*$"));
                     } else {
