@@ -1,13 +1,30 @@
 package com.corgi.activity;
 
+import com.corgi.activity.entity.CorgiActivity;
 import org.junit.Test;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.mongodb.core.query.Criteria;
 
-@SpringBootTest
+import java.lang.reflect.Field;
+import java.util.ArrayList;
+import java.util.List;
+
+//@SpringBootTest
 class CorgiActivityServiceApplicationTests {
 
 	@Test
-	void contextLoads() {
+	static void contextLoads() {
+		Field[] fields = CorgiActivity.class.getDeclaredFields();
+		List<Criteria> criteriaList = new ArrayList<>();
+		for (int i = 0; i < fields.length; i++) {
+			Field field = fields[i];
+			field.setAccessible(true);
+			System.out.println(field.getName()+" "+field.getType());
+		}
+	}
+
+	public static void main(String[] args) {
+		contextLoads();
 	}
 
 }
