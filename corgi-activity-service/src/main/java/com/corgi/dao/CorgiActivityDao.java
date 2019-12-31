@@ -5,7 +5,6 @@ import com.corgi.activity.entity.CorgiActivity;
 import com.corgi.entity.ActivityMongo;
 import com.corgi.util.ActivityUtil;
 import org.bson.types.ObjectId;
-import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.geo.Circle;
 import org.springframework.data.geo.Distance;
@@ -13,12 +12,14 @@ import org.springframework.data.geo.Metrics;
 import org.springframework.data.geo.Point;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
-import org.springframework.data.mongodb.core.query.CriteriaExtensionsKt;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
+import java.lang.reflect.Field;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
@@ -33,6 +34,8 @@ public class CorgiActivityDao {
     private SimpleDateFormat sdf = new SimpleDateFormat("yyyy/MM/dd HH:mm");
 
     private SimpleDateFormat created_sdf = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
+
+    private static List<String> LIKE_FIELDS = Arrays.asList("title", "content", "address");
 
     public ActivityMongo getActivityById(String activityId) {
         ActivityMongo mongo = mongoTemplate.findById(new ObjectId(activityId), ActivityMongo.class);
@@ -112,5 +115,32 @@ public class CorgiActivityDao {
             }
         }
         return corgiActivities;
+    }
+
+    public List<ActivityMongo> queryActivities(CorgiActivity activity) {
+        Field[] fields = CorgiActivity.class.getDeclaredFields();
+        List<Criteria> criteriaList = new ArrayList<>();
+        for (int i = 0; i < fields.length; i++) {
+            Field field = fields[i];
+            field.setAccessible(true);
+            try {
+                Object value = field.get(activity);
+                if (value != null) {
+                    String fieldName = field.getName();
+                    if (LIKE_FIELDS.contains(fieldName)) {
+                        criteriaList.add(Criteria.where(field.getName()).regex("^.*" + value + ".*$"));
+                    } else {
+                        criteriaList.add(Criteria.where(field.getName()).is(value));
+                    }
+                }
+            } catch (IllegalAccessException e) {
+                e.printStackTrace();
+            }
+        }
+        if (criteriaList.size() > 0) {
+            Query query = new Query(new Criteria().andOperator((Criteria[]) criteriaList.toArray())).limit(20);
+            mongoTemplate.find(query, ActivityMongo.class);
+        }
+        return new ArrayList<>();
     }
 }
