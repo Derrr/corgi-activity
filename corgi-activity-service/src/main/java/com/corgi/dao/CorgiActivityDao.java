@@ -146,7 +146,7 @@ public class CorgiActivityDao {
             }
         }
         if (criteriaList.size() > 0) {
-            Query query = new Query(new Criteria().andOperator((Criteria[]) criteriaList.toArray())).limit(20);
+            Query query = new Query(new Criteria().andOperator(criteriaList.toArray(new Criteria[0]))).limit(20);
             mongoTemplate.find(query, ActivityMongo.class);
         }
         return new ArrayList<>();
