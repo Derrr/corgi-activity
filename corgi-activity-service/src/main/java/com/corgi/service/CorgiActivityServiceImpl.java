@@ -1,10 +1,13 @@
 package com.corgi.service;
 
+import com.alibaba.dubbo.config.annotation.Reference;
 import com.alibaba.dubbo.config.annotation.Service;
 import com.corgi.activity.api.CorgiActivityService;
+import com.corgi.activity.entity.ActivityPic;
 import com.corgi.activity.entity.CorgiActivity;
 import com.corgi.dao.CorgiActivityDao;
 import com.corgi.entity.ActivityMongo;
+import com.corgi.user.api.CorgiPicService;
 import lombok.extern.slf4j.Slf4j;
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,10 +25,17 @@ import java.util.List;
 public class CorgiActivityServiceImpl implements CorgiActivityService {
     @Autowired
     private CorgiActivityDao corgiActivityDao;
+    @Reference
+    private CorgiPicService corgiPicService;
 
     @Override
     public CorgiActivity addCorgiActivity(CorgiActivity corgiActivity) {
         ActivityMongo activityMongo = corgiActivityDao.addActivity(corgiActivity);
+        if(corgiActivity.getPics() != null){
+            for(ActivityPic pic:corgiActivity.getPics()){
+                corgiPicService.addActivityPic(pic);
+            }
+        }
         return activityMongo.getActivity();
     }
 
@@ -81,7 +91,9 @@ public class CorgiActivityServiceImpl implements CorgiActivityService {
         if (activityMongoList != null) {
             for (ActivityMongo mongo : activityMongoList) {
                 log.info("mongo" + mongo);
-                corgiActivities.add(mongo.getActivity());
+                CorgiActivity activity = mongo.getActivity();
+                activity.setPics(corgiPicService.getActivityPic(activity.getId()));
+                corgiActivities.add(activity);
             }
         }
         return corgiActivities;

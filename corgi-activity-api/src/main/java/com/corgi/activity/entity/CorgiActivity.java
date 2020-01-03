@@ -30,7 +30,7 @@ public class CorgiActivity implements Serializable {
     private String updateTime;
     private String currentTime;
     private String status;
-    private List<String> pics;
+    private List<ActivityPic> pics;
 
 
     public String getStatus() {

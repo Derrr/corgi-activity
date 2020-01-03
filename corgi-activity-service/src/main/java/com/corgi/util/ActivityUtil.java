@@ -14,6 +14,7 @@ public class ActivityUtil {
             activityMongo.setMongoId(new ObjectId(activity.getId()));
             activityMongo.setId(null);
         }
+        activityMongo.setPics(null);
         return activityMongo;
     }
 }
