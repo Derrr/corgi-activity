@@ -31,8 +31,9 @@ public class CorgiActivityServiceImpl implements CorgiActivityService {
     @Override
     public CorgiActivity addCorgiActivity(CorgiActivity corgiActivity) {
         ActivityMongo activityMongo = corgiActivityDao.addActivity(corgiActivity);
-        if(corgiActivity.getPics() != null){
-            for(ActivityPic pic:corgiActivity.getPics()){
+        if (corgiActivity.getPics() != null) {
+            for (ActivityPic pic : corgiActivity.getPics()) {
+                pic.setActivityId(activityMongo.getMongoId().toHexString());
                 corgiPicService.addActivityPic(pic);
             }
         }
