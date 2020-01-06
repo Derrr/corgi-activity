@@ -31,6 +31,7 @@ public class CorgiActivity implements Serializable {
     private String currentTime;
     private String status;
     private List<ActivityPic> pics;
+    private List<String> topics;
 
 
     public String getStatus() {

@@ -24,6 +24,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
+import java.util.regex.Pattern;
 
 /**
  * @author tairanliu
@@ -151,5 +152,11 @@ public class CorgiActivityDao {
             return mongoTemplate.find(query, ActivityMongo.class);
         }
         return new ArrayList<>();
+    }
+
+    public long countActivity(String date) {
+        Pattern pattern = Pattern.compile("^" + date);
+        Query query = new Query(Criteria.where("createTime").regex(pattern));
+        return mongoTemplate.count(query, ActivityMongo.class);
     }
 }

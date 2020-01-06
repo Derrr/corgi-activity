@@ -8,6 +8,7 @@ import com.corgi.activity.entity.CorgiActivity;
 import com.corgi.dao.CorgiActivityDao;
 import com.corgi.entity.ActivityMongo;
 import com.corgi.user.api.CorgiPicService;
+import com.corgi.user.api.CorgiToolService;
 import lombok.extern.slf4j.Slf4j;
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,6 +28,8 @@ public class CorgiActivityServiceImpl implements CorgiActivityService {
     private CorgiActivityDao corgiActivityDao;
     @Reference
     private CorgiPicService corgiPicService;
+    @Reference
+    private CorgiToolService corgiToolService;
 
     @Override
     public CorgiActivity addCorgiActivity(CorgiActivity corgiActivity) {
@@ -37,6 +40,7 @@ public class CorgiActivityServiceImpl implements CorgiActivityService {
                 corgiPicService.addActivityPic(pic);
             }
         }
+        corgiToolService.updateActivityTopic(activityMongo.getMongoId().toHexString(), corgiActivity.getTopics());
         return activityMongo.getActivity();
     }
 
@@ -73,6 +77,7 @@ public class CorgiActivityServiceImpl implements CorgiActivityService {
     @Override
     public CorgiActivity updateCorgiActivity(CorgiActivity corgiActivity) {
         ActivityMongo activityMongo = corgiActivityDao.updateActivity(corgiActivity);
+        corgiToolService.updateActivityTopic(activityMongo.getMongoId().toHexString(), corgiActivity.getTopics());
         return activityMongo.getActivity();
     }
 
@@ -85,6 +90,11 @@ public class CorgiActivityServiceImpl implements CorgiActivityService {
     @Override
     public List<CorgiActivity> searchCorgiActivity(CorgiActivity activity) {
         return convertActivity(corgiActivityDao.queryActivities(activity));
+    }
+
+    @Override
+    public long countPublishActivity(String date) {
+        return corgiActivityDao.countActivity(date);
     }
 
     List<CorgiActivity> convertActivity(List<ActivityMongo> activityMongoList) {
