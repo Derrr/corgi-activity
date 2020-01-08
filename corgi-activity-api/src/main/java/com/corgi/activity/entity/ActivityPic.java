@@ -9,6 +9,6 @@ import java.io.Serializable;
  * @author tairanliu
  */
 @Data
-public class ActivityPic extends CorgiPic implements Serializable{
+public class ActivityPic extends CorgiPic{
     private String activityId;
 }
