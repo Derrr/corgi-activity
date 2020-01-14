@@ -1,6 +1,7 @@
 package com.corgi.activity.api;
 
 import com.corgi.activity.entity.CorgiActivity;
+import com.corgi.entity.ActivityQuery;
 
 import java.util.List;
 
@@ -10,11 +11,11 @@ import java.util.List;
 public interface CorgiActivityService {
     CorgiActivity addCorgiActivity(CorgiActivity corgiActivity);
 
-    List<CorgiActivity> getCorgiActivityByRange(double lng, double lat, double range, String type);
+    List<CorgiActivity> getCorgiActivityByRange(double lng, double lat, double range, ActivityQuery activityQuery);
 
-    List<CorgiActivity> getUserRunningActivity(String userId);
+    List<CorgiActivity> getUserRunningActivity(String userId, Integer page, Integer size);
 
-    List<CorgiActivity> getUserEndedActivity(String userId);
+    List<CorgiActivity> getUserEndedActivity(String userId, Integer page, Integer size);
 
     List<CorgiActivity> getActivityByIds(List<String> activityIds);
 
@@ -25,4 +26,6 @@ public interface CorgiActivityService {
     List<CorgiActivity> searchCorgiActivity(CorgiActivity activity);
 
     long countPublishActivity(String date);
+
+    List<CorgiActivity> getActivityByUserIds(List<String> userIds, String status, Integer page, Integer size);
 }

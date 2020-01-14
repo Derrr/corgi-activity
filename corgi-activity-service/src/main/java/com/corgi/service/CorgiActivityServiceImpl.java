@@ -7,6 +7,7 @@ import com.corgi.activity.entity.ActivityPic;
 import com.corgi.activity.entity.CorgiActivity;
 import com.corgi.dao.CorgiActivityDao;
 import com.corgi.entity.ActivityMongo;
+import com.corgi.entity.ActivityQuery;
 import com.corgi.user.api.CorgiPicService;
 import com.corgi.user.api.CorgiToolService;
 import lombok.extern.slf4j.Slf4j;
@@ -45,20 +46,20 @@ public class CorgiActivityServiceImpl implements CorgiActivityService {
     }
 
     @Override
-    public List<CorgiActivity> getCorgiActivityByRange(double lng, double lat, double range, String type) {
-        List<ActivityMongo> find = corgiActivityDao.getNearActivities(lng, lat, range, type);
+    public List<CorgiActivity> getCorgiActivityByRange(double lng, double lat, double range, ActivityQuery activityQuery) {
+        List<ActivityMongo> find = corgiActivityDao.getNearActivities(lng, lat, range, activityQuery);
         return convertActivity(find);
     }
 
     @Override
-    public List<CorgiActivity> getUserRunningActivity(String userId) {
-        List<ActivityMongo> mongoList = corgiActivityDao.getRunningActivities(userId);
+    public List<CorgiActivity> getUserRunningActivity(String userId, Integer page, Integer size) {
+        List<ActivityMongo> mongoList = corgiActivityDao.getRunningActivities(userId, (page - 1) * size, size);
         return convertActivity(mongoList);
     }
 
     @Override
-    public List<CorgiActivity> getUserEndedActivity(String userId) {
-        List<ActivityMongo> mongoList = corgiActivityDao.getEndedActivities(userId);
+    public List<CorgiActivity> getUserEndedActivity(String userId, Integer page, Integer size) {
+        List<ActivityMongo> mongoList = corgiActivityDao.getEndedActivities(userId, (page - 1) * size, size);
         return convertActivity(mongoList);
     }
 
@@ -97,11 +98,15 @@ public class CorgiActivityServiceImpl implements CorgiActivityService {
         return corgiActivityDao.countActivity(date);
     }
 
+    @Override
+    public List<CorgiActivity> getActivityByUserIds(List<String> userIds, String status, Integer page, Integer size) {
+        return convertActivity(corgiActivityDao.getActivityByUserIds(userIds, status, (page - 1) * size, size));
+    }
+
     List<CorgiActivity> convertActivity(List<ActivityMongo> activityMongoList) {
         List<CorgiActivity> corgiActivities = new ArrayList<>();
         if (activityMongoList != null) {
             for (ActivityMongo mongo : activityMongoList) {
-                log.info("mongo" + mongo);
                 CorgiActivity activity = mongo.getActivity();
                 activity.setPics(corgiPicService.getActivityPic(activity.getId()));
                 corgiActivities.add(activity);

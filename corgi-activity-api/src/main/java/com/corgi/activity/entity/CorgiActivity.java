@@ -25,6 +25,9 @@ public class CorgiActivity implements Serializable {
     private int peopleCount;
     private double lat;
     private double lng;
+    private String city;
+    private String area;
+    private String station;
     private String payType;
     private Integer budget;
     private String createTime;
