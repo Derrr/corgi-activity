@@ -26,6 +26,7 @@ import sun.text.resources.uk.CollationData_uk;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.text.CollationElementIterator;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.regex.Pattern;
@@ -166,6 +167,36 @@ public class CorgiActivityDao {
             return mongoTemplate.find(query, ActivityMongo.class);
         }
         return new ArrayList<>();
+    }
+
+    public List<ActivityMongo> searchActivity(CorgiActivity activity, double range) {
+        Criteria criteriaLocation = Criteria.where("location").withinSphere(new Circle(new Point(activity.getLng(), activity.getLat()), new Distance(range, Metrics.KILOMETERS)));
+        Criteria criteriaSignUpTime = Criteria.where("signUpTime").gte(sdf.format(new Date()));
+
+        try {
+            Date signUpTime = sdf.parse(activity.getSignUpTime());
+            Calendar signUpCalendar = Calendar.getInstance();
+
+            signUpCalendar.setTime(signUpTime);
+            signUpCalendar.add(Calendar.HOUR,-1);
+            Date beginDate = signUpCalendar.getTime();
+
+            signUpCalendar.setTime(signUpTime);
+            signUpCalendar.add(Calendar.HOUR,1);
+            Date endDate = signUpCalendar.getTime();
+
+            Criteria criteriaBeginTime = Criteria.where("signUpTime").gte(sdf.format(beginDate));
+            Criteria criteriaEndTime = Criteria.where("signUpTime").lte(sdf.format(endDate));
+
+            criteriaSignUpTime = new Criteria().andOperator(criteriaBeginTime,criteriaEndTime,criteriaSignUpTime);
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+
+        Criteria criteriaStatus = Criteria.where("status").ne(CorgiActivity.DELETED);
+
+        Query query = getDescIdQuery(new Criteria().andOperator(criteriaLocation,criteriaSignUpTime,criteriaStatus), 0, 20);
+        return mongoTemplate.find(query, ActivityMongo.class);
     }
 
     public List<ActivityMongo> getActivityByUserIds(List<String> userIds, String status, Integer start, Integer size) {

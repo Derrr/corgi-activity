@@ -103,6 +103,11 @@ public class CorgiActivityServiceImpl implements CorgiActivityService {
         return convertActivity(corgiActivityDao.getActivityByUserIds(userIds, status, (page - 1) * size, size));
     }
 
+    @Override
+    public List<CorgiActivity> getSimilarActivity(CorgiActivity corgiActivity) {
+        return convertActivity(corgiActivityDao.searchActivity(corgiActivity, 5));
+    }
+
     List<CorgiActivity> convertActivity(List<ActivityMongo> activityMongoList) {
         List<CorgiActivity> corgiActivities = new ArrayList<>();
         if (activityMongoList != null) {
