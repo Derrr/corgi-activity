@@ -82,16 +82,29 @@ public class CorgiActivityDao {
     }
 
     public List<ActivityMongo> getNearActivities(double lng, double lat, double range, ActivityQuery activityQuery) {
-        Criteria criteriaLocation = Criteria.where("location").withinSphere(new Circle(new Point(lng, lat), new Distance(range, Metrics.KILOMETERS)));
-        Criteria criteriaSignUpTime = Criteria.where("signUpTime").gte(sdf.format(new Date()));
-        Criteria criteriaStatus = Criteria.where("status").ne(CorgiActivity.DELETED);
-        Criteria queryCriteria = new Criteria().andOperator(criteriaLocation, criteriaSignUpTime, criteriaStatus);
+        List<Criteria> criteriaList = new ArrayList<>();
+        criteriaList.add(Criteria.where("location").withinSphere(new Circle(new Point(lng, lat), new Distance(range, Metrics.KILOMETERS))));
+        criteriaList.add(Criteria.where("signUpTime").gte(sdf.format(new Date())));
+        criteriaList.add(Criteria.where("status").ne(CorgiActivity.DELETED));
         if (!StringUtils.isEmpty(activityQuery.getType())) {
-            queryCriteria = queryCriteria.andOperator(Criteria.where("activityType").is(activityQuery.getType()));
+            criteriaList.add(Criteria.where("activityType").is(activityQuery.getType()));
         }
         if (CollectionUtils.isNotEmpty(activityQuery.getPayType())) {
-            queryCriteria = queryCriteria.andOperator(Criteria.where("payType").in(activityQuery.getPayType()));
+            criteriaList.add(Criteria.where("payType").in(activityQuery.getPayType()));
         }
+        if(!StringUtils.isEmpty(activityQuery.getCity())){
+            criteriaList.add(Criteria.where("city").is(activityQuery.getCity()));
+        }
+        if (!StringUtils.isEmpty(activityQuery.getAdname())) {
+            criteriaList.add(Criteria.where("adname").is(activityQuery.getAdname()));
+        }
+        if(!StringUtils.isEmpty(activityQuery.getBusinessArea())){
+            criteriaList.add(Criteria.where("businessArea").is(activityQuery.getBusinessArea()));
+        }
+        if(!StringUtils.isEmpty(activityQuery.getStation())){
+            criteriaList.add(Criteria.where("station").is(activityQuery.getStation()));
+        }
+        Criteria queryCriteria = new Criteria().andOperator(criteriaList.toArray(new Criteria[0]));
         Query query = new Query(queryCriteria);
         List<ActivityMongo> corgiActivities = mongoTemplate.find(query, ActivityMongo.class);
 
