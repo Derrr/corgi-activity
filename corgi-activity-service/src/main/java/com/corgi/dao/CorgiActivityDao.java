@@ -233,6 +233,11 @@ public class CorgiActivityDao {
         return mongoTemplate.count(query, ActivityMongo.class);
     }
 
+    public long countUserActivity(String userId) {
+        Query query = new Query(Criteria.where("userId").is(userId));
+        return mongoTemplate.count(query, ActivityMongo.class);
+    }
+
     private Query getDescIdQuery(Criteria criteria, Integer start, Integer size) {
         Query query = new Query(criteria).with(Sort.by(Sort.Direction.DESC, "_id")).skip(start).limit(size);
         return query;

@@ -99,6 +99,11 @@ public class CorgiActivityServiceImpl implements CorgiActivityService {
     }
 
     @Override
+    public long countUserActivity(String userId) {
+        return corgiActivityDao.countUserActivity(userId);
+    }
+
+    @Override
     public List<CorgiActivity> getActivityByUserIds(List<String> userIds, String status, Integer page, Integer size) {
         return convertActivity(corgiActivityDao.getActivityByUserIds(userIds, status, (page - 1) * size, size));
     }
