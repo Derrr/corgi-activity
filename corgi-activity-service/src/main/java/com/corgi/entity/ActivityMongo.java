@@ -24,6 +24,8 @@ import java.lang.reflect.Method;
                 @CompoundIndex(name = "activity_creator", def = "{'userId':1}")
         })
 public class ActivityMongo extends CorgiActivity {
+    public static final String SIGN_UP_TIME = "signUpTime";
+
     @MongoId
     private ObjectId mongoId;
 

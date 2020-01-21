@@ -86,7 +86,7 @@ public class CorgiActivityDao {
         if (range > 0) {
             criteriaList.add(Criteria.where("location").withinSphere(new Circle(new Point(lng, lat), new Distance(range, Metrics.KILOMETERS))));
         }
-        criteriaList.add(Criteria.where("signUpTime").gte(sdf.format(new Date())));
+        criteriaList.add(Criteria.where(ActivityMongo.SIGN_UP_TIME).gte(sdf.format(new Date())));
         criteriaList.add(Criteria.where("status").ne(CorgiActivity.DELETED));
         if (!StringUtils.isEmpty(activityQuery.getType())) {
             criteriaList.add(Criteria.where("activityType").is(activityQuery.getType()));
@@ -106,8 +106,24 @@ public class CorgiActivityDao {
         if (!StringUtils.isEmpty(activityQuery.getStation())) {
             criteriaList.add(Criteria.where("station").is(activityQuery.getStation()));
         }
+        if (activityQuery.getStartBudget() > 0) {
+            criteriaList.add(Criteria.where("budget").gte(activityQuery.getStartBudget()));
+        }
+        if (activityQuery.getEndBudget() > 0) {
+            criteriaList.add(Criteria.where("budget").lte(activityQuery.getEndBudget()));
+        }
+        if (!StringUtils.isEmpty(activityQuery.getStartTime())) {
+            criteriaList.add(Criteria.where(ActivityMongo.SIGN_UP_TIME).gte(activityQuery.getStartTime()));
+        }
+        if (!StringUtils.isEmpty(activityQuery.getEndTime())) {
+            criteriaList.add(Criteria.where(ActivityMongo.SIGN_UP_TIME).lte(activityQuery.getEndTime()));
+        }
+
         Criteria queryCriteria = new Criteria().andOperator(criteriaList.toArray(new Criteria[0]));
         Query query = new Query(queryCriteria).limit(500);
+        if (ActivityQuery.SORT_TIME.equals(activityQuery.getSort())) {
+            query = query.with(Sort.by(Sort.Direction.DESC, ActivityMongo.SIGN_UP_TIME));
+        }
         List<ActivityMongo> corgiActivities = mongoTemplate.find(query, ActivityMongo.class);
 
         if (activityQuery.checkUser() && CollectionUtils.isNotEmpty(corgiActivities)) {
@@ -134,7 +150,7 @@ public class CorgiActivityDao {
     public List<ActivityMongo> getRunningActivities(String userId, Integer start, Integer size) {
         Criteria userCriteria = Criteria.where("userId").is(userId);
         Criteria statusCriteria = Criteria.where("status").is(CorgiActivity.CREATED);
-        Criteria signUpCriteria = Criteria.where("signUpTime").gte(sdf.format(new Date()));
+        Criteria signUpCriteria = Criteria.where(ActivityMongo.SIGN_UP_TIME).gte(sdf.format(new Date()));
         Query query = getDescIdQuery(new Criteria().andOperator(userCriteria, statusCriteria, signUpCriteria), start, size);
         List<ActivityMongo> corgiActivities = mongoTemplate.find(query, ActivityMongo.class);
         return corgiActivities;
@@ -144,7 +160,7 @@ public class CorgiActivityDao {
         Criteria userCriteria = Criteria.where("userId").is(userId);
         Criteria statusCriteria = new Criteria().orOperator(
                 Criteria.where("status").is(CorgiActivity.DELETED),
-                Criteria.where("signUpTime").lt(sdf.format(new Date()))
+                Criteria.where(ActivityMongo.SIGN_UP_TIME).lt(sdf.format(new Date()))
         );
         Query query = getDescIdQuery(new Criteria().andOperator(userCriteria, statusCriteria), start, size);
         List<ActivityMongo> corgiActivities = mongoTemplate.find(query, ActivityMongo.class);
@@ -186,7 +202,7 @@ public class CorgiActivityDao {
 
     public List<ActivityMongo> searchActivity(CorgiActivity activity, double range) {
         Criteria criteriaLocation = Criteria.where("location").withinSphere(new Circle(new Point(activity.getLng(), activity.getLat()), new Distance(range, Metrics.KILOMETERS)));
-        Criteria criteriaSignUpTime = Criteria.where("signUpTime").gte(sdf.format(new Date()));
+        Criteria criteriaSignUpTime = Criteria.where(ActivityMongo.SIGN_UP_TIME).gte(sdf.format(new Date()));
 
         try {
             Date signUpTime = sdf.parse(activity.getSignUpTime());
@@ -200,8 +216,8 @@ public class CorgiActivityDao {
             signUpCalendar.add(Calendar.HOUR, 1);
             Date endDate = signUpCalendar.getTime();
 
-            Criteria criteriaBeginTime = Criteria.where("signUpTime").gte(sdf.format(beginDate));
-            Criteria criteriaEndTime = Criteria.where("signUpTime").lte(sdf.format(endDate));
+            Criteria criteriaBeginTime = Criteria.where(ActivityMongo.SIGN_UP_TIME).gte(sdf.format(beginDate));
+            Criteria criteriaEndTime = Criteria.where(ActivityMongo.SIGN_UP_TIME).lte(sdf.format(endDate));
 
             criteriaSignUpTime = new Criteria().andOperator(criteriaBeginTime, criteriaEndTime, criteriaSignUpTime);
         } catch (ParseException e) {
@@ -217,9 +233,9 @@ public class CorgiActivityDao {
     public List<ActivityMongo> getActivityByUserIds(List<String> userIds, String status, Integer start, Integer size) {
         Criteria c = Criteria.where("userId").in(userIds);
         if (CorgiActivity.CREATED.equals(status)) {
-            c = new Criteria().andOperator(c, Criteria.where("signUpTime").gte(sdf.format(new Date())));
+            c = new Criteria().andOperator(c, Criteria.where(ActivityMongo.SIGN_UP_TIME).gte(sdf.format(new Date())));
         } else if (CorgiActivity.ENDED.equals(status)) {
-            c = new Criteria().andOperator(c, Criteria.where("signUpTime").lte(sdf.format(new Date())));
+            c = new Criteria().andOperator(c, Criteria.where(ActivityMongo.SIGN_UP_TIME).lte(sdf.format(new Date())));
         } else if (!StringUtils.isEmpty(start)) {
             c = new Criteria().andOperator(c, Criteria.where("status").is(status));
         }
