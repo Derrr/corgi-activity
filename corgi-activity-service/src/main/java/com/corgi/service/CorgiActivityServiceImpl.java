@@ -89,8 +89,14 @@ public class CorgiActivityServiceImpl implements CorgiActivityService {
     }
 
     @Override
-    public List<CorgiActivity> searchCorgiActivity(CorgiActivity activity) {
-        return convertActivity(corgiActivityDao.queryActivities(activity));
+    public List<CorgiActivity> searchCorgiActivity(CorgiActivity activity, Integer page, Integer pageSize) {
+
+        return convertActivity(corgiActivityDao.queryActivities(activity, page < 1 ? 0 : (page - 1) * pageSize, pageSize));
+    }
+
+    @Override
+    public long countCorgiActivity(CorgiActivity activity) {
+        return corgiActivityDao.countActivities(activity);
     }
 
     @Override

@@ -167,37 +167,22 @@ public class CorgiActivityDao {
         return corgiActivities;
     }
 
-    public List<ActivityMongo> queryActivities(CorgiActivity activity) {
-        Field[] fields = CorgiActivity.class.getDeclaredFields();
-        List<Criteria> criteriaList = new ArrayList<>();
-        for (int i = 0; i < fields.length; i++) {
-            Field field = fields[i];
-            field.setAccessible(true);
-            if (Modifier.isStatic(field.getModifiers()) || field.getType().equals(double.class)) {
-                continue;
-            }
-            try {
-                Object value = field.get(activity);
-                if (value != null) {
-                    String fieldName = field.getName();
-                    log.info("field " + fieldName + " value=" + value);
-                    if (LIKE_FIELDS.contains(fieldName)) {
-                        criteriaList.add(Criteria.where(field.getName()).regex("^.*" + value + ".*$"));
-                    } else if (int.class.equals(field.getType()) && (int) value != 0) {
-                        criteriaList.add(Criteria.where(field.getName()).is(value));
-                    } else if (!int.class.equals(field.getType())) {
-                        criteriaList.add(Criteria.where(field.getName()).is(value));
-                    }
-                }
-            } catch (IllegalAccessException e) {
-                e.printStackTrace();
-            }
-        }
+    public List<ActivityMongo> queryActivities(CorgiActivity activity, Integer start, Integer size) {
+        List<Criteria> criteriaList = getCriteriaList(activity);
         if (criteriaList.size() > 0) {
-            Query query = getDescIdQuery(new Criteria().andOperator(criteriaList.toArray(new Criteria[0])), 0, 20);
+            Query query = getDescIdQuery(new Criteria().andOperator(criteriaList.toArray(new Criteria[0])), start, size);
             return mongoTemplate.find(query, ActivityMongo.class);
         }
-        return new ArrayList<>();
+        return mongoTemplate.find(new Query().skip(start).limit(size), ActivityMongo.class);
+    }
+
+    public long countActivities(CorgiActivity activity) {
+        List<Criteria> criteriaList = getCriteriaList(activity);
+        if (criteriaList.size() > 0) {
+            Query query = getDescIdQuery(new Criteria().andOperator(criteriaList.toArray(new Criteria[0])), 0, 20);
+            return mongoTemplate.count(query, ActivityMongo.class);
+        }
+        return mongoTemplate.count(new Query(), ActivityMongo.class);
     }
 
     public List<ActivityMongo> searchActivity(CorgiActivity activity, double range) {
@@ -257,5 +242,34 @@ public class CorgiActivityDao {
     private Query getDescIdQuery(Criteria criteria, Integer start, Integer size) {
         Query query = new Query(criteria).with(Sort.by(Sort.Direction.DESC, "_id")).skip(start).limit(size);
         return query;
+    }
+
+    private List<Criteria> getCriteriaList(CorgiActivity activity) {
+        Field[] fields = CorgiActivity.class.getDeclaredFields();
+        List<Criteria> criteriaList = new ArrayList<>();
+        for (int i = 0; i < fields.length; i++) {
+            Field field = fields[i];
+            field.setAccessible(true);
+            if (Modifier.isStatic(field.getModifiers()) || field.getType().equals(double.class)) {
+                continue;
+            }
+            try {
+                Object value = field.get(activity);
+                if (value != null) {
+                    String fieldName = field.getName();
+                    log.info("field " + fieldName + " value=" + value);
+                    if (LIKE_FIELDS.contains(fieldName)) {
+                        criteriaList.add(Criteria.where(field.getName()).regex("^.*" + value + ".*$"));
+                    } else if (int.class.equals(field.getType()) && (int) value != 0) {
+                        criteriaList.add(Criteria.where(field.getName()).is(value));
+                    } else if (!int.class.equals(field.getType())) {
+                        criteriaList.add(Criteria.where(field.getName()).is(value));
+                    }
+                }
+            } catch (IllegalAccessException e) {
+                e.printStackTrace();
+            }
+        }
+        return criteriaList;
     }
 }

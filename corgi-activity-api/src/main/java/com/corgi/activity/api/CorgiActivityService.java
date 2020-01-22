@@ -23,7 +23,9 @@ public interface CorgiActivityService {
 
     CorgiActivity deleteCorgiActivity(String activityId);
 
-    List<CorgiActivity> searchCorgiActivity(CorgiActivity activity);
+    List<CorgiActivity> searchCorgiActivity(CorgiActivity activity, Integer page, Integer pageSize);
+
+    long countCorgiActivity(CorgiActivity activity);
 
     long countPublishActivity(String date);
 
