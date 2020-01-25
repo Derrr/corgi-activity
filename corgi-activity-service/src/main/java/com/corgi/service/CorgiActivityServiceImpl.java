@@ -65,13 +65,15 @@ public class CorgiActivityServiceImpl implements CorgiActivityService {
 
     @Override
     public List<CorgiActivity> getActivityByIds(List<String> activityIds) {
-        List<ObjectId> objectIds = new ArrayList<>();
+        List<ActivityMongo> mongoList = new ArrayList<>();
         if (activityIds != null) {
             for (String id : activityIds) {
-                objectIds.add(new ObjectId(id));
+               ActivityMongo mongo = corgiActivityDao.getActivityById(id);
+               if(mongo != null) {
+                   mongoList.add(mongo);
+               }
             }
         }
-        List<ActivityMongo> mongoList = corgiActivityDao.getActivityByIds(objectIds);
         return convertActivity(mongoList);
     }
 
