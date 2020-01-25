@@ -53,7 +53,7 @@ public class CorgiActivityDao {
         return mongo;
     }
 
-    public List<ActivityMongo> getActivityByIds(List<String> activityIds) {
+    public List<ActivityMongo> getActivityByIds(List<ObjectId> activityIds) {
         Query query = new Query(Criteria.where("_id").in(activityIds));
         List<ActivityMongo> activityMongoList = mongoTemplate.find(query, ActivityMongo.class);
         return activityMongoList;
