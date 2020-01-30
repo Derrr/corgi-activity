@@ -122,8 +122,18 @@ public class CorgiActivityServiceImpl implements CorgiActivityService {
     }
 
     @Override
+    public void updateByColumnn(String activity, String column, String value) {
+        corgiActivityDao.updateActivityByColumn(activity, column, value);
+    }
+
+    @Override
     public void deleteUserActivity(String userId) {
         corgiActivityDao.deleteActivityByUserId(userId);
+    }
+
+    @Override
+    public void removeActivity(String activityId) {
+        corgiActivityDao.removeActivity(activityId);
     }
 
     List<CorgiActivity> convertActivity(List<ActivityMongo> activityMongoList) {

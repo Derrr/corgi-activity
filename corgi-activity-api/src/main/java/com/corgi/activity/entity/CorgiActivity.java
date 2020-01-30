@@ -17,7 +17,9 @@ public class CorgiActivity implements Serializable {
 
     private String id;
     private String title;
+    private String checkTitle;
     private String content;
+    private String checkContent;
     private String activityType;
     private String userId;
     private String address;

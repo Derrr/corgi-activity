@@ -35,5 +35,9 @@ public interface CorgiActivityService {
 
     List<CorgiActivity> getSimilarActivity(CorgiActivity corgiActivity);
 
+    void updateByColumnn(String activity, String column, String value);
+
     void deleteUserActivity(String userId);
+
+    void removeActivity(String activityId);
 }

@@ -20,6 +20,7 @@ import org.springframework.data.geo.Point;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
+import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
@@ -175,7 +176,7 @@ public class CorgiActivityDao {
             Query query = getDescIdQuery(new Criteria().andOperator(criteriaList.toArray(new Criteria[0])), start, size);
             return mongoTemplate.find(query, ActivityMongo.class);
         }
-        return mongoTemplate.find(new Query().skip(start).limit(size), ActivityMongo.class);
+        return mongoTemplate.find(new Query().with(Sort.by(Sort.Direction.DESC, "_id")).skip(start).limit(size), ActivityMongo.class);
     }
 
     public long countActivities(CorgiActivity activity) {
@@ -277,10 +278,21 @@ public class CorgiActivityDao {
 
     public void deleteActivityByUserId(String userId) {
         Query query = new Query(Criteria.where("userId").is(userId));
-        List<ActivityMongo> activityMongoList = mongoTemplate.find(query, ActivityMongo.class);
+        List<ActivityMongo> activityMongoList = mongoTemplate.findAllAndRemove(query, ActivityMongo.class);
         for (ActivityMongo mongo : activityMongoList) {
             corgiFavorActivityService.deleteByActivityId(mongo.getMongoId().toString());
         }
+    }
+
+    public void removeActivity(String activityId) {
+        Query query = new Query(Criteria.where("_id").is(new ObjectId(activityId)));
+        corgiFavorActivityService.deleteByActivityId(activityId);
         mongoTemplate.remove(query, ActivityMongo.class);
+    }
+
+    public void updateActivityByColumn(String activityId, String column, String value) {
+        Update update = new Update().set(column, value);
+        Query query = new Query(Criteria.where("_id").is(new ObjectId(activityId)));
+        mongoTemplate.updateFirst(query, update, ActivityMongo.class);
     }
 }
