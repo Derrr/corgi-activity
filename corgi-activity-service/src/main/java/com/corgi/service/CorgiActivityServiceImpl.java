@@ -68,10 +68,10 @@ public class CorgiActivityServiceImpl implements CorgiActivityService {
         List<ActivityMongo> mongoList = new ArrayList<>();
         if (activityIds != null) {
             for (String id : activityIds) {
-               ActivityMongo mongo = corgiActivityDao.getActivityById(id);
-               if(mongo != null) {
-                   mongoList.add(mongo);
-               }
+                ActivityMongo mongo = corgiActivityDao.getActivityById(id);
+                if (mongo != null) {
+                    mongoList.add(mongo);
+                }
             }
         }
         return convertActivity(mongoList);
@@ -119,6 +119,11 @@ public class CorgiActivityServiceImpl implements CorgiActivityService {
     @Override
     public List<CorgiActivity> getSimilarActivity(CorgiActivity corgiActivity) {
         return convertActivity(corgiActivityDao.searchActivity(corgiActivity, 5));
+    }
+
+    @Override
+    public void deleteUserActivity(String userId) {
+        corgiActivityDao.deleteActivityByUserId(userId);
     }
 
     List<CorgiActivity> convertActivity(List<ActivityMongo> activityMongoList) {

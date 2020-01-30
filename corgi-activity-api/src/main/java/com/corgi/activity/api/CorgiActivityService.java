@@ -34,4 +34,6 @@ public interface CorgiActivityService {
     List<CorgiActivity> getActivityByUserIds(List<String> userIds, String status, Integer page, Integer size);
 
     List<CorgiActivity> getSimilarActivity(CorgiActivity corgiActivity);
+
+    void deleteUserActivity(String userId);
 }

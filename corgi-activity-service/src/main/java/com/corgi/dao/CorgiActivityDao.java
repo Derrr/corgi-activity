@@ -5,6 +5,7 @@ import com.alibaba.dubbo.common.utils.CollectionUtils;
 import com.corgi.activity.entity.CorgiActivity;
 import com.corgi.entity.ActivityMongo;
 import com.corgi.entity.ActivityQuery;
+import com.corgi.user.api.CorgiFavorActivityService;
 import com.corgi.user.api.CorgiUserService;
 import com.corgi.util.ActivityUtil;
 import jdk.nashorn.internal.ir.annotations.Reference;
@@ -21,7 +22,6 @@ import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
-import sun.text.resources.uk.CollationData_uk;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
@@ -41,6 +41,8 @@ public class CorgiActivityDao {
     MongoTemplate mongoTemplate;
     @Reference
     private CorgiUserService corgiUserService;
+    @Reference
+    private CorgiFavorActivityService corgiFavorActivityService;
 
     private SimpleDateFormat sdf = new SimpleDateFormat("yyyy/MM/dd HH:mm");
 
@@ -271,5 +273,14 @@ public class CorgiActivityDao {
             }
         }
         return criteriaList;
+    }
+
+    public void deleteActivityByUserId(String userId) {
+        Query query = new Query(Criteria.where("userId").is(userId));
+        List<ActivityMongo> activityMongoList = mongoTemplate.find(query, ActivityMongo.class);
+        for (ActivityMongo mongo : activityMongoList) {
+            corgiFavorActivityService.deleteByActivityId(mongo.getMongoId().toString());
+        }
+        mongoTemplate.remove(query, ActivityMongo.class);
     }
 }
