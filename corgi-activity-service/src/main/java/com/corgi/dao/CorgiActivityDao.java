@@ -73,6 +73,14 @@ public class CorgiActivityDao {
     public ActivityMongo updateActivity(CorgiActivity corgiActivity) {
         ActivityMongo activity = ActivityUtil.getMongo(corgiActivity);
         activity.setUpdateTime(created_sdf.format(new Date()));
+        ActivityMongo oldMongo = mongoTemplate.findById(activity.getMongoId(), ActivityMongo.class);
+        if(StringUtils.isEmpty(activity.getCheckTitle()) && !StringUtils.isEmpty(oldMongo.getCheckTitle())){
+            activity.setCheckTitle(oldMongo.getTitle());
+        }
+        if(StringUtils.isEmpty(activity.getCheckContent()) && !StringUtils.isEmpty(oldMongo.getCheckContent())){
+            activity.setCheckContent(oldMongo.getCheckContent());
+        }
+
         ActivityMongo mongo = mongoTemplate.save(activity);
         return mongo;
     }
