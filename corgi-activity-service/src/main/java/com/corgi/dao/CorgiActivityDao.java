@@ -73,10 +73,10 @@ public class CorgiActivityDao {
         ActivityMongo activity = ActivityUtil.getMongo(corgiActivity);
         activity.setUpdateTime(created_sdf.format(new Date()));
         ActivityMongo oldMongo = mongoTemplate.findById(activity.getMongoId(), ActivityMongo.class);
-        if(StringUtils.isEmpty(activity.getCheckTitle()) && !StringUtils.isEmpty(oldMongo.getCheckTitle())){
+        if (StringUtils.isEmpty(activity.getCheckTitle()) && !StringUtils.isEmpty(oldMongo.getCheckTitle())) {
             activity.setCheckTitle(oldMongo.getTitle());
         }
-        if(StringUtils.isEmpty(activity.getCheckContent()) && !StringUtils.isEmpty(oldMongo.getCheckContent())){
+        if (StringUtils.isEmpty(activity.getCheckContent()) && !StringUtils.isEmpty(oldMongo.getCheckContent())) {
             activity.setCheckContent(oldMongo.getCheckContent());
         }
 
@@ -265,7 +265,7 @@ public class CorgiActivityDao {
             }
             try {
                 Object value = field.get(activity);
-                if (value != null) {
+                if (value != null && !"".equals(value.toString())) {
                     String fieldName = field.getName();
                     log.info("field " + fieldName + " value=" + value);
                     if (LIKE_FIELDS.contains(fieldName)) {
