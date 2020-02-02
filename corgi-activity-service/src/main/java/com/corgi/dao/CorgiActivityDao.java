@@ -30,6 +30,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.regex.Pattern;
+import java.util.zip.CheckedOutputStream;
 
 /**
  * @author tairanliu
@@ -268,7 +269,14 @@ public class CorgiActivityDao {
                 if (value != null && !"".equals(value.toString())) {
                     String fieldName = field.getName();
                     log.info("field " + fieldName + " value=" + value);
-                    if (LIKE_FIELDS.contains(fieldName)) {
+                    if ("status".equals(fieldName)) {
+                        if (CorgiActivity.ENDED.equals(value)) {
+                            criteriaList.add(Criteria.where(ActivityMongo.SIGN_UP_TIME).gte(sdf.format(new Date())));
+                            criteriaList.add(Criteria.where("status").is(CorgiActivity.CREATED));
+                        } else {
+                            criteriaList.add(Criteria.where("status").is(value));
+                        }
+                    } else if (LIKE_FIELDS.contains(fieldName)) {
                         criteriaList.add(Criteria.where(field.getName()).regex("^.*" + value + ".*$"));
                     } else if (int.class.equals(field.getType()) && (int) value != 0) {
                         criteriaList.add(Criteria.where(field.getName()).is(value));
