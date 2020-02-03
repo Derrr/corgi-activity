@@ -29,6 +29,8 @@ public interface CorgiActivityService {
 
     long countPublishActivity(String date);
 
+    long countRangePublishActivity(String beginDate,String endDate);
+
     long countUserActivity(String userId);
 
     List<CorgiActivity> getActivityByUserIds(List<String> userIds, String status, Integer page, Integer size);

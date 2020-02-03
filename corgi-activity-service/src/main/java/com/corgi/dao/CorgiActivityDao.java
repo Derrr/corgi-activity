@@ -246,6 +246,14 @@ public class CorgiActivityDao {
         return mongoTemplate.count(query, ActivityMongo.class);
     }
 
+    public long countAcitivity(String beginDate, String endDate) {
+        Criteria criteria = new Criteria().andOperator(
+                Criteria.where("createTime").gte(beginDate),
+                Criteria.where("createTime").lte(endDate));
+        Query query = new Query(criteria);
+        return mongoTemplate.count(query, ActivityMongo.class);
+    }
+
     public long countUserActivity(String userId) {
         Query query = new Query(Criteria.where("userId").is(userId));
         return mongoTemplate.count(query, ActivityMongo.class);

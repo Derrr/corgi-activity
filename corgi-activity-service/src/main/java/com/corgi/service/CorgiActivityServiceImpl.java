@@ -107,6 +107,11 @@ public class CorgiActivityServiceImpl implements CorgiActivityService {
     }
 
     @Override
+    public long countRangePublishActivity(String beginDate, String endDate) {
+        return corgiActivityDao.countAcitivity(beginDate, endDate);
+    }
+
+    @Override
     public long countUserActivity(String userId) {
         return corgiActivityDao.countUserActivity(userId);
     }
