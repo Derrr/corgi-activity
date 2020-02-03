@@ -89,6 +89,7 @@ public class CorgiActivityDao {
         ActivityMongo activity = mongoTemplate.findById(new ObjectId(activityId), ActivityMongo.class);
         activity.setUpdateTime(created_sdf.format(new Date()));
         activity.setStatus(CorgiActivity.DELETED);
+        mongoTemplate.save(activity);
         return activity;
     }
 
