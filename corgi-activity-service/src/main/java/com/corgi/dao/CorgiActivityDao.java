@@ -329,8 +329,7 @@ public class CorgiActivityDao {
                         Criteria.where("createTime").lte(endDate)
                 )),
                 Aggregation.project(key),
-                Aggregation.group(key).count().as("count"),
-                Aggregation.project(key).and("activityType").previousOperation()
+                Aggregation.group(key).count().as("count")
         );
         AggregationResults<HashMap> results = mongoTemplate.aggregate(agg, ActivityMongo.class, HashMap.class);
         return results.getMappedResults();
