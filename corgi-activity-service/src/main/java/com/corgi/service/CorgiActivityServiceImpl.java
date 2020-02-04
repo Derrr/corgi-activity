@@ -144,7 +144,7 @@ public class CorgiActivityServiceImpl implements CorgiActivityService {
 
     @Override
     public List<HashMap> groupByActivity(String type, String beginDate, String endDate) {
-        return corgiActivityDao.groupByActivity(type);
+        return corgiActivityDao.groupByActivity(type, beginDate, endDate);
     }
 
     List<CorgiActivity> convertActivity(List<ActivityMongo> activityMongoList) {
