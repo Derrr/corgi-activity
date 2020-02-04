@@ -30,7 +30,7 @@ public interface CorgiActivityService {
 
     long countPublishActivity(String date);
 
-    long countRangePublishActivity(String beginDate,String endDate);
+    long countRangePublishActivity(String beginDate, String endDate);
 
     long countUserActivity(String userId);
 
@@ -44,5 +44,5 @@ public interface CorgiActivityService {
 
     void removeActivity(String activityId);
 
-    List<HashMap> groupByActivity(String key);
+    List<HashMap> groupByActivity(String key, String beginDate, String endDate);
 }

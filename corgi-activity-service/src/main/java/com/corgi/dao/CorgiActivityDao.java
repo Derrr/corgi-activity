@@ -322,8 +322,12 @@ public class CorgiActivityDao {
         mongoTemplate.updateFirst(query, update, ActivityMongo.class);
     }
 
-    public List<HashMap> groupByActivity(String key) {
+    public List<HashMap> groupByActivity(String key, String beginDate, String endDate) {
         Aggregation agg = Aggregation.newAggregation(
+                Aggregation.match(new Criteria().andOperator(
+                        Criteria.where("createTime").gte(beginDate),
+                        Criteria.where("createTime").lte(endDate)
+                )),
                 Aggregation.project(key),
                 Aggregation.group(key).count().as("count"),
                 Aggregation.project(key).and("count").previousOperation()
