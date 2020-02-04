@@ -16,6 +16,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 /**
@@ -139,6 +140,11 @@ public class CorgiActivityServiceImpl implements CorgiActivityService {
     @Override
     public void removeActivity(String activityId) {
         corgiActivityDao.removeActivity(activityId);
+    }
+
+    @Override
+    public List<HashMap> groupByActivity(String type) {
+        return corgiActivityDao.groupByActivity(type);
     }
 
     List<CorgiActivity> convertActivity(List<ActivityMongo> activityMongoList) {

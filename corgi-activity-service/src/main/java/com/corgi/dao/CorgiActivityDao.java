@@ -18,6 +18,8 @@ import org.springframework.data.geo.Distance;
 import org.springframework.data.geo.Metrics;
 import org.springframework.data.geo.Point;
 import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.data.mongodb.core.aggregation.Aggregation;
+import org.springframework.data.mongodb.core.aggregation.AggregationResults;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.Update;
@@ -318,5 +320,15 @@ public class CorgiActivityDao {
         Update update = new Update().set(column, value);
         Query query = new Query(Criteria.where("mongoId").is(new ObjectId(activityId)));
         mongoTemplate.updateFirst(query, update, ActivityMongo.class);
+    }
+
+    public List<HashMap> groupByActivity(String key) {
+        Aggregation agg = Aggregation.newAggregation(
+                Aggregation.project(key),
+                Aggregation.group(key).count().as("count"),
+                Aggregation.project(key).and("count").previousOperation()
+        );
+        AggregationResults<HashMap> results = mongoTemplate.aggregate(agg, ActivityMongo.class, HashMap.class);
+        return results.getMappedResults();
     }
 }

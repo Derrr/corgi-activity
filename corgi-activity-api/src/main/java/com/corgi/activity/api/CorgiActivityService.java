@@ -3,6 +3,7 @@ package com.corgi.activity.api;
 import com.corgi.activity.entity.CorgiActivity;
 import com.corgi.entity.ActivityQuery;
 
+import java.util.HashMap;
 import java.util.List;
 
 /**
@@ -42,4 +43,6 @@ public interface CorgiActivityService {
     void deleteUserActivity(String userId);
 
     void removeActivity(String activityId);
+
+    List<HashMap> groupByActivity(String key);
 }
