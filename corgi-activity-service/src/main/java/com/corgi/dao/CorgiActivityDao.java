@@ -201,7 +201,7 @@ public class CorgiActivityDao {
     }
 
     public List<ActivityMongo> searchActivity(CorgiActivity activity, double range) {
-        Criteria criteriaLocation = Criteria.where("location").withinSphere(new Circle(new Point(activity.getLng(), activity.getLat()), new Distance(range * 1000, Metrics.KILOMETERS)));
+        Criteria criteriaLocation = Criteria.where("location").withinSphere(new Circle(new Point(activity.getLng(), activity.getLat()), new Distance(range * 100000, Metrics.KILOMETERS)));
         Criteria criteriaSignUpTime = Criteria.where(ActivityMongo.SIGN_UP_TIME).gte(activity.getSignUpTime());
         Criteria criteriaStatus = Criteria.where("status").ne(CorgiActivity.DELETED);
         Query query = getDescIdQuery(new Criteria().andOperator(criteriaLocation, criteriaSignUpTime, criteriaStatus), 0, 20);

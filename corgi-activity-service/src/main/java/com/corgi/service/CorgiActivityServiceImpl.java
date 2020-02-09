@@ -124,7 +124,7 @@ public class CorgiActivityServiceImpl implements CorgiActivityService {
 
     @Override
     public List<CorgiActivity> getSimilarActivity(CorgiActivity corgiActivity) {
-        return convertActivity(corgiActivityDao.searchActivity(corgiActivity, 5));
+        return convertActivity(corgiActivityDao.searchActivity(corgiActivity, 2));
     }
 
     @Override
