@@ -241,7 +241,7 @@ public class CorgiActivityDao {
     }
 
     private Query getDescIdQuery(Criteria criteria, Integer start, Integer size) {
-        Query query = new Query(criteria).with(Sort.by(Sort.Direction.DESC, "_id")).skip(start).limit(size);
+        Query query = new Query(criteria).with(Sort.by(Sort.Direction.DESC, "mongoId")).skip(start).limit(size);
         return query;
     }
 
