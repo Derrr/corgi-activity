@@ -21,6 +21,7 @@ import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.aggregation.Aggregation;
 import org.springframework.data.mongodb.core.aggregation.AggregationResults;
 import org.springframework.data.mongodb.core.query.Criteria;
+import org.springframework.data.mongodb.core.query.NearQuery;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.stereotype.Component;
@@ -98,7 +99,7 @@ public class CorgiActivityDao {
     public List<ActivityMongo> getNearActivities(double lng, double lat, double range, ActivityQuery activityQuery) {
         List<Criteria> criteriaList = new ArrayList<>();
         if (range > 0) {
-            criteriaList.add(Criteria.where("location").nearSphere(new Point(lng, lat)).maxDistance(range * 1000));
+            criteriaList.add(Criteria.where("location").nearSphere(new Point(lng, lat)).maxDistance(range / 6371));
             //new Distance(range * 1000, Metrics.KILOMETERS))));
         }
         criteriaList.add(Criteria.where(ActivityMongo.SIGN_UP_TIME).gte(sdf.format(new Date())));
