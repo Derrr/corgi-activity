@@ -212,7 +212,8 @@ public class CorgiActivityDao {
     public List<ActivityMongo> getActivityByUserIds(List<String> userIds, String status, Integer start, Integer size) {
         Criteria c = Criteria.where("userId").in(userIds);
         if (CorgiActivity.CREATED.equals(status)) {
-            c = new Criteria().andOperator(c, Criteria.where(ActivityMongo.SIGN_UP_TIME).gte(sdf.format(new Date())));
+            new Criteria().andOperator(c, Criteria.where("status").ne(CorgiActivity.DELETED));
+            //c = new Criteria().andOperator(c, Criteria.where(ActivityMongo.SIGN_UP_TIME).gte(sdf.format(new Date())));
         } else if (CorgiActivity.ENDED.equals(status)) {
             c = new Criteria().andOperator(c, Criteria.where(ActivityMongo.SIGN_UP_TIME).lte(sdf.format(new Date())));
         } else if (!StringUtils.isEmpty(start)) {
@@ -228,7 +229,7 @@ public class CorgiActivityDao {
         return mongoTemplate.count(query, ActivityMongo.class);
     }
 
-    public long countAcitivity(String beginDate, String endDate) {
+    public long countActivity(String beginDate, String endDate) {
         Criteria criteria = new Criteria().andOperator(
                 Criteria.where("createTime").gte(beginDate),
                 Criteria.where("createTime").lte(endDate));
