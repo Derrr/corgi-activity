@@ -106,10 +106,12 @@ public class CorgiActivityDao {
 
     public List<ActivityMongo> getNearActivities(double lng, double lat, double range, ActivityQuery activityQuery) {
         List<Criteria> criteriaList = new ArrayList<>();
+        Criteria distanceCriteria = Criteria.where("location").nearSphere(new Point(lng, lat));
+
         if (range > 0) {
-            criteriaList.add(Criteria.where("location").nearSphere(new Point(lng, lat)).maxDistance(range / 6371));
-            //new Distance(range * 1000, Metrics.KILOMETERS))));
+            distanceCriteria.maxDistance(range / 6371);
         }
+        criteriaList.add(distanceCriteria);
         criteriaList.add(Criteria.where(ActivityMongo.SIGN_UP_TIME).gte(sdf.format(new Date())));
         criteriaList.add(Criteria.where("status").ne(CorgiActivity.DELETED));
         if (!StringUtils.isEmpty(activityQuery.getType())) {
