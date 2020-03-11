@@ -145,7 +145,7 @@ public class CorgiActivityDao {
 
         Criteria queryCriteria = new Criteria().andOperator(criteriaList.toArray(new Criteria[0]));
         Query query = new Query(queryCriteria).limit(100);
-        if(range <= 0){
+        if (range <= 0) {
             query = query.with(Sort.by(Sort.Direction.DESC, "mongoId"));
         }
         List<ActivityMongo> corgiActivities = mongoTemplate.find(query, ActivityMongo.class);
@@ -220,12 +220,11 @@ public class CorgiActivityDao {
     public List<ActivityMongo> getActivityByUserIds(List<String> userIds, String status, Integer start, Integer size) {
         Criteria c = Criteria.where("userId").in(userIds);
         if (CorgiActivity.CREATED.equals(status)) {
-            new Criteria().andOperator(c, Criteria.where("status").ne(CorgiActivity.DELETED));
-            //c = new Criteria().andOperator(c, Criteria.where(ActivityMongo.SIGN_UP_TIME).gte(sdf.format(new Date())));
+            c = new Criteria().andOperator(c, Criteria.where(ActivityMongo.SIGN_UP_TIME).gte(sdf.format(new Date())), Criteria.where("status").ne(CorgiActivity.DELETED));
         } else if (CorgiActivity.ENDED.equals(status)) {
             c = new Criteria().andOperator(c, Criteria.where(ActivityMongo.SIGN_UP_TIME).lte(sdf.format(new Date())));
         } else if (!StringUtils.isEmpty(start)) {
-            c = new Criteria().andOperator(c, Criteria.where("status").is(status));
+            c = new Criteria().andOperator(c, Criteria.where("status").is(status), Criteria.where("status").ne(CorgiActivity.DELETED));
         }
         Query query = getDescIdQuery(c, start, size);
         return mongoTemplate.find(query, ActivityMongo.class);
