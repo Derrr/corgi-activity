@@ -145,7 +145,7 @@ public class CorgiActivityDao {
 
         Criteria queryCriteria = new Criteria().andOperator(criteriaList.toArray(new Criteria[0]));
         Query query = new Query(queryCriteria).limit(100);
-        if (ActivityQuery.SORT_TIME.equals(activityQuery.getSort()) || range <= 0) {
+        if(range <= 0){
             query = query.with(Sort.by(Sort.Direction.DESC, "mongoId"));
         }
         List<ActivityMongo> corgiActivities = mongoTemplate.find(query, ActivityMongo.class);
