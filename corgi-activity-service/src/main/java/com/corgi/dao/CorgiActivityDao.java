@@ -113,7 +113,8 @@ public class CorgiActivityDao {
         }
         criteriaList.add(distanceCriteria);
         criteriaList.add(Criteria.where(ActivityMongo.SIGN_UP_TIME).gte(sdf.format(new Date())));
-        criteriaList.add(Criteria.where("status").ne(CorgiActivity.DELETED));
+        criteriaList.add(Criteria.where("status").is(CorgiActivity.CREATED));
+        
         if (!StringUtils.isEmpty(activityQuery.getType())) {
             criteriaList.add(Criteria.where("activityType").is(activityQuery.getType()));
         }
