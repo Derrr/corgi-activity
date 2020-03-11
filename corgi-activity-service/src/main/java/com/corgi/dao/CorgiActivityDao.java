@@ -83,7 +83,15 @@ public class CorgiActivityDao {
         if (StringUtils.isEmpty(activity.getCheckContent()) && !StringUtils.isEmpty(oldMongo.getCheckContent())) {
             activity.setCheckContent(oldMongo.getCheckContent());
         }
-
+        if (StringUtils.isEmpty(activity.getCheckStatus()) && !StringUtils.isEmpty(oldMongo.getCheckStatus())) {
+            activity.setCheckStatus(oldMongo.getCheckStatus());
+        }
+        if (StringUtils.isEmpty(activity.getCreateTime()) && !StringUtils.isEmpty(oldMongo.getCreateTime())) {
+            activity.setCreateTime(oldMongo.getCreateTime());
+        }
+        if (StringUtils.isEmpty(activity.getStatus()) && !StringUtils.isEmpty(oldMongo.getStatus())) {
+            activity.setStatus(oldMongo.getStatus());
+        }
         ActivityMongo mongo = mongoTemplate.save(activity);
         return mongo;
     }
