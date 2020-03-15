@@ -224,7 +224,7 @@ public class CorgiActivityDao {
         } else if (CorgiActivity.ENDED.equals(status)) {
             c = new Criteria().andOperator(c, Criteria.where(ActivityMongo.SIGN_UP_TIME).lte(sdf.format(new Date())));
         } else if (!StringUtils.isEmpty(start)) {
-            c = new Criteria().andOperator(c, Criteria.where("status").is(status), Criteria.where("status").ne(CorgiActivity.DELETED));
+            c = new Criteria().andOperator(c, Criteria.where("status").ne(CorgiActivity.DELETED));
         }
         Query query = getDescIdQuery(c, start, size);
         return mongoTemplate.find(query, ActivityMongo.class);
