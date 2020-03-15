@@ -76,6 +76,12 @@ public class CorgiActivityDao {
         return mongo;
     }
 
+    public void updateActivityStatus(CorgiActivity corgiActivity) {
+        Update update = new Update().set("status", corgiActivity.getStatus());
+        Query query = new Query(Criteria.where("mongoId").is(new ObjectId(corgiActivity.getId())));
+        mongoTemplate.updateFirst(query, update, ActivityMongo.class);
+    }
+
     public ActivityMongo updateActivity(CorgiActivity corgiActivity) {
         ActivityMongo activity = ActivityUtil.getMongo(corgiActivity);
         activity.setUpdateTime(created_sdf.format(new Date()));

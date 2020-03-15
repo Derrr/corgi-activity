@@ -86,6 +86,11 @@ public class CorgiActivityServiceImpl implements CorgiActivityService {
     }
 
     @Override
+    public void updateCorgiActivityStatus(CorgiActivity corgiActivity) {
+        corgiActivityDao.updateActivityStatus(corgiActivity);
+    }
+
+    @Override
     public CorgiActivity deleteCorgiActivity(String activityId) {
         ActivityMongo activityMongo = corgiActivityDao.deleteActivityById(activityId);
         return activityMongo.getActivity();
@@ -93,7 +98,6 @@ public class CorgiActivityServiceImpl implements CorgiActivityService {
 
     @Override
     public List<CorgiActivity> searchCorgiActivity(CorgiActivity activity, Integer page, Integer pageSize) {
-
         return convertActivity(corgiActivityDao.queryActivities(activity, page < 1 ? 0 : (page - 1) * pageSize, pageSize));
     }
 

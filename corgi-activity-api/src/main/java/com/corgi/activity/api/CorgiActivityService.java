@@ -22,6 +22,8 @@ public interface CorgiActivityService {
 
     CorgiActivity updateCorgiActivity(CorgiActivity corgiActivity);
 
+    void updateCorgiActivityStatus(CorgiActivity corgiActivity);
+
     CorgiActivity deleteCorgiActivity(String activityId);
 
     List<CorgiActivity> searchCorgiActivity(CorgiActivity activity, Integer page, Integer pageSize);
