@@ -99,14 +99,9 @@ public class CorgiActivityDao {
             activity.setCreateTime(oldMongo.getCreateTime());
         }
         if (StringUtils.isEmpty(activity.getStatus()) && !StringUtils.isEmpty(oldMongo.getStatus())) {
-            if (ActivityMongo.FULL.equals(oldMongo.getStatus())) {
-                activity.setStatus(ActivityMongo.CREATED);
-            } else {
-                activity.setStatus(oldMongo.getStatus());
-            }
+            activity.setStatus(oldMongo.getStatus());
         }
         ActivityMongo mongo = mongoTemplate.save(activity);
-        corgiUserActivityService.deleteSignUpByActivity(corgiActivity.getId());
         return mongo;
     }
 
