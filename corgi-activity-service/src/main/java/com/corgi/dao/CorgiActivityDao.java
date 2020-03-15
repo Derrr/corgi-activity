@@ -7,6 +7,7 @@ import com.corgi.activity.entity.CorgiActivity;
 import com.corgi.entity.ActivityMongo;
 import com.corgi.entity.ActivityQuery;
 import com.corgi.user.api.CorgiFavorActivityService;
+import com.corgi.user.api.CorgiUserActivityService;
 import com.corgi.user.api.CorgiUserService;
 import com.corgi.util.ActivityUtil;
 import lombok.extern.slf4j.Slf4j;
@@ -47,6 +48,8 @@ public class CorgiActivityDao {
     private CorgiUserService corgiUserService;
     @Reference
     private CorgiFavorActivityService corgiFavorActivityService;
+    @Reference
+    private CorgiUserActivityService corgiUserActivityService;
 
     private SimpleDateFormat sdf = new SimpleDateFormat("yyyy/MM/dd HH:mm");
 
@@ -90,9 +93,14 @@ public class CorgiActivityDao {
             activity.setCreateTime(oldMongo.getCreateTime());
         }
         if (StringUtils.isEmpty(activity.getStatus()) && !StringUtils.isEmpty(oldMongo.getStatus())) {
-            activity.setStatus(oldMongo.getStatus());
+            if (ActivityMongo.FULL.equals(oldMongo.getStatus())) {
+                activity.setStatus(ActivityMongo.CREATED);
+            } else {
+                activity.setStatus(oldMongo.getStatus());
+            }
         }
         ActivityMongo mongo = mongoTemplate.save(activity);
+        corgiUserActivityService.deleteSignUpByActivity(corgiActivity.getId());
         return mongo;
     }
 
