@@ -48,8 +48,6 @@ public class CorgiActivityDao {
     private CorgiUserService corgiUserService;
     @Reference
     private CorgiFavorActivityService corgiFavorActivityService;
-    @Reference
-    private CorgiUserActivityService corgiUserActivityService;
 
     private SimpleDateFormat sdf = new SimpleDateFormat("yyyy/MM/dd HH:mm");
 
