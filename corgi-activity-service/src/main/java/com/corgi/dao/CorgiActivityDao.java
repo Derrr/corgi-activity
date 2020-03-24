@@ -158,7 +158,7 @@ public class CorgiActivityDao {
         Query query = new Query(queryCriteria).limit(100);
         List<ActivityMongo> corgiActivities = mongoTemplate.find(query, ActivityMongo.class);
 
-        if (activityQuery.checkUser() && CollectionUtils.isNotEmpty(corgiActivities)) {
+        if (CollectionUtils.isNotEmpty(corgiActivities) && !StringUtils.isEmpty(activityQuery.getUserId())) {
             List<String> userIds = new ArrayList<>();
             for (ActivityMongo mongo : corgiActivities) {
                 userIds.add(mongo.getUserId());
