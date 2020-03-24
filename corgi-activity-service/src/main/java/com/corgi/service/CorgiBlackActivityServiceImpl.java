@@ -37,7 +37,6 @@ public class CorgiBlackActivityServiceImpl implements CorgiBlackActivityService 
         List<ActivityMongo> activityIds = corgiActivityDao.getActivityIdByUserId(blackId);
         if (!CollectionUtils.isEmpty(activityIds)) {
             for (ActivityMongo activityId : activityIds) {
-                log.info(activityId.getMongoId().toString());
                 corgiFavorActivityService.deleteFavor(userId, activityId.getMongoId().toHexString());
             }
         }
