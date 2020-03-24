@@ -57,6 +57,7 @@ public class CorgiActivityDao {
 
     public ActivityMongo getActivityById(String activityId) {
         ActivityMongo mongo = mongoTemplate.findById(new ObjectId(activityId), ActivityMongo.class);
+        mongo.setCurrentTime(sdf.format(new Date()));
         return mongo;
     }
 
@@ -235,6 +236,12 @@ public class CorgiActivityDao {
         }
         Query query = getDescIdQuery(c, start, size);
         return mongoTemplate.find(query, ActivityMongo.class);
+    }
+
+    public List<String> getActivityIdByUserId(String userId) {
+        Query query = new Query(Criteria.where("userId").is(userId));
+        query.fields().include("_id");
+        return mongoTemplate.find(query, String.class);
     }
 
     public long countActivity(String date) {
