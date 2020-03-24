@@ -238,10 +238,10 @@ public class CorgiActivityDao {
         return mongoTemplate.find(query, ActivityMongo.class);
     }
 
-    public List<String> getActivityIdByUserId(String userId) {
+    public List<ActivityMongo> getActivityIdByUserId(String userId) {
         Query query = new Query(Criteria.where("userId").is(userId));
         query.fields().include("_id");
-        return mongoTemplate.find(query, String.class);
+        return mongoTemplate.find(query, ActivityMongo.class);
     }
 
     public long countActivity(String date) {

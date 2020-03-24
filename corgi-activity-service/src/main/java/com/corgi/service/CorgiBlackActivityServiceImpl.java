@@ -34,18 +34,18 @@ public class CorgiBlackActivityServiceImpl implements CorgiBlackActivityService 
 
     @Override
     public void deleteFavorActivity(String userId, String blackId) {
-        List<String> activityIds = corgiActivityDao.getActivityIdByUserId(blackId);
+        List<ActivityMongo> activityIds = corgiActivityDao.getActivityIdByUserId(blackId);
         if (!CollectionUtils.isEmpty(activityIds)) {
-            for (String activityId : activityIds) {
-                log.info(activityId);
-                corgiFavorActivityService.deleteFavor(userId, activityId);
+            for (ActivityMongo activityId : activityIds) {
+                log.info(activityId.getMongoId().toString());
+                corgiFavorActivityService.deleteFavor(userId, activityId.getMongoId().toHexString());
             }
         }
 
         activityIds = corgiActivityDao.getActivityIdByUserId(userId);
         if (!CollectionUtils.isEmpty(activityIds)) {
-            for (String activityId : activityIds) {
-                corgiFavorActivityService.deleteFavor(blackId, activityId);
+            for (ActivityMongo activityId : activityIds) {
+                corgiFavorActivityService.deleteFavor(blackId, activityId.getMongoId().toHexString());
             }
         }
     }
@@ -59,12 +59,12 @@ public class CorgiBlackActivityServiceImpl implements CorgiBlackActivityService 
                 int count = 0;
                 if (!CollectionUtils.isEmpty(userProfiles)) {
                     for (UserProfile userProfile : userProfiles) {
-                        if(userProfile.getSignUpStatus() == UserSignUp.AGREE && !userProfile.getUserId().equals(userId)){
+                        if (userProfile.getSignUpStatus() == UserSignUp.AGREE && !userProfile.getUserId().equals(userId)) {
                             count++;
                         }
                     }
                 }
-                if(count < activityMongo.getPeopleCount() -1){
+                if (count < activityMongo.getPeopleCount() - 1) {
                     CorgiActivity corgiActivity = new CorgiActivity();
                     corgiActivity.setId(activityId);
                     corgiActivity.setStatus(CorgiActivity.CREATED);
