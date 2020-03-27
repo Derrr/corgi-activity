@@ -281,8 +281,9 @@ public class CorgiActivityDao {
                 Object value = field.get(activity);
                 if (value != null && !"".equals(value.toString())) {
                     String fieldName = field.getName();
-                    log.info("field " + fieldName + " value=" + value);
-                    if ("status".equals(fieldName)) {
+                    if("id".equals(fieldName)){
+                        criteriaList.add(Criteria.where("mongoId").is(new ObjectId(value.toString())));
+                    }else if ("status".equals(fieldName)) {
                         if (CorgiActivity.ENDED.equals(value)) {
                             criteriaList.add(Criteria.where(ActivityMongo.SIGN_UP_TIME).gte(sdf.format(new Date())));
                             criteriaList.add(Criteria.where("status").is(CorgiActivity.CREATED));
