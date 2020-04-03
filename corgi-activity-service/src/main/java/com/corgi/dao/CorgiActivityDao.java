@@ -281,21 +281,23 @@ public class CorgiActivityDao {
                 Object value = field.get(activity);
                 if (value != null && !"".equals(value.toString())) {
                     String fieldName = field.getName();
-                    if("id".equals(fieldName)){
+                    if ("id".equals(fieldName)) {
                         criteriaList.add(Criteria.where("mongoId").is(new ObjectId(value.toString())));
-                    }else if ("status".equals(fieldName)) {
+                    } else if ("status".equals(fieldName)) {
                         if (CorgiActivity.ENDED.equals(value)) {
                             criteriaList.add(Criteria.where(ActivityMongo.SIGN_UP_TIME).lte(sdf.format(new Date())));
                             criteriaList.add(Criteria.where("status").ne(CorgiActivity.DELETED));
-                        } else if(CorgiActivity.CREATED.equals(value)) {
+                        } else if (CorgiActivity.CREATED.equals(value)) {
                             criteriaList.add(Criteria.where(ActivityMongo.SIGN_UP_TIME).gte(sdf.format(new Date())));
                             criteriaList.add(Criteria.where("status").ne(CorgiActivity.DELETED));
-                        }else if(CorgiActivity.FULL.equals(value)){
+                        } else if (CorgiActivity.FULL.equals(value)) {
                             criteriaList.add(Criteria.where(ActivityMongo.SIGN_UP_TIME).gte(sdf.format(new Date())));
                             criteriaList.add(Criteria.where("status").is(value));
-                        } else{
+                        } else {
                             criteriaList.add(Criteria.where("status").is(value));
                         }
+                    } else if (ActivityMongo.SIGN_UP_TIME.equals(fieldName)) {
+                        criteriaList.add(Criteria.where(ActivityMongo.SIGN_UP_TIME).lte(value));
                     } else if (LIKE_FIELDS.contains(fieldName)) {
                         criteriaList.add(Criteria.where(field.getName()).regex("^.*" + value + ".*$"));
                     } else if (int.class.equals(field.getType()) && (int) value != 0) {
