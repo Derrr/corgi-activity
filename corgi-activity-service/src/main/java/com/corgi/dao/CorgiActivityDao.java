@@ -222,7 +222,7 @@ public class CorgiActivityDao {
         Criteria criteriaLocation = Criteria.where("location").withinSphere(new Circle(new Point(activity.getLng(), activity.getLat()), new Distance(range * 100000, Metrics.KILOMETERS)));
         Criteria criteriaCheckStatus = Criteria.where("checkStatus").ne("fail");
         Criteria criteriaSignUpTime = Criteria.where(ActivityMongo.SIGN_UP_TIME).gte(activity.getSignUpTime());
-        Criteria criteriaStatus = Criteria.where("status").ne(CorgiActivity.DELETED);
+        Criteria criteriaStatus = Criteria.where("status").is(CorgiActivity.CREATED);
         Query query = getDescIdQuery(new Criteria().andOperator(criteriaLocation, criteriaSignUpTime, criteriaStatus, criteriaCheckStatus), 0, 20);
         return mongoTemplate.find(query, ActivityMongo.class);
     }
