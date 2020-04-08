@@ -27,6 +27,7 @@ import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
+import org.springframework.web.bind.annotation.ExceptionHandler;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
@@ -56,8 +57,15 @@ public class CorgiActivityDao {
     private static List<String> LIKE_FIELDS = Arrays.asList("title", "content", "address");
 
     public ActivityMongo getActivityById(String activityId) {
-        ActivityMongo mongo = mongoTemplate.findById(new ObjectId(activityId), ActivityMongo.class);
-        mongo.setCurrentTime(sdf.format(new Date()));
+        ActivityMongo mongo = null;
+        try {
+            mongo = mongoTemplate.findById(new ObjectId(activityId), ActivityMongo.class);
+            if (mongo != null) {
+                mongo.setCurrentTime(sdf.format(new Date()));
+            }
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
+        }
         return mongo;
     }
 
@@ -106,9 +114,11 @@ public class CorgiActivityDao {
 
     public ActivityMongo deleteActivityById(String activityId) {
         ActivityMongo activity = mongoTemplate.findById(new ObjectId(activityId), ActivityMongo.class);
-        activity.setUpdateTime(created_sdf.format(new Date()));
-        activity.setStatus(CorgiActivity.DELETED);
-        mongoTemplate.save(activity);
+        if (activity != null) {
+            activity.setUpdateTime(created_sdf.format(new Date()));
+            activity.setStatus(CorgiActivity.DELETED);
+            mongoTemplate.save(activity);
+        }
         return activity;
     }
 
