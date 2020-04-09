@@ -222,7 +222,7 @@ public class CorgiActivityDao {
     public long countActivities(CorgiActivity activity) {
         List<Criteria> criteriaList = getCriteriaList(activity);
         if (criteriaList.size() > 0) {
-            Query query = getDescIdQuery(new Criteria().andOperator(criteriaList.toArray(new Criteria[0])), 0, 20);
+            Query query = new Query(new Criteria().andOperator(criteriaList.toArray(new Criteria[0])));
             return mongoTemplate.count(query, ActivityMongo.class);
         }
         return mongoTemplate.count(new Query(), ActivityMongo.class);
