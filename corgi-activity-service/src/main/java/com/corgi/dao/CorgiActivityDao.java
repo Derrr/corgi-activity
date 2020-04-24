@@ -166,7 +166,15 @@ public class CorgiActivityDao {
         }
 
         Criteria queryCriteria = new Criteria().andOperator(criteriaList.toArray(new Criteria[0]));
-        Query query = new Query(queryCriteria).limit(100);
+        int skip = 0;
+        int size = 100;
+        if (activityQuery.getPageSize() != null && activityQuery.getPageSize() > 0) {
+            size = activityQuery.getPageSize();
+        }
+        if (activityQuery.getPage() != null && activityQuery.getPage() > 0) {
+            skip = (activityQuery.getPage() - 1) * size;
+        }
+        Query query = new Query(queryCriteria).skip(skip).limit(size);
         List<ActivityMongo> corgiActivities = mongoTemplate.find(query, ActivityMongo.class);
 
         if (CollectionUtils.isNotEmpty(corgiActivities) && !StringUtils.isEmpty(activityQuery.getUserId())) {
