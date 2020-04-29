@@ -58,6 +58,11 @@ public class ActivityMongo extends CorgiActivity {
         if (this.mongoId != null) {
             activity.setId(this.mongoId.toString());
         }
+        String signUpTime = activity.getSignUpTime();
+        if (signUpTime != null && signUpTime.length() > 10 && !signUpTime.contains(" ")) {
+            signUpTime = signUpTime.substring(0, 10) + " " + signUpTime.substring(10);
+            activity.setSignUpTime(signUpTime);
+        }
         return activity;
     }
 
