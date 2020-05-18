@@ -20,6 +20,7 @@ public class CorgiActivity implements Serializable {
     private String checkTitle;
     private String content;
     private String checkContent;
+    private String category;
     private String activityType;
     private String checkActivityType;
     private String userId;
@@ -37,6 +38,8 @@ public class CorgiActivity implements Serializable {
     private String createTime;
     private String updateTime;
     private String currentTime;
+    private String startTime;
+    private String endTime;
     private String status;
     private String checkStatus;
     private List<ActivityPic> pics;
