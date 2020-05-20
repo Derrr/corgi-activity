@@ -202,7 +202,9 @@ public class CorgiActivityDao {
         Criteria userCriteria = Criteria.where("userId").is(userId);
         Criteria statusCriteria = Criteria.where("status").is(CorgiActivity.CREATED);
         Criteria signUpCriteria = Criteria.where(ActivityMongo.SIGN_UP_TIME).gte(sdf.format(new Date()));
-        Query query = getDescIdQuery(new Criteria().andOperator(userCriteria, statusCriteria, signUpCriteria), start, size);
+        Criteria categoryCriteria = Criteria.where("category").is("image");
+        Criteria orCriteria = new Criteria().orOperator(signUpCriteria, categoryCriteria);
+        Query query = getDescIdQuery(new Criteria().andOperator(userCriteria, statusCriteria, orCriteria), start, size);
         List<ActivityMongo> corgiActivities = mongoTemplate.find(query, ActivityMongo.class);
         return corgiActivities;
     }
@@ -248,10 +250,12 @@ public class CorgiActivityDao {
     public List<ActivityMongo> getActivityByUserIds(List<String> userIds, String status, Integer start, Integer size) {
         Criteria c = Criteria.where("userId").in(userIds);
         if (CorgiActivity.CREATED.equals(status)) {
-            c = new Criteria().andOperator(c, Criteria.where(ActivityMongo.SIGN_UP_TIME).gte(sdf.format(new Date())), Criteria.where("status").ne(CorgiActivity.DELETED));
+            Criteria signUp = Criteria.where(ActivityMongo.SIGN_UP_TIME).gte(sdf.format(new Date()));
+            Criteria image = Criteria.where("category").is("image");
+            c = new Criteria().andOperator(c, new Criteria().orOperator(signUp, image), Criteria.where("status").ne(CorgiActivity.DELETED));
         } else if (CorgiActivity.ENDED.equals(status)) {
             c = new Criteria().andOperator(c, Criteria.where(ActivityMongo.SIGN_UP_TIME).lte(sdf.format(new Date())));
-        } else if (!StringUtils.isEmpty(start)) {
+        } else {
             c = new Criteria().andOperator(c, Criteria.where("status").ne(CorgiActivity.DELETED));
         }
         Query query = getDescIdQuery(c, start, size);
