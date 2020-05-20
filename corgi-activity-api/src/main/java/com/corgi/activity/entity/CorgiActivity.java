@@ -15,11 +15,16 @@ public class CorgiActivity implements Serializable {
     public static final String DELETED = "deleted";
     public static final String FULL = "full";
 
+    public static final String CAT_IMAGE = "image";
+    public static final String CAT_ACTIVITY = "activity";
+    public static final String CAT_BUSINESS = "business";
+
     private String id;
     private String title;
     private String checkTitle;
     private String content;
     private String checkContent;
+    private String category;
     private String activityType;
     private String checkActivityType;
     private String userId;
@@ -37,6 +42,8 @@ public class CorgiActivity implements Serializable {
     private String createTime;
     private String updateTime;
     private String currentTime;
+    private String startTime;
+    private String endTime;
     private String status;
     private String checkStatus;
     private List<ActivityPic> pics;
