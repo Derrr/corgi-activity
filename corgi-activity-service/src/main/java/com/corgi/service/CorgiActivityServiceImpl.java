@@ -10,6 +10,7 @@ import com.corgi.entity.ActivityMongo;
 import com.corgi.entity.ActivityQuery;
 import com.corgi.user.api.CorgiPicService;
 import com.corgi.user.api.CorgiToolService;
+import com.corgi.user.api.CorgiUserActivityService;
 import lombok.extern.slf4j.Slf4j;
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,6 +33,8 @@ public class CorgiActivityServiceImpl implements CorgiActivityService {
     private CorgiPicService corgiPicService;
     @Reference
     private CorgiToolService corgiToolService;
+    @Reference
+    private CorgiUserActivityService corgiUserActivityService;
 
     @Override
     public CorgiActivity addCorgiActivity(CorgiActivity corgiActivity) {
@@ -43,6 +46,7 @@ public class CorgiActivityServiceImpl implements CorgiActivityService {
             }
         }
         corgiToolService.updateActivityTopic(activityMongo.getMongoId().toHexString(), corgiActivity.getTopics());
+        corgiUserActivityService.addActivityCreator(corgiActivity.getUserId(), corgiActivity.getId(), corgiActivity.getCategory());
         return activityMongo.getActivity();
     }
 
