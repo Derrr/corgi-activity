@@ -130,7 +130,9 @@ public class CorgiActivityDao {
             distanceCriteria.maxDistance(range / 6371);
         }
         criteriaList.add(distanceCriteria);
-        criteriaList.add(Criteria.where(ActivityMongo.SIGN_UP_TIME).gte(sdf.format(new Date())));
+        Criteria signUpCriteria = Criteria.where(ActivityMongo.SIGN_UP_TIME).gte(sdf.format(new Date()));
+        Criteria businessCriteria = Criteria.where("category").is(CorgiActivity.CAT_BUSINESS);
+        criteriaList.add(new Criteria().orOperator(signUpCriteria, businessCriteria));
         criteriaList.add(Criteria.where("status").is(CorgiActivity.CREATED));
         criteriaList.add(Criteria.where("checkStatus").ne("fail"));
 
@@ -202,7 +204,7 @@ public class CorgiActivityDao {
         Criteria userCriteria = Criteria.where("userId").is(userId);
         Criteria statusCriteria = Criteria.where("status").is(CorgiActivity.CREATED);
         Criteria signUpCriteria = Criteria.where(ActivityMongo.SIGN_UP_TIME).gte(sdf.format(new Date()));
-        Criteria categoryCriteria = Criteria.where("category").is("image");
+        Criteria categoryCriteria = Criteria.where("category").is(CorgiActivity.CAT_IMAGE);
         Criteria orCriteria = new Criteria().orOperator(signUpCriteria, categoryCriteria);
         Query query = getDescIdQuery(new Criteria().andOperator(userCriteria, statusCriteria, orCriteria), start, size);
         List<ActivityMongo> corgiActivities = mongoTemplate.find(query, ActivityMongo.class);
