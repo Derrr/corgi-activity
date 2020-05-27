@@ -151,6 +151,11 @@ public class CorgiActivityServiceImpl implements CorgiActivityService {
         return corgiActivityDao.groupByActivity(type, beginDate, endDate);
     }
 
+    @Override
+    public List<CorgiActivity> getBarActivity(CorgiActivity activity) {
+        return convertActivity(corgiActivityDao.getBarActivity(activity));
+    }
+
     List<CorgiActivity> convertActivity(List<ActivityMongo> activityMongoList) {
         List<CorgiActivity> corgiActivities = new ArrayList<>();
         if (activityMongoList != null) {
