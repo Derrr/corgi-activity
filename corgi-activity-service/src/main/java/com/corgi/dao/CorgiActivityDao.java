@@ -249,6 +249,15 @@ public class CorgiActivityDao {
         return mongoTemplate.find(query, ActivityMongo.class);
     }
 
+    public List<ActivityMongo> getBarActivity(CorgiActivity activity) {
+        Criteria criteria = Criteria.where("category").is(CorgiActivity.CAT_BUSINESS);
+        if(!StringUtils.isEmpty(activity.getStatus())){
+            Criteria criteriaStatus = Criteria.where("status").is(activity.getStatus());
+            criteria = new Criteria().andOperator(criteria,criteriaStatus);
+        }
+        return mongoTemplate.find(new Query(criteria),ActivityMongo.class);
+    }
+
     public List<ActivityMongo> getActivityByUserIds(List<String> userIds, String status, Integer start, Integer size) {
         Criteria c = Criteria.where("userId").in(userIds);
         if (CorgiActivity.CREATED.equals(status)) {

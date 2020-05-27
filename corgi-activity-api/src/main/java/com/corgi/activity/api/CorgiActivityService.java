@@ -47,4 +47,6 @@ public interface CorgiActivityService {
     void removeActivity(String activityId);
 
     List<HashMap> groupByActivity(String key, String beginDate, String endDate);
+
+    List<CorgiActivity> getBarActivity(CorgiActivity activity);
 }
