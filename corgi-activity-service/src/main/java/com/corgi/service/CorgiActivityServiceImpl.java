@@ -63,6 +63,12 @@ public class CorgiActivityServiceImpl implements CorgiActivityService {
     }
 
     @Override
+    public List<CorgiActivity> getUserAllRunningActivity(String userId, Integer page, Integer size) {
+        List<ActivityMongo> mongoList = corgiActivityDao.getAllRunningActivities(userId, (page - 1) * size, size);
+        return convertActivity(mongoList);
+    }
+
+    @Override
     public List<CorgiActivity> getUserEndedActivity(String userId, Integer page, Integer size) {
         List<ActivityMongo> mongoList = corgiActivityDao.getEndedActivities(userId, (page - 1) * size, size);
         return convertActivity(mongoList);
@@ -129,6 +135,12 @@ public class CorgiActivityServiceImpl implements CorgiActivityService {
     public List<CorgiActivity> getActivityByUserIds(List<String> userIds, String status, Integer page, Integer size) {
         return convertActivity(corgiActivityDao.getActivityByUserIds(userIds, status, (page - 1) * size, size));
     }
+
+    @Override
+    public List<CorgiActivity> getAllActivityByUserIds(List<String> userIds, String status, Integer page, Integer size) {
+        return convertActivity(corgiActivityDao.getActivityByUserIds(userIds, status, (page - 1) * size, size));
+    }
+
 
     @Override
     public List<CorgiActivity> getSimilarActivity(CorgiActivity corgiActivity) {

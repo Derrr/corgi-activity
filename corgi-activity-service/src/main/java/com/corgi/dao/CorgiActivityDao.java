@@ -131,8 +131,13 @@ public class CorgiActivityDao {
         }
         criteriaList.add(distanceCriteria);
         Criteria signUpCriteria = Criteria.where(ActivityMongo.SIGN_UP_TIME).gte(sdf.format(new Date()));
-        Criteria businessCriteria = Criteria.where("category").is(CorgiActivity.CAT_BUSINESS);
-        criteriaList.add(new Criteria().orOperator(signUpCriteria, businessCriteria));
+        if (StringUtils.isEmpty(activityQuery.getVersion())) {
+            criteriaList.add(signUpCriteria);
+        } else {
+            Criteria businessCriteria = Criteria.where("category").is(CorgiActivity.CAT_BUSINESS);
+            Criteria imageCriteria = Criteria.where("category").is(CorgiActivity.CAT_IMAGE);
+            criteriaList.add(new Criteria().orOperator(signUpCriteria, businessCriteria, imageCriteria));
+        }
         criteriaList.add(Criteria.where("status").is(CorgiActivity.CREATED));
         criteriaList.add(Criteria.where("checkStatus").ne("fail"));
 
@@ -204,8 +209,18 @@ public class CorgiActivityDao {
         Criteria userCriteria = Criteria.where("userId").is(userId);
         Criteria statusCriteria = Criteria.where("status").is(CorgiActivity.CREATED);
         Criteria signUpCriteria = Criteria.where(ActivityMongo.SIGN_UP_TIME).gte(sdf.format(new Date()));
-        Criteria categoryCriteria = Criteria.where("category").is(CorgiActivity.CAT_IMAGE);
-        Criteria orCriteria = new Criteria().orOperator(signUpCriteria, categoryCriteria);
+        Query query = getDescIdQuery(new Criteria().andOperator(userCriteria, statusCriteria, signUpCriteria), start, size);
+        List<ActivityMongo> corgiActivities = mongoTemplate.find(query, ActivityMongo.class);
+        return corgiActivities;
+    }
+
+    public List<ActivityMongo> getAllRunningActivities(String userId, Integer start, Integer size) {
+        Criteria userCriteria = Criteria.where("userId").is(userId);
+        Criteria statusCriteria = Criteria.where("status").is(CorgiActivity.CREATED);
+        Criteria signUpCriteria = Criteria.where(ActivityMongo.SIGN_UP_TIME).gte(sdf.format(new Date()));
+        Criteria categoryCriteria1 = Criteria.where("category").is(CorgiActivity.CAT_IMAGE);
+        Criteria categoryCriteria2 = Criteria.where("category").is(CorgiActivity.CAT_BUSINESS);
+        Criteria orCriteria = new Criteria().orOperator(signUpCriteria, categoryCriteria1, categoryCriteria2);
         Query query = getDescIdQuery(new Criteria().andOperator(userCriteria, statusCriteria, orCriteria), start, size);
         List<ActivityMongo> corgiActivities = mongoTemplate.find(query, ActivityMongo.class);
         return corgiActivities;
@@ -251,19 +266,34 @@ public class CorgiActivityDao {
 
     public List<ActivityMongo> getBarActivity(CorgiActivity activity) {
         Criteria criteria = Criteria.where("category").is(CorgiActivity.CAT_BUSINESS);
-        if(!StringUtils.isEmpty(activity.getStatus())){
+        if (!StringUtils.isEmpty(activity.getStatus())) {
             Criteria criteriaStatus = Criteria.where("status").is(activity.getStatus());
-            criteria = new Criteria().andOperator(criteria,criteriaStatus);
+            criteria = new Criteria().andOperator(criteria, criteriaStatus);
         }
-        return mongoTemplate.find(new Query(criteria),ActivityMongo.class);
+        return mongoTemplate.find(new Query(criteria), ActivityMongo.class);
     }
 
     public List<ActivityMongo> getActivityByUserIds(List<String> userIds, String status, Integer start, Integer size) {
         Criteria c = Criteria.where("userId").in(userIds);
         if (CorgiActivity.CREATED.equals(status)) {
             Criteria signUp = Criteria.where(ActivityMongo.SIGN_UP_TIME).gte(sdf.format(new Date()));
-            Criteria image = Criteria.where("category").is("image");
-            c = new Criteria().andOperator(c, new Criteria().orOperator(signUp, image), Criteria.where("status").ne(CorgiActivity.DELETED));
+            c = new Criteria().andOperator(c, signUp, Criteria.where("status").ne(CorgiActivity.DELETED));
+        } else if (CorgiActivity.ENDED.equals(status)) {
+            c = new Criteria().andOperator(c, Criteria.where(ActivityMongo.SIGN_UP_TIME).lte(sdf.format(new Date())));
+        } else {
+            c = new Criteria().andOperator(c, Criteria.where("status").ne(CorgiActivity.DELETED));
+        }
+        Query query = getDescIdQuery(c, start, size);
+        return mongoTemplate.find(query, ActivityMongo.class);
+    }
+
+    public List<ActivityMongo> getAllActivityByUserIds(List<String> userIds, String status, Integer start, Integer size) {
+        Criteria c = Criteria.where("userId").in(userIds);
+        if (CorgiActivity.CREATED.equals(status)) {
+            Criteria signUp = Criteria.where(ActivityMongo.SIGN_UP_TIME).gte(sdf.format(new Date()));
+            Criteria image = Criteria.where("category").is(CorgiActivity.CAT_IMAGE);
+            Criteria business = Criteria.where("category").is(CorgiActivity.CAT_BUSINESS);
+            c = new Criteria().andOperator(c, new Criteria().orOperator(signUp, image, business), Criteria.where("status").ne(CorgiActivity.DELETED));
         } else if (CorgiActivity.ENDED.equals(status)) {
             c = new Criteria().andOperator(c, Criteria.where(ActivityMongo.SIGN_UP_TIME).lte(sdf.format(new Date())));
         } else {

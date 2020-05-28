@@ -16,6 +16,8 @@ public interface CorgiActivityService {
 
     List<CorgiActivity> getUserRunningActivity(String userId, Integer page, Integer size);
 
+    List<CorgiActivity> getUserAllRunningActivity(String userId, Integer page, Integer size);
+
     List<CorgiActivity> getUserEndedActivity(String userId, Integer page, Integer size);
 
     List<CorgiActivity> getActivityByIds(List<String> activityIds);
@@ -37,6 +39,8 @@ public interface CorgiActivityService {
     long countUserActivity(String userId);
 
     List<CorgiActivity> getActivityByUserIds(List<String> userIds, String status, Integer page, Integer size);
+
+    List<CorgiActivity> getAllActivityByUserIds(List<String> userIds, String status, Integer page, Integer size);
 
     List<CorgiActivity> getSimilarActivity(CorgiActivity corgiActivity);
 
