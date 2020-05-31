@@ -51,7 +51,10 @@ public class CorgiActivity implements Serializable {
 
 
     public String getStatus() {
-        if (!DELETED.equals(status) && currentTime != null && currentTime.compareTo(signUpTime) >= 0) {
+        if (!DELETED.equals(status)
+                && currentTime != null
+                && signUpTime != null
+                && currentTime.compareTo(signUpTime) >= 0) {
             return ENDED;
         }
         return status;
