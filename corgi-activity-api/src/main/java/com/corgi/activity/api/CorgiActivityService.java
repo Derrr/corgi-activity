@@ -40,7 +40,7 @@ public interface CorgiActivityService {
 
     List<CorgiActivity> getActivityByUserIds(List<String> userIds, String status, Integer page, Integer size);
 
-    List<CorgiActivity> getAllActivityByUserIds(List<String> userIds, String status, Integer page, Integer size);
+    List<CorgiActivity> getAllActivityByUserIds(String userId, List<String> userIds, String status, Integer page, Integer size);
 
     List<CorgiActivity> getSimilarActivity(CorgiActivity corgiActivity);
 
