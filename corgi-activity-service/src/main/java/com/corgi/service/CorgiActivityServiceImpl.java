@@ -138,7 +138,7 @@ public class CorgiActivityServiceImpl implements CorgiActivityService {
 
     @Override
     public List<CorgiActivity> getAllActivityByUserIds(List<String> userIds, String status, Integer page, Integer size) {
-        return convertActivity(corgiActivityDao.getActivityByUserIds(userIds, status, (page - 1) * size, size));
+        return convertActivity(corgiActivityDao.getAllActivityByUserIds(userIds, status, (page - 1) * size, size));
     }
 
 
