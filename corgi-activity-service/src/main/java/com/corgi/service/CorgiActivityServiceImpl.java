@@ -46,7 +46,7 @@ public class CorgiActivityServiceImpl implements CorgiActivityService {
             }
         }
         corgiToolService.updateActivityTopic(activityMongo.getMongoId().toHexString(), corgiActivity.getTopics());
-        corgiUserActivityService.addActivityCreator(corgiActivity.getUserId(), corgiActivity.getId(), corgiActivity.getCategory());
+        corgiUserActivityService.addActivityCreator(corgiActivity.getUserId(), activityMongo.getMongoId().toHexString(), corgiActivity.getCategory());
         return activityMongo.getActivity();
     }
 
