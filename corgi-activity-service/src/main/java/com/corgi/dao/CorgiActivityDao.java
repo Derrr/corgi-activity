@@ -243,11 +243,13 @@ public class CorgiActivityDao {
 
     public List<ActivityMongo> queryActivities(CorgiActivity activity, Integer start, Integer size) {
         List<Criteria> criteriaList = getCriteriaList(activity);
+        List<ActivityMongo> mongos;
         if (criteriaList.size() > 0) {
             Query query = getDescIdQuery(new Criteria().andOperator(criteriaList.toArray(new Criteria[0])), start, size);
-            return mongoTemplate.find(query, ActivityMongo.class);
+            mongos = mongoTemplate.find(query, ActivityMongo.class);
+        } else {
+            mongos = mongoTemplate.find(new Query().with(Sort.by(Sort.Direction.DESC, "_id")).skip(start).limit(size), ActivityMongo.class);
         }
-        List<ActivityMongo> mongos = mongoTemplate.find(new Query().with(Sort.by(Sort.Direction.DESC, "_id")).skip(start).limit(size), ActivityMongo.class);
         if (CollectionUtils.isNotEmpty(mongos)) {
             String nowTime = sdf.format(new Date());
             for (ActivityMongo activityMongo : mongos) {
