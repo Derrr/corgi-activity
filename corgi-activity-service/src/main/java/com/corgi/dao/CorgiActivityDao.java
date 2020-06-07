@@ -296,8 +296,8 @@ public class CorgiActivityDao {
     }
 
     public List<ActivityMongo> getAllActivityByUserIds(String loginUserId, List<String> userIds, String status, Integer start, Integer size) {
+        userIds.add(loginUserId);
         Criteria c = new Criteria().andOperator(Criteria.where("userId").in(userIds), Criteria.where("checkStatus").is("pass"));
-        c = new Criteria().orOperator(c, Criteria.where("userId").is(loginUserId));
         if (CorgiActivity.CREATED.equals(status)) {
             Criteria signUp = Criteria.where(ActivityMongo.SIGN_UP_TIME).gte(sdf.format(new Date()));
             Criteria image = Criteria.where("category").is(CorgiActivity.CAT_IMAGE);
