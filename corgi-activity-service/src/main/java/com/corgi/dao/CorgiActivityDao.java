@@ -141,6 +141,10 @@ public class CorgiActivityDao {
         criteriaList.add(Criteria.where("status").is(CorgiActivity.CREATED));
         criteriaList.add(Criteria.where("checkStatus").is("pass"));
 
+        if (!StringUtils.isEmpty(activityQuery.getUserId())) {
+            criteriaList.add(Criteria.where("userId").ne(activityQuery.getUserId()));
+        }
+
         if (!StringUtils.isEmpty(activityQuery.getType())) {
             criteriaList.add(Criteria.where("activityType").is(activityQuery.getType()));
         }
