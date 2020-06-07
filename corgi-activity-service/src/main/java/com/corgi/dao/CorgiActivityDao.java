@@ -279,9 +279,10 @@ public class CorgiActivityDao {
 
     public List<ActivityMongo> getBarActivity(CorgiActivity activity) {
         Criteria criteria = Criteria.where("category").is(CorgiActivity.CAT_BUSINESS);
+        Criteria criteriaUserId = Criteria.where("userId").is(activity.getUserId());
         if (!StringUtils.isEmpty(activity.getStatus())) {
             Criteria criteriaStatus = Criteria.where("status").is(activity.getStatus());
-            criteria = new Criteria().andOperator(criteria, criteriaStatus);
+            criteria = new Criteria().andOperator(criteria, criteriaStatus, criteriaUserId);
         }
         return mongoTemplate.find(new Query(criteria), ActivityMongo.class);
     }
