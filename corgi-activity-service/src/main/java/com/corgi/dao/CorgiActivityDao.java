@@ -247,11 +247,20 @@ public class CorgiActivityDao {
 
     public List<ActivityMongo> queryActivities(CorgiActivity activity, Integer start, Integer size) {
         List<Criteria> criteriaList = getCriteriaList(activity);
+        List<ActivityMongo> mongos;
         if (criteriaList.size() > 0) {
             Query query = getDescIdQuery(new Criteria().andOperator(criteriaList.toArray(new Criteria[0])), start, size);
-            return mongoTemplate.find(query, ActivityMongo.class);
+            mongos = mongoTemplate.find(query, ActivityMongo.class);
+        } else {
+            mongos = mongoTemplate.find(new Query().with(Sort.by(Sort.Direction.DESC, "_id")).skip(start).limit(size), ActivityMongo.class);
         }
-        return mongoTemplate.find(new Query().with(Sort.by(Sort.Direction.DESC, "_id")).skip(start).limit(size), ActivityMongo.class);
+        if (CollectionUtils.isNotEmpty(mongos)) {
+            String nowTime = sdf.format(new Date());
+            for (ActivityMongo activityMongo : mongos) {
+                activityMongo.setCurrentTime(nowTime);
+            }
+        }
+        return mongos;
     }
 
     public long countActivities(CorgiActivity activity) {
@@ -274,9 +283,10 @@ public class CorgiActivityDao {
 
     public List<ActivityMongo> getBarActivity(CorgiActivity activity) {
         Criteria criteria = Criteria.where("category").is(CorgiActivity.CAT_BUSINESS);
+        Criteria criteriaUserId = Criteria.where("userId").is(activity.getUserId());
         if (!StringUtils.isEmpty(activity.getStatus())) {
             Criteria criteriaStatus = Criteria.where("status").is(activity.getStatus());
-            criteria = new Criteria().andOperator(criteria, criteriaStatus);
+            criteria = new Criteria().andOperator(criteria, criteriaStatus, criteriaUserId);
         }
         return mongoTemplate.find(new Query(criteria), ActivityMongo.class);
     }
