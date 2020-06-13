@@ -18,8 +18,10 @@ public class CorgiActivity implements Serializable {
     public static final String CAT_IMAGE = "image";
     public static final String CAT_ACTIVITY = "activity";
     public static final String CAT_BUSINESS = "business";
+    public static final String CAT_ATTENDANCE = "attendance";
 
     private String id;
+    private String barId;
     private String title;
     private String checkTitle;
     private String content;
