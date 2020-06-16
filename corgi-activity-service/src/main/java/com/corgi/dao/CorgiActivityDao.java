@@ -339,7 +339,8 @@ public class CorgiActivityDao {
     public long countActivity(String beginDate, String endDate) {
         Criteria criteria = new Criteria().andOperator(
                 Criteria.where("createTime").gte(beginDate),
-                Criteria.where("createTime").lte(endDate));
+                Criteria.where("createTime").lte(endDate),
+                Criteria.where("category").is(CorgiActivity.CAT_ACTIVITY));
         Query query = new Query(criteria);
         return mongoTemplate.count(query, ActivityMongo.class);
     }
