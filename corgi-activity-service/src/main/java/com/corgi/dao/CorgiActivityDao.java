@@ -84,9 +84,16 @@ public class CorgiActivityDao {
     }
 
     public void updateActivityStatus(CorgiActivity corgiActivity) {
-        Update update = new Update().set("status", corgiActivity.getStatus());
         Query query = new Query(Criteria.where("mongoId").is(new ObjectId(corgiActivity.getId())));
-        mongoTemplate.updateFirst(query, update, ActivityMongo.class);
+        if(!StringUtils.isEmpty(corgiActivity.getStatus())) {
+            Update update = new Update().set("status", corgiActivity.getStatus());
+            mongoTemplate.updateFirst(query, update, ActivityMongo.class);
+        }
+        if(!StringUtils.isEmpty(corgiActivity.getCheckStatus())){
+            Update update = new Update().set("checkStatus", corgiActivity.getCheckStatus());
+            mongoTemplate.updateFirst(query, update, ActivityMongo.class);
+        }
+
     }
 
     public ActivityMongo updateActivity(CorgiActivity corgiActivity) {
