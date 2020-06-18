@@ -15,6 +15,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.util.CollectionUtils;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -181,8 +182,11 @@ public class CorgiActivityServiceImpl implements CorgiActivityService {
         if (activityMongoList != null) {
             for (ActivityMongo mongo : activityMongoList) {
                 CorgiActivity activity = mongo.getActivity();
-                activity.setPics(corgiPicService.getActivityPic(activity.getId()));
-                corgiActivities.add(activity);
+                List<ActivityPic> activityPics = corgiPicService.getActivityPic(activity.getId());
+                if (!CollectionUtils.isEmpty(activityPics)) {
+                    activity.setPics(activityPics);
+                    corgiActivities.add(activity);
+                }
             }
         }
         return corgiActivities;
