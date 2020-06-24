@@ -390,7 +390,7 @@ public class CorgiActivityDao {
                             criteriaList.add(Criteria.where("status").is(value));
                         }
                     } else if ("createTime".equals(fieldName)) {
-                        criteriaList.add(Criteria.where("createTime").regex("^" + value));
+                        criteriaList.add(Criteria.where("createTime").regex("^" + value+".*"));
                     } else if (ActivityMongo.SIGN_UP_TIME.equals(fieldName)) {
                         criteriaList.add(Criteria.where(ActivityMongo.SIGN_UP_TIME).lte(value));
                     } else if (LIKE_FIELDS.contains(fieldName)) {
