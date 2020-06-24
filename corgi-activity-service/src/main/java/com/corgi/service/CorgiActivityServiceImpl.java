@@ -113,7 +113,7 @@ public class CorgiActivityServiceImpl implements CorgiActivityService {
 
     @Override
     public List<CorgiActivity> searchCorgiActivity(CorgiActivity activity, Integer page, Integer pageSize) {
-        return convertActivity(corgiActivityDao.queryActivities(activity, page < 1 ? 0 : (page - 1) * pageSize, pageSize));
+        return convertActivity(corgiActivityDao.queryActivities(activity, page < 1 ? 0 : (page - 1) * pageSize, pageSize), page != -1);
     }
 
     @Override
@@ -177,18 +177,23 @@ public class CorgiActivityServiceImpl implements CorgiActivityService {
         return convertActivity(corgiActivityDao.getBarActivity(activity));
     }
 
-    List<CorgiActivity> convertActivity(List<ActivityMongo> activityMongoList) {
+    List<CorgiActivity> convertActivity(List<ActivityMongo> activityMongoList, boolean checkPic) {
         List<CorgiActivity> corgiActivities = new ArrayList<>();
         if (activityMongoList != null) {
             for (ActivityMongo mongo : activityMongoList) {
                 CorgiActivity activity = mongo.getActivity();
                 List<ActivityPic> activityPics = corgiPicService.getActivityPic(activity.getId());
-                if (!CollectionUtils.isEmpty(activityPics)) {
-                    activity.setPics(activityPics);
-                    corgiActivities.add(activity);
+                if (checkPic && CollectionUtils.isEmpty(activityPics)) {
+                    continue;
                 }
+                activity.setPics(activityPics);
+                corgiActivities.add(activity);
             }
         }
         return corgiActivities;
+    }
+
+    List<CorgiActivity> convertActivity(List<ActivityMongo> activityMongoList) {
+        return convertActivity(activityMongoList, true);
     }
 }
