@@ -85,11 +85,11 @@ public class CorgiActivityDao {
 
     public void updateActivityStatus(CorgiActivity corgiActivity) {
         Query query = new Query(Criteria.where("mongoId").is(new ObjectId(corgiActivity.getId())));
-        if(!StringUtils.isEmpty(corgiActivity.getStatus())) {
+        if (!StringUtils.isEmpty(corgiActivity.getStatus())) {
             Update update = new Update().set("status", corgiActivity.getStatus());
             mongoTemplate.updateFirst(query, update, ActivityMongo.class);
         }
-        if(!StringUtils.isEmpty(corgiActivity.getCheckStatus())){
+        if (!StringUtils.isEmpty(corgiActivity.getCheckStatus())) {
             Update update = new Update().set("checkStatus", corgiActivity.getCheckStatus());
             mongoTemplate.updateFirst(query, update, ActivityMongo.class);
         }
@@ -196,7 +196,11 @@ public class CorgiActivityDao {
         if (activityQuery.getPage() != null && activityQuery.getPage() > 0) {
             skip = (activityQuery.getPage() - 1) * size;
         }
+
         Query query = new Query(queryCriteria).skip(skip).limit(size);
+        if (ActivityQuery.SORT_TIME.equals(activityQuery.getSort())) {
+            query.with(Sort.by(Sort.Direction.DESC, "createTime"));
+        }
         List<ActivityMongo> corgiActivities = mongoTemplate.find(query, ActivityMongo.class);
 
         if (CollectionUtils.isNotEmpty(corgiActivities) && !StringUtils.isEmpty(activityQuery.getUserId())) {
@@ -390,7 +394,7 @@ public class CorgiActivityDao {
                             criteriaList.add(Criteria.where("status").is(value));
                         }
                     } else if ("createTime".equals(fieldName)) {
-                        criteriaList.add(Criteria.where("createTime").regex("^" + value+".*"));
+                        criteriaList.add(Criteria.where("createTime").regex("^" + value + ".*"));
                     } else if (ActivityMongo.SIGN_UP_TIME.equals(fieldName)) {
                         criteriaList.add(Criteria.where(ActivityMongo.SIGN_UP_TIME).lte(value));
                     } else if (LIKE_FIELDS.contains(fieldName)) {
