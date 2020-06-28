@@ -235,7 +235,7 @@ public class CorgiActivityDao {
 
     public List<ActivityMongo> getAllRunningActivities(String userId, Integer start, Integer size) {
         Criteria userCriteria = Criteria.where("userId").is(userId);
-        Criteria statusCriteria = Criteria.where("status").is(CorgiActivity.CREATED);
+        Criteria statusCriteria = Criteria.where("status").ne(CorgiActivity.DELETED);
         Criteria signUpCriteria = Criteria.where(ActivityMongo.SIGN_UP_TIME).gte(new SimpleDateFormat("yyyy/MM/dd HH:mm").format(new Date()));
         Criteria categoryCriteria1 = Criteria.where("category").is(CorgiActivity.CAT_IMAGE);
         Criteria categoryCriteria2 = Criteria.where("category").is(CorgiActivity.CAT_BUSINESS);
