@@ -84,9 +84,16 @@ public class CorgiActivityDao {
     }
 
     public void updateActivityStatus(CorgiActivity corgiActivity) {
-        Update update = new Update().set("status", corgiActivity.getStatus());
         Query query = new Query(Criteria.where("mongoId").is(new ObjectId(corgiActivity.getId())));
-        mongoTemplate.updateFirst(query, update, ActivityMongo.class);
+        if (!StringUtils.isEmpty(corgiActivity.getStatus())) {
+            Update update = new Update().set("status", corgiActivity.getStatus());
+            mongoTemplate.updateFirst(query, update, ActivityMongo.class);
+        }
+        if (!StringUtils.isEmpty(corgiActivity.getCheckStatus())) {
+            Update update = new Update().set("checkStatus", corgiActivity.getCheckStatus());
+            mongoTemplate.updateFirst(query, update, ActivityMongo.class);
+        }
+
     }
 
     public ActivityMongo updateActivity(CorgiActivity corgiActivity) {
@@ -189,7 +196,11 @@ public class CorgiActivityDao {
         if (activityQuery.getPage() != null && activityQuery.getPage() > 0) {
             skip = (activityQuery.getPage() - 1) * size;
         }
+
         Query query = new Query(queryCriteria).skip(skip).limit(size);
+        if (ActivityQuery.SORT_TIME.equals(activityQuery.getSort())) {
+            query.with(Sort.by(Sort.Direction.DESC, "createTime"));
+        }
         List<ActivityMongo> corgiActivities = mongoTemplate.find(query, ActivityMongo.class);
 
         if (CollectionUtils.isNotEmpty(corgiActivities) && !StringUtils.isEmpty(activityQuery.getUserId())) {
@@ -224,7 +235,7 @@ public class CorgiActivityDao {
 
     public List<ActivityMongo> getAllRunningActivities(String userId, Integer start, Integer size) {
         Criteria userCriteria = Criteria.where("userId").is(userId);
-        Criteria statusCriteria = Criteria.where("status").is(CorgiActivity.CREATED);
+        Criteria statusCriteria = Criteria.where("status").ne(CorgiActivity.DELETED);
         Criteria signUpCriteria = Criteria.where(ActivityMongo.SIGN_UP_TIME).gte(new SimpleDateFormat("yyyy/MM/dd HH:mm").format(new Date()));
         Criteria categoryCriteria1 = Criteria.where("category").is(CorgiActivity.CAT_IMAGE);
         Criteria categoryCriteria2 = Criteria.where("category").is(CorgiActivity.CAT_BUSINESS);
@@ -283,12 +294,25 @@ public class CorgiActivityDao {
     }
 
     public List<ActivityMongo> getBarActivity(CorgiActivity activity) {
+        List<Criteria> criteras = new ArrayList<>();
         Criteria criteria = Criteria.where("category").is(CorgiActivity.CAT_BUSINESS);
         Criteria criteriaUserId = Criteria.where("userId").is(activity.getUserId());
-        if (!StringUtils.isEmpty(activity.getStatus())) {
-            Criteria criteriaStatus = Criteria.where("status").is(activity.getStatus());
-            criteria = new Criteria().andOperator(criteria, criteriaStatus, criteriaUserId);
+        criteras.add(criteria);
+        criteras.add(criteriaUserId);
+        String status = activity.getStatus();
+        if (!StringUtils.isEmpty(status)) {
+            Criteria criteriaStatus = Criteria.where("status").is(status);
+            criteras.add(criteriaStatus);
+            if (!StringUtils.isEmpty(activity.getStartTime())) {
+                Criteria startTime = Criteria.where("startTime").lte(activity.getStartTime());
+                criteras.add(startTime);
+            }
+            if (!StringUtils.isEmpty(activity.getEndTime())) {
+                Criteria endTime = Criteria.where("endTime").gte(activity.getEndTime());
+                criteras.add(endTime);
+            }
         }
+        criteria = new Criteria().andOperator(criteras.toArray(new Criteria[0]));
         return mongoTemplate.find(new Query(criteria), ActivityMongo.class);
     }
 
@@ -356,6 +380,7 @@ public class CorgiActivityDao {
 
     private List<Criteria> getCriteriaList(CorgiActivity activity) {
         Field[] fields = CorgiActivity.class.getDeclaredFields();
+        boolean isBusiness = CorgiActivity.CAT_BUSINESS.equals(activity.getCategory());
         List<Criteria> criteriaList = new ArrayList<>();
         for (int i = 0; i < fields.length; i++) {
             Field field = fields[i];
@@ -383,7 +408,7 @@ public class CorgiActivityDao {
                             criteriaList.add(Criteria.where("status").is(value));
                         }
                     } else if ("createTime".equals(fieldName)) {
-                        criteriaList.add(Criteria.where("createTime").regex("^" + value));
+                        criteriaList.add(Criteria.where("createTime").regex("^" + value + ".*"));
                     } else if (ActivityMongo.SIGN_UP_TIME.equals(fieldName)) {
                         criteriaList.add(Criteria.where(ActivityMongo.SIGN_UP_TIME).lte(value));
                     } else if (LIKE_FIELDS.contains(fieldName)) {

@@ -15,6 +15,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.util.CollectionUtils;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -46,7 +47,11 @@ public class CorgiActivityServiceImpl implements CorgiActivityService {
             }
         }
         corgiToolService.updateActivityTopic(activityMongo.getMongoId().toHexString(), corgiActivity.getTopics());
-        corgiUserActivityService.addActivityCreator(corgiActivity.getUserId(), activityMongo.getMongoId().toHexString(), corgiActivity.getCategory());
+        String category = corgiActivity.getCategory();
+        if (CorgiActivity.CAT_ATTENDANCE.equals(category)) {
+            category = category + corgiActivity.getBarId();
+        }
+        corgiUserActivityService.addActivityCreator(corgiActivity.getUserId(), activityMongo.getMongoId().toHexString(), category);
         return activityMongo.getActivity();
     }
 
@@ -108,7 +113,7 @@ public class CorgiActivityServiceImpl implements CorgiActivityService {
 
     @Override
     public List<CorgiActivity> searchCorgiActivity(CorgiActivity activity, Integer page, Integer pageSize) {
-        return convertActivity(corgiActivityDao.queryActivities(activity, page < 1 ? 0 : (page - 1) * pageSize, pageSize));
+        return convertActivity(corgiActivityDao.queryActivities(activity, page < 1 ? 0 : (page - 1) * pageSize, pageSize), page != -1 && !"check".equals(activity.getCheckStatus()));
     }
 
     @Override
@@ -172,15 +177,23 @@ public class CorgiActivityServiceImpl implements CorgiActivityService {
         return convertActivity(corgiActivityDao.getBarActivity(activity));
     }
 
-    List<CorgiActivity> convertActivity(List<ActivityMongo> activityMongoList) {
+    List<CorgiActivity> convertActivity(List<ActivityMongo> activityMongoList, boolean checkPic) {
         List<CorgiActivity> corgiActivities = new ArrayList<>();
         if (activityMongoList != null) {
             for (ActivityMongo mongo : activityMongoList) {
                 CorgiActivity activity = mongo.getActivity();
-                activity.setPics(corgiPicService.getActivityPic(activity.getId()));
+                List<ActivityPic> activityPics = corgiPicService.getActivityPic(activity.getId());
+                if (checkPic && CollectionUtils.isEmpty(activityPics)) {
+                    continue;
+                }
+                activity.setPics(activityPics);
                 corgiActivities.add(activity);
             }
         }
         return corgiActivities;
+    }
+
+    List<CorgiActivity> convertActivity(List<ActivityMongo> activityMongoList) {
+        return convertActivity(activityMongoList, true);
     }
 }
