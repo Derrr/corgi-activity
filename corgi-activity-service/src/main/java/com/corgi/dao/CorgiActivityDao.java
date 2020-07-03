@@ -294,21 +294,25 @@ public class CorgiActivityDao {
     }
 
     public List<ActivityMongo> getBarActivity(CorgiActivity activity) {
+        List<Criteria> criteras = new ArrayList<>();
         Criteria criteria = Criteria.where("category").is(CorgiActivity.CAT_BUSINESS);
         Criteria criteriaUserId = Criteria.where("userId").is(activity.getUserId());
+        criteras.add(criteria);
+        criteras.add(criteriaUserId);
         String status = activity.getStatus();
         if (!StringUtils.isEmpty(status)) {
             Criteria criteriaStatus = Criteria.where("status").is(status);
-            criteria = new Criteria().andOperator(criteria, criteriaStatus, criteriaUserId);
+            criteras.add(criteriaStatus);
             if (!StringUtils.isEmpty(activity.getStartTime())) {
                 Criteria startTime = Criteria.where("startTime").lte(activity.getStartTime());
-                criteria = criteria.andOperator(startTime);
+                criteras.add(startTime);
             }
             if (!StringUtils.isEmpty(activity.getEndTime())) {
                 Criteria endTime = Criteria.where("endTime").gte(activity.getEndTime());
-                criteria = criteria.andOperator(endTime);
+                criteras.add(endTime);
             }
         }
+        criteria = new Criteria().andOperator(criteras.toArray(new Criteria[0]));
         return mongoTemplate.find(new Query(criteria), ActivityMongo.class);
     }
 
