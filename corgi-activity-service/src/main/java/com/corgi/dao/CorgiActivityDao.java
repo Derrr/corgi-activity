@@ -296,9 +296,18 @@ public class CorgiActivityDao {
     public List<ActivityMongo> getBarActivity(CorgiActivity activity) {
         Criteria criteria = Criteria.where("category").is(CorgiActivity.CAT_BUSINESS);
         Criteria criteriaUserId = Criteria.where("userId").is(activity.getUserId());
-        if (!StringUtils.isEmpty(activity.getStatus())) {
-            Criteria criteriaStatus = Criteria.where("status").is(activity.getStatus());
+        String status = activity.getStatus();
+        if (!StringUtils.isEmpty(status)) {
+            Criteria criteriaStatus = Criteria.where("status").is(status);
             criteria = new Criteria().andOperator(criteria, criteriaStatus, criteriaUserId);
+            if (!StringUtils.isEmpty(activity.getStartTime())) {
+                Criteria startTime = Criteria.where("startTime").lte(activity.getStartTime());
+                criteria = criteria.andOperator(startTime);
+            }
+            if (!StringUtils.isEmpty(activity.getEndTime())) {
+                Criteria endTime = Criteria.where("endTime").gte(activity.getEndTime());
+                criteria = criteria.andOperator(endTime);
+            }
         }
         return mongoTemplate.find(new Query(criteria), ActivityMongo.class);
     }
@@ -367,6 +376,7 @@ public class CorgiActivityDao {
 
     private List<Criteria> getCriteriaList(CorgiActivity activity) {
         Field[] fields = CorgiActivity.class.getDeclaredFields();
+        boolean isBusiness = CorgiActivity.CAT_BUSINESS.equals(activity.getCategory());
         List<Criteria> criteriaList = new ArrayList<>();
         for (int i = 0; i < fields.length; i++) {
             Field field = fields[i];
@@ -395,10 +405,6 @@ public class CorgiActivityDao {
                         }
                     } else if ("createTime".equals(fieldName)) {
                         criteriaList.add(Criteria.where("createTime").regex("^" + value + ".*"));
-                    } else if ("endTime".equals(fieldName)) {
-                        criteriaList.add(Criteria.where("endTime").gte(value));
-                    } else if ("startTime".equals(fieldName)) {
-                        criteriaList.add(Criteria.where("startTime").lte(value));
                     } else if (ActivityMongo.SIGN_UP_TIME.equals(fieldName)) {
                         criteriaList.add(Criteria.where(ActivityMongo.SIGN_UP_TIME).lte(value));
                     } else if (LIKE_FIELDS.contains(fieldName)) {
