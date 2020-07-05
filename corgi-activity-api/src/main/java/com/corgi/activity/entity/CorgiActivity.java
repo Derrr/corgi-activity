@@ -14,6 +14,7 @@ public class CorgiActivity implements Serializable {
     public static final String ENDED = "ended";
     public static final String DELETED = "deleted";
     public static final String FULL = "full";
+    public static final String NOT_DELETED = "not_deleted";
 
     public static final String CAT_IMAGE = "image";
     public static final String CAT_ACTIVITY = "activity";

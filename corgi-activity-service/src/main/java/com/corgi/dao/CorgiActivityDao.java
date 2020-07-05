@@ -380,7 +380,6 @@ public class CorgiActivityDao {
 
     private List<Criteria> getCriteriaList(CorgiActivity activity) {
         Field[] fields = CorgiActivity.class.getDeclaredFields();
-        boolean isBusiness = CorgiActivity.CAT_BUSINESS.equals(activity.getCategory());
         List<Criteria> criteriaList = new ArrayList<>();
         for (int i = 0; i < fields.length; i++) {
             Field field = fields[i];
@@ -404,6 +403,8 @@ public class CorgiActivityDao {
                         } else if (CorgiActivity.FULL.equals(value)) {
                             criteriaList.add(Criteria.where(ActivityMongo.SIGN_UP_TIME).gte(new SimpleDateFormat("yyyy/MM/dd HH:mm").format(new Date())));
                             criteriaList.add(Criteria.where("status").is(value));
+                        } else if (CorgiActivity.NOT_DELETED.equals(value)) {
+                            criteriaList.add(Criteria.where("status").ne(CorgiActivity.DELETED));
                         } else {
                             criteriaList.add(Criteria.where("status").is(value));
                         }
