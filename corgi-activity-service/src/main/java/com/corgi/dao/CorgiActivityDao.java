@@ -137,14 +137,14 @@ public class CorgiActivityDao {
             distanceCriteria.maxDistance(range / 6371);
         }
         criteriaList.add(distanceCriteria);
-        Criteria signUpCriteria = Criteria.where(ActivityMongo.SIGN_UP_TIME).gte(new SimpleDateFormat("yyyy/MM/dd HH:mm").format(new Date()));
-        if (StringUtils.isEmpty(activityQuery.getVersion())) {
-            criteriaList.add(signUpCriteria);
-        } else {
-            Criteria businessCriteria = Criteria.where("category").is(CorgiActivity.CAT_BUSINESS);
-            Criteria imageCriteria = Criteria.where("category").is(CorgiActivity.CAT_IMAGE);
-            criteriaList.add(new Criteria().orOperator(signUpCriteria, businessCriteria, imageCriteria));
-        }
+
+//        if (StringUtils.isEmpty(activityQuery.getVersion())) {
+//            criteriaList.add(signUpCriteria);
+//        } else {
+//            Criteria businessCriteria = Criteria.where("category").is(CorgiActivity.CAT_BUSINESS);
+//            Criteria imageCriteria = Criteria.where("category").is(CorgiActivity.CAT_IMAGE);
+//            criteriaList.add(new Criteria().orOperator(signUpCriteria, businessCriteria, imageCriteria));
+//        }
         criteriaList.add(Criteria.where("status").is(CorgiActivity.CREATED));
         criteriaList.add(Criteria.where("checkStatus").is("pass"));
 
@@ -152,6 +152,12 @@ public class CorgiActivityDao {
             criteriaList.add(Criteria.where("userId").ne(activityQuery.getUserId()));
         }
 
+        if (!StringUtils.isEmpty(activityQuery.getCategory())) {
+            criteriaList.add(Criteria.where("category").is(activityQuery.getStation()));
+        }
+        if (CorgiActivity.CAT_ACTIVITY.equals(activityQuery.getCategory())) {
+            criteriaList.add(Criteria.where(ActivityMongo.SIGN_UP_TIME).gte(new SimpleDateFormat("yyyy/MM/dd HH:mm").format(new Date())));
+        }
         if (!StringUtils.isEmpty(activityQuery.getType())) {
             criteriaList.add(Criteria.where("activityType").is(activityQuery.getType()));
         }
@@ -189,7 +195,7 @@ public class CorgiActivityDao {
 
         Criteria queryCriteria = new Criteria().andOperator(criteriaList.toArray(new Criteria[0]));
         int skip = 0;
-        int size = 100;
+        int size = 1000;
         if (activityQuery.getPageSize() != null && activityQuery.getPageSize() > 0) {
             size = activityQuery.getPageSize();
         }
@@ -400,9 +406,6 @@ public class CorgiActivityDao {
                         } else if (CorgiActivity.CREATED.equals(value)) {
                             criteriaList.add(Criteria.where(ActivityMongo.SIGN_UP_TIME).gte(new SimpleDateFormat("yyyy/MM/dd HH:mm").format(new Date())));
                             criteriaList.add(Criteria.where("status").ne(CorgiActivity.DELETED));
-                        } else if (CorgiActivity.FULL.equals(value)) {
-                            criteriaList.add(Criteria.where(ActivityMongo.SIGN_UP_TIME).gte(new SimpleDateFormat("yyyy/MM/dd HH:mm").format(new Date())));
-                            criteriaList.add(Criteria.where("status").is(value));
                         } else if (CorgiActivity.NOT_DELETED.equals(value)) {
                             criteriaList.add(Criteria.where("status").ne(CorgiActivity.DELETED));
                         } else {
@@ -410,6 +413,8 @@ public class CorgiActivityDao {
                         }
                     } else if ("createTime".equals(fieldName)) {
                         criteriaList.add(Criteria.where("createTime").regex("^" + value + ".*"));
+                    } else if ("updateTime".equals(fieldName)) {
+                        criteriaList.add(Criteria.where("updateTime").regex("^" + value + ".*"));
                     } else if (ActivityMongo.SIGN_UP_TIME.equals(fieldName)) {
                         criteriaList.add(Criteria.where(ActivityMongo.SIGN_UP_TIME).lte(value));
                     } else if (LIKE_FIELDS.contains(fieldName)) {

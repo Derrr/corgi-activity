@@ -36,19 +36,6 @@ public class ActivityMongo extends CorgiActivity {
     }
 
     public ActivityMongo(CorgiActivity activity) {
-
-//        this.setActivityType(activity.getActivityType());
-//        this.setAddress(activity.getAddress());
-//        this.setBudget(activity.getBudget());
-//        this.setContent(activity.getContent());
-//        this.setSignUpTime(activity.getSignUpTime());
-//        this.setLat(activity.getLat());
-//        this.setLng(activity.getLng());
-//        this.setPayType(activity.getPayType());
-//        this.setPeopleCount(activity.getPeopleCount());
-//        this.setTitle(activity.getTitle());
-//        this.setPics(activity.getPics());
-//        this.setCreateTime(activity.getCreateTime());
         this.location = new GeoJsonPoint(activity.getLng(), activity.getLat());
     }
 
