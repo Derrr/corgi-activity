@@ -153,7 +153,7 @@ public class CorgiActivityDao {
         }
 
         if (!StringUtils.isEmpty(activityQuery.getCategory())) {
-            criteriaList.add(Criteria.where("category").is(activityQuery.getStation()));
+            criteriaList.add(Criteria.where("category").is(activityQuery.getCategory()));
         }
         if (CorgiActivity.CAT_ACTIVITY.equals(activityQuery.getCategory())) {
             criteriaList.add(Criteria.where(ActivityMongo.SIGN_UP_TIME).gte(new SimpleDateFormat("yyyy/MM/dd HH:mm").format(new Date())));
