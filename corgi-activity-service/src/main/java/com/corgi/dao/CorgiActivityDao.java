@@ -207,7 +207,7 @@ public class CorgiActivityDao {
             query.with(Sort.by(Sort.Direction.DESC, "createTime"));
         }
         List<ActivityMongo> corgiActivities = mongoTemplate.find(query, ActivityMongo.class);
-
+        log.info("near size... {} ", corgiActivities.size());
         if (CollectionUtils.isNotEmpty(corgiActivities) && !StringUtils.isEmpty(activityQuery.getUserId())) {
             List<String> userIds = new ArrayList<>();
             for (ActivityMongo mongo : corgiActivities) {
@@ -226,6 +226,7 @@ public class CorgiActivityDao {
                 iterator.remove();
             }
         }
+        log.info("near final size... {} ", corgiActivities.size());
         return corgiActivities;
     }
 
