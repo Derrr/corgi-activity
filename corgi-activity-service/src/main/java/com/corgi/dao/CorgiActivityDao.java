@@ -210,17 +210,22 @@ public class CorgiActivityDao {
         log.info("near size... {} ", corgiActivities.size());
         if (CollectionUtils.isNotEmpty(corgiActivities) && !StringUtils.isEmpty(activityQuery.getUserId())) {
             List<String> userIds = new ArrayList<>();
+            List<String> barIds = new ArrayList<>();
             for (ActivityMongo mongo : corgiActivities) {
-                userIds.add(mongo.getUserId());
+                if(CorgiActivity.CAT_BUSINESS.equals(mongo.getCategory())){
+                    barIds.add(mongo.getUserId());
+                }else {
+                    userIds.add(mongo.getUserId());
+                }
             }
             List<String> resultUserIds = corgiUserService.filterUser(userIds, activityQuery);
-            if (CollectionUtils.isEmpty(resultUserIds)) {
+            if (CollectionUtils.isEmpty(resultUserIds) && CollectionUtils.isEmpty(barIds)) {
                 return new ArrayList<>();
             }
             Iterator<ActivityMongo> iterator = corgiActivities.iterator();
             while (iterator.hasNext()) {
                 ActivityMongo mongo = iterator.next();
-                if (resultUserIds.contains(mongo.getUserId()) || CorgiActivity.CAT_BUSINESS.equals(mongo.getCategory())) {
+                if (CorgiActivity.CAT_BUSINESS.equals(mongo.getCategory()) || resultUserIds.contains(mongo.getUserId())) {
                     continue;
                 }
                 iterator.remove();
