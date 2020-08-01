@@ -220,7 +220,7 @@ public class CorgiActivityDao {
             Iterator<ActivityMongo> iterator = corgiActivities.iterator();
             while (iterator.hasNext()) {
                 ActivityMongo mongo = iterator.next();
-                if (resultUserIds.contains(mongo.getUserId())) {
+                if (resultUserIds.contains(mongo.getUserId()) || CorgiActivity.CAT_BUSINESS.equals(mongo.getCategory())) {
                     continue;
                 }
                 iterator.remove();
