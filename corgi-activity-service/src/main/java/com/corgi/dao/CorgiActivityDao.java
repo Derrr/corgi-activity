@@ -146,7 +146,9 @@ public class CorgiActivityDao {
 //            criteriaList.add(new Criteria().orOperator(signUpCriteria, businessCriteria, imageCriteria));
 //        }
         criteriaList.add(Criteria.where("status").is(CorgiActivity.CREATED));
-        criteriaList.add(Criteria.where("checkStatus").is("pass"));
+        if (!CorgiActivity.CAT_BUSINESS.equals(activityQuery.getCategory())) {
+            criteriaList.add(Criteria.where("checkStatus").is("pass"));
+        }
 
         if (!StringUtils.isEmpty(activityQuery.getUserId())) {
             criteriaList.add(Criteria.where("userId").ne(activityQuery.getUserId()));
