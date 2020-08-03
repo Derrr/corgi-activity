@@ -145,6 +145,12 @@ public class CorgiActivityDao {
 //            Criteria imageCriteria = Criteria.where("category").is(CorgiActivity.CAT_IMAGE);
 //            criteriaList.add(new Criteria().orOperator(signUpCriteria, businessCriteria, imageCriteria));
 //        }
+        if (StringUtils.isEmpty(activityQuery.getCategory())) {
+            Criteria imageCriteria = Criteria.where("category").is(CorgiActivity.CAT_IMAGE);
+            Criteria signUpCriteria = Criteria.where(ActivityMongo.SIGN_UP_TIME).gte(new SimpleDateFormat("yyyy/MM/dd HH:mm").format(new Date()));
+            criteriaList.add(new Criteria().orOperator(signUpCriteria, imageCriteria));
+        }
+
         criteriaList.add(Criteria.where("status").is(CorgiActivity.CREATED));
         if (!CorgiActivity.CAT_BUSINESS.equals(activityQuery.getCategory())) {
             criteriaList.add(Criteria.where("checkStatus").is("pass"));
@@ -212,9 +218,9 @@ public class CorgiActivityDao {
             List<String> userIds = new ArrayList<>();
             List<String> barIds = new ArrayList<>();
             for (ActivityMongo mongo : corgiActivities) {
-                if(CorgiActivity.CAT_BUSINESS.equals(mongo.getCategory())){
+                if (CorgiActivity.CAT_BUSINESS.equals(mongo.getCategory())) {
                     barIds.add(mongo.getUserId());
-                }else {
+                } else {
                     userIds.add(mongo.getUserId());
                 }
             }
