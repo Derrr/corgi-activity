@@ -117,6 +117,12 @@ public class CorgiActivityServiceImpl implements CorgiActivityService {
     }
 
     @Override
+    public List<CorgiActivity> searchActivity(CorgiActivity activity, Integer page, Integer pageSize) {
+        return null;
+    }
+
+
+    @Override
     public long countCorgiActivity(CorgiActivity activity) {
         return corgiActivityDao.countActivities(activity);
     }

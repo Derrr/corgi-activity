@@ -30,6 +30,8 @@ public interface CorgiActivityService {
 
     List<CorgiActivity> searchCorgiActivity(CorgiActivity activity, Integer page, Integer pageSize);
 
+    List<CorgiActivity> searchActivity(CorgiActivity activity, Integer page, Integer pageSize);
+
     long countCorgiActivity(CorgiActivity activity);
 
     long countPublishActivity(String date);

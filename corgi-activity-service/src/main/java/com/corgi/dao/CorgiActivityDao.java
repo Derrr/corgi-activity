@@ -292,6 +292,28 @@ public class CorgiActivityDao {
         return mongos;
     }
 
+    public List<ActivityMongo> searchActivity(CorgiActivity activity, Integer start, Integer size) {
+        Date now = new Date();
+        Criteria statusCriteria = Criteria.where("status").is(CorgiActivity.CREATED);
+        Criteria titleCriteria = Criteria.where("title").regex("^.*" + activity.getTitle() + ".*$");
+        Criteria contentCriteria = Criteria.where("content").regex("^.*" + activity.getTitle() + ".*$");
+        Criteria addressCriteria = Criteria.where("address").regex("^.*" + activity.getTitle() + ".*$");
+        Criteria signUpCriteria = Criteria.where(ActivityMongo.SIGN_UP_TIME).gte(new SimpleDateFormat("yyyy/MM/dd HH:mm").format(now));
+        Criteria endTimeCriteria = Criteria.where("endTime").gte(new SimpleDateFormat("yyyy-MM-dd HH:mm").format(now));
+        Criteria contentCri = new Criteria().orOperator(titleCriteria, contentCriteria, addressCriteria);
+        Criteria categoryCri = new Criteria().orOperator(endTimeCriteria, signUpCriteria);
+        Criteria andCri = new Criteria().andOperator(categoryCri, contentCri, statusCriteria);
+        Query query = getDescIdQuery(andCri, start, size);
+        List<ActivityMongo> mongos = mongoTemplate.find(query, ActivityMongo.class);
+        if (CollectionUtils.isNotEmpty(mongos)) {
+            String nowTime = new SimpleDateFormat("yyyy/MM/dd HH:mm").format(new Date());
+            for (ActivityMongo activityMongo : mongos) {
+                activityMongo.setCurrentTime(nowTime);
+            }
+        }
+        return mongos;
+    }
+
     public long countActivities(CorgiActivity activity) {
         List<Criteria> criteriaList = getCriteriaList(activity);
         if (criteriaList.size() > 0) {
