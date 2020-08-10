@@ -3,6 +3,7 @@ package com.corgi.service;
 import com.alibaba.dubbo.config.annotation.Reference;
 import com.alibaba.dubbo.config.annotation.Service;
 import com.corgi.activity.api.CorgiActivityService;
+import com.corgi.activity.entity.ActivityPage;
 import com.corgi.activity.entity.ActivityPic;
 import com.corgi.activity.entity.CorgiActivity;
 import com.corgi.dao.CorgiActivityDao;
@@ -180,6 +181,16 @@ public class CorgiActivityServiceImpl implements CorgiActivityService {
     @Override
     public List<CorgiActivity> getBarActivity(CorgiActivity activity) {
         return convertActivity(corgiActivityDao.getBarActivity(activity));
+    }
+
+    @Override
+    public ActivityPage getRecommendActivity(Double lat, Double lng, ActivityQuery activityQuery) {
+        List<ActivityMongo> mongos = corgiActivityDao.getRecommendActivities(lng, lat, activityQuery);
+        ActivityPage page = new ActivityPage();
+        page.setDPage(activityQuery.getDPage());
+        page.setTPage(activityQuery.getTPage());
+        page.setCorgiActivityList(convertActivity(mongos));
+        return page;
     }
 
     List<CorgiActivity> convertActivity(List<ActivityMongo> activityMongoList, boolean checkPic) {

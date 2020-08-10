@@ -3,6 +3,7 @@ package com.corgi.dao;
 
 import com.alibaba.dubbo.common.utils.CollectionUtils;
 import com.alibaba.dubbo.config.annotation.Reference;
+import com.corgi.activity.entity.ActivityPage;
 import com.corgi.activity.entity.CorgiActivity;
 import com.corgi.entity.ActivityMongo;
 import com.corgi.entity.ActivityQuery;
@@ -51,6 +52,8 @@ public class CorgiActivityDao {
     private CorgiFavorActivityService corgiFavorActivityService;
     @Reference
     private CorgiUserActivityService corgiUserActivityService;
+
+    private final static Double RADIUS = 6371.0;
 
     //private SimpleDateFormat sdf = new SimpleDateFormat("yyyy/MM/dd HH:mm");
 
@@ -131,12 +134,56 @@ public class CorgiActivityDao {
         return activity;
     }
 
+    public List<ActivityMongo> getRecommendActivities(double lng, double lat, ActivityQuery activityQuery) {
+        Double dStep = 100.0;
+        Integer tStep = 1;
+        if (activityQuery.getDPage() == null) {
+            activityQuery.setDPage(0);
+        }
+        if (activityQuery.getTPage() == null) {
+            activityQuery.setTPage(0);
+        }
+        List<ActivityMongo> activityMongoList = new ArrayList<>();
+
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy/MM/dd HH:mm");
+        while (true) {
+            if (activityQuery.getTPage() * tStep > 24 * 30) {
+                break;
+            }
+            //翻页
+            ActivityUtil.addPage(activityQuery);
+            //获取距离条件
+            Calendar calendar = Calendar.getInstance();
+            Criteria distanceCriteria = Criteria.where("location").nearSphere(new Point(lng, lat));
+            distanceCriteria.minDistance(dStep * (activityQuery.getDPage() - 1) / RADIUS);
+            distanceCriteria.maxDistance(dStep * activityQuery.getDPage() / RADIUS);
+            //获取时间条件
+            calendar.add(Calendar.HOUR, -1 * tStep * activityQuery.getTPage());
+            String startTime = sdf.format(calendar.getTime());
+            calendar.add(Calendar.HOUR, tStep);
+            String endTime = sdf.format(calendar.getTime());
+            Criteria startCriteria = Criteria.where("createTime").gte(startTime);
+            Criteria endCriteria = Criteria.where("createTime").lte(endTime);
+
+            Criteria queryCriteria = new Criteria().andOperator(distanceCriteria, startCriteria, endCriteria);
+            Query query = new Query(queryCriteria);
+            List<ActivityMongo> corgiActivities = mongoTemplate.find(query, ActivityMongo.class);
+            if (corgiActivities.size() > 0) {
+                activityMongoList.addAll(corgiActivities);
+                if (activityMongoList.size() > activityQuery.getPageSize()) {
+                    break;
+                }
+            }
+        }
+        return activityMongoList;
+    }
+
     public List<ActivityMongo> getNearActivities(double lng, double lat, double range, ActivityQuery activityQuery) {
         List<Criteria> criteriaList = new ArrayList<>();
         Criteria distanceCriteria = Criteria.where("location").nearSphere(new Point(lng, lat));
 
         if (range > 0) {
-            distanceCriteria.maxDistance(range / 6371);
+            distanceCriteria.maxDistance(range / RADIUS);
         }
         criteriaList.add(distanceCriteria);
 
@@ -175,7 +222,7 @@ public class CorgiActivityDao {
             criteriaList.add(Criteria.where("payType").in(activityQuery.getPayType()));
         }
         if (!StringUtils.isEmpty(activityQuery.getCity())) {
-            criteriaList.add(Criteria.where("city").regex(activityQuery.getCity()+".*"));
+            criteriaList.add(Criteria.where("city").regex(activityQuery.getCity() + ".*"));
         }
         if (!StringUtils.isEmpty(activityQuery.getAdname())) {
             criteriaList.add(Criteria.where("adname").is(activityQuery.getAdname()));
@@ -446,7 +493,7 @@ public class CorgiActivityDao {
                         } else {
                             criteriaList.add(Criteria.where("status").is(value));
                         }
-                    }else if("city".equals(fieldName)){
+                    } else if ("city".equals(fieldName)) {
                         criteriaList.add(Criteria.where("city").regex("^" + value + ".*"));
                     } else if ("createTime".equals(fieldName)) {
                         criteriaList.add(Criteria.where("createTime").regex("^" + value + ".*"));

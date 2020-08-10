@@ -1,5 +1,6 @@
 package com.corgi.activity.api;
 
+import com.corgi.activity.entity.ActivityPage;
 import com.corgi.activity.entity.CorgiActivity;
 import com.corgi.entity.ActivityQuery;
 
@@ -55,4 +56,6 @@ public interface CorgiActivityService {
     List<HashMap> groupByActivity(String key, String beginDate, String endDate);
 
     List<CorgiActivity> getBarActivity(CorgiActivity activity);
+
+    ActivityPage getRecommendActivity(Double lat, Double lng, ActivityQuery activityQuery);
 }
