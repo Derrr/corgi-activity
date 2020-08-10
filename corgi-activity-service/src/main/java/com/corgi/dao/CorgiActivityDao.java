@@ -173,7 +173,7 @@ public class CorgiActivityDao {
             criteriaList.add(Criteria.where("payType").in(activityQuery.getPayType()));
         }
         if (!StringUtils.isEmpty(activityQuery.getCity())) {
-            criteriaList.add(Criteria.where("city").is(activityQuery.getCity()));
+            criteriaList.add(Criteria.where("city").regex(activityQuery.getCity()+".*"));
         }
         if (!StringUtils.isEmpty(activityQuery.getAdname())) {
             criteriaList.add(Criteria.where("adname").is(activityQuery.getAdname()));
@@ -444,6 +444,8 @@ public class CorgiActivityDao {
                         } else {
                             criteriaList.add(Criteria.where("status").is(value));
                         }
+                    }else if("city".equals(fieldName)){
+                        criteriaList.add(Criteria.where("city").regex("^" + value + ".*"));
                     } else if ("createTime".equals(fieldName)) {
                         criteriaList.add(Criteria.where("createTime").regex("^" + value + ".*"));
                     } else if ("updateTime".equals(fieldName)) {
