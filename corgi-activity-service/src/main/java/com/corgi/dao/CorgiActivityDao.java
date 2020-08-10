@@ -136,7 +136,7 @@ public class CorgiActivityDao {
 
     public List<ActivityMongo> getRecommendActivities(double lng, double lat, ActivityQuery activityQuery) {
         Double dStep = 100.0;
-        Integer tStep = 1;
+        Integer tStep = 6;
         if (activityQuery.getDPage() == null) {
             activityQuery.setDPage(0);
         }
@@ -168,7 +168,7 @@ public class CorgiActivityDao {
             Criteria endCriteria = Criteria.where("createTime").lte(endTime);
 
             Criteria queryCriteria = new Criteria().andOperator(distanceCriteria, startCriteria, endCriteria, userCriteria, categoryCriteria);
-            Query query = new Query(queryCriteria);
+            Query query = new Query(queryCriteria).with(Sort.by(Sort.Direction.DESC, "createTime"));
             List<ActivityMongo> corgiActivities = mongoTemplate.find(query, ActivityMongo.class);
             if (corgiActivities.size() > 0) {
                 activityMongoList.addAll(corgiActivities);
