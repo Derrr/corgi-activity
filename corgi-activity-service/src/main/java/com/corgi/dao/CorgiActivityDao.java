@@ -49,6 +49,8 @@ public class CorgiActivityDao {
     private CorgiUserService corgiUserService;
     @Reference
     private CorgiFavorActivityService corgiFavorActivityService;
+    @Reference
+    private CorgiUserActivityService corgiUserActivityService;
 
     //private SimpleDateFormat sdf = new SimpleDateFormat("yyyy/MM/dd HH:mm");
 
@@ -472,6 +474,7 @@ public class CorgiActivityDao {
         List<ActivityMongo> activityMongoList = mongoTemplate.findAllAndRemove(query, ActivityMongo.class);
         for (ActivityMongo mongo : activityMongoList) {
             corgiFavorActivityService.deleteByActivityId(mongo.getMongoId().toString());
+            corgiUserActivityService.deleteActivityCreator(mongo.getMongoId().toString());
         }
     }
 
