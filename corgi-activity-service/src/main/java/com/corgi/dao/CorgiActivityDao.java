@@ -136,7 +136,7 @@ public class CorgiActivityDao {
 
     public List<ActivityMongo> getRecommendActivities(double lng, double lat, ActivityQuery activityQuery) {
         Double dStep = 100.0;
-        Integer tStep = 6;
+        Integer tStep = 12;
         if (activityQuery.getDPage() == null) {
             activityQuery.setDPage(0);
         }
