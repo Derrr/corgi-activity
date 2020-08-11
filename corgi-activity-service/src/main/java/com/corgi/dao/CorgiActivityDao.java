@@ -223,9 +223,8 @@ public class CorgiActivityDao {
         if (CollectionUtils.isNotEmpty(activityQuery.getPayType())) {
             criteriaList.add(Criteria.where("payType").in(activityQuery.getPayType()));
         }
-        log.info("not city... {} ", activityQuery.getNotCity());
         if (!StringUtils.isEmpty(activityQuery.getNotCity())) {
-            criteriaList.add(Criteria.where("city").regex(activityQuery.getCity() + ".*").not());
+            criteriaList.add(Criteria.where("city").ne(activityQuery.getCity()));
         } else if (!StringUtils.isEmpty(activityQuery.getCity())) {
             criteriaList.add(Criteria.where("city").regex(activityQuery.getCity() + ".*"));
         }
