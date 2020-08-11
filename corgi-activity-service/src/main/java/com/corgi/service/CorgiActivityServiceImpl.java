@@ -59,7 +59,7 @@ public class CorgiActivityServiceImpl implements CorgiActivityService {
     @Override
     public List<CorgiActivity> getCorgiActivityByRange(double lng, double lat, double range, ActivityQuery activityQuery) {
         List<ActivityMongo> find = corgiActivityDao.getNearActivities(lng, lat, range, activityQuery);
-        return convertActivity(find);
+        return convertActivity(find, false);
     }
 
     @Override
@@ -189,7 +189,7 @@ public class CorgiActivityServiceImpl implements CorgiActivityService {
         ActivityPage page = new ActivityPage();
         page.setDPage(activityQuery.getDPage());
         page.setTPage(activityQuery.getTPage());
-        page.setCorgiActivityList(convertActivity(mongos));
+        page.setCorgiActivityList(convertActivity(mongos, false));
         return page;
     }
 

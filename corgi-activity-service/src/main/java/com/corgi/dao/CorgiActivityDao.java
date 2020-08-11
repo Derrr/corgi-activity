@@ -257,7 +257,9 @@ public class CorgiActivityDao {
         if (activityQuery.getPageSize() != null && activityQuery.getPageSize() > 0) {
             size = activityQuery.getPageSize();
         }
-        if (activityQuery.getPage() != null && activityQuery.getPage() > 0) {
+        if(activityQuery.getOffset() != null && activityQuery.getOffset() > 0){
+            skip=activityQuery.getOffset();
+        }else if (activityQuery.getPage() != null && activityQuery.getPage() > 0) {
             skip = (activityQuery.getPage() - 1) * size;
         }
 
