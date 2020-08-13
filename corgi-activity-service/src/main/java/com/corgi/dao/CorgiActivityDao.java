@@ -120,6 +120,34 @@ public class CorgiActivityDao {
         if (StringUtils.isEmpty(activity.getStatus()) && !StringUtils.isEmpty(oldMongo.getStatus())) {
             activity.setStatus(oldMongo.getStatus());
         }
+        if (StringUtils.isEmpty(activity.getStartTime()) && !StringUtils.isEmpty(oldMongo.getStartTime())) {
+            activity.setStartTime(oldMongo.getStartTime());
+        }
+        if (StringUtils.isEmpty(activity.getEndTime()) && !StringUtils.isEmpty(oldMongo.getEndTime())) {
+            activity.setEndTime(oldMongo.getEndTime());
+        }
+        if (StringUtils.isEmpty(activity.getStartDeliver()) && !StringUtils.isEmpty(oldMongo.getStartDeliver())) {
+            activity.setStartDeliver(oldMongo.getStartDeliver());
+        }
+        if (StringUtils.isEmpty(activity.getEndDeliver()) && !StringUtils.isEmpty(oldMongo.getEndDeliver())) {
+            activity.setEndDeliver(oldMongo.getEndDeliver());
+        }
+        if (StringUtils.isEmpty(activity.getAddress()) && !StringUtils.isEmpty(oldMongo.getAddress())) {
+            activity.setAddress(oldMongo.getAddress());
+        }
+        if (StringUtils.isEmpty(activity.getCity()) && !StringUtils.isEmpty(oldMongo.getCity())) {
+            activity.setCity(oldMongo.getCity());
+        }
+        if (StringUtils.isEmpty(activity.getBarId()) && !StringUtils.isEmpty(oldMongo.getBarId())) {
+            activity.setBarId(oldMongo.getBarId());
+        }
+        if (StringUtils.isEmpty(activity.getDeliverCity()) && !StringUtils.isEmpty(oldMongo.getDeliverCity())) {
+            activity.setDeliverCity(oldMongo.getDeliverCity());
+        }
+        if (activity.getLat() == 0 && oldMongo.getLat() != 0) {
+            activity.setLat(oldMongo.getLat());
+        }
+
         ActivityMongo mongo = mongoTemplate.save(activity);
         return mongo;
     }
@@ -257,9 +285,9 @@ public class CorgiActivityDao {
         if (activityQuery.getPageSize() != null && activityQuery.getPageSize() > 0) {
             size = activityQuery.getPageSize();
         }
-        if(activityQuery.getOffset() != null && activityQuery.getOffset() > 0){
-            skip=activityQuery.getOffset();
-        }else if (activityQuery.getPage() != null && activityQuery.getPage() > 0) {
+        if (activityQuery.getOffset() != null && activityQuery.getOffset() > 0) {
+            skip = activityQuery.getOffset();
+        } else if (activityQuery.getPage() != null && activityQuery.getPage() > 0) {
             skip = (activityQuery.getPage() - 1) * size;
         }
 
