@@ -98,6 +98,11 @@ public class CorgiActivityDao {
             Update update = new Update().set("checkStatus", corgiActivity.getCheckStatus());
             mongoTemplate.updateFirst(query, update, ActivityMongo.class);
         }
+        if (!StringUtils.isEmpty(corgiActivity.getRStatus())) {
+            Update update = new Update().set("rStatus", corgiActivity.getRStatus());
+            mongoTemplate.updateFirst(query, update, ActivityMongo.class);
+        }
+
 
     }
 
@@ -126,12 +131,6 @@ public class CorgiActivityDao {
         if (StringUtils.isEmpty(activity.getEndTime()) && !StringUtils.isEmpty(oldMongo.getEndTime())) {
             activity.setEndTime(oldMongo.getEndTime());
         }
-        if (StringUtils.isEmpty(activity.getStartDeliver()) && !StringUtils.isEmpty(oldMongo.getStartDeliver())) {
-            activity.setStartDeliver(oldMongo.getStartDeliver());
-        }
-        if (StringUtils.isEmpty(activity.getEndDeliver()) && !StringUtils.isEmpty(oldMongo.getEndDeliver())) {
-            activity.setEndDeliver(oldMongo.getEndDeliver());
-        }
         if (StringUtils.isEmpty(activity.getAddress()) && !StringUtils.isEmpty(oldMongo.getAddress())) {
             activity.setAddress(oldMongo.getAddress());
         }
@@ -140,9 +139,6 @@ public class CorgiActivityDao {
         }
         if (StringUtils.isEmpty(activity.getBarId()) && !StringUtils.isEmpty(oldMongo.getBarId())) {
             activity.setBarId(oldMongo.getBarId());
-        }
-        if (StringUtils.isEmpty(activity.getDeliverCity()) && !StringUtils.isEmpty(oldMongo.getDeliverCity())) {
-            activity.setDeliverCity(oldMongo.getDeliverCity());
         }
         if (activity.getLat() == 0 && oldMongo.getLat() != 0) {
             activity.setLat(oldMongo.getLat());
