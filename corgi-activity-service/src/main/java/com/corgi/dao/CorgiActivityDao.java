@@ -525,6 +525,10 @@ public class CorgiActivityDao {
                         }
                     } else if ("city".equals(fieldName)) {
                         criteriaList.add(Criteria.where("city").regex("^" + value + ".*"));
+                    }else if ("title".equals(fieldName)) {
+                        criteriaList.add(new Criteria().
+                                orOperator(Criteria.where("title").regex("^" + value + ".*"),
+                                Criteria.where("content").regex("^" + value + ".*")));
                     } else if ("createTime".equals(fieldName)) {
                         criteriaList.add(Criteria.where("createTime").regex("^" + value + ".*"));
                     } else if ("updateTime".equals(fieldName)) {
