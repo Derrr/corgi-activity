@@ -170,6 +170,7 @@ public class CorgiActivityDao {
         Criteria userCriteria = Criteria.where("userId").ne(activityQuery.getUserId());
         Criteria categoryCriteria = Criteria.where("category").is(activityQuery.getCategory());
         Criteria statusCriteria = Criteria.where("status").ne(CorgiActivity.DELETED);
+        Criteria checkCriteria = Criteria.where("checkStatus").is("pass");
         List<ActivityMongo> activityMongoList = new ArrayList<>();
 
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy/MM/dd HH:mm");
@@ -192,7 +193,7 @@ public class CorgiActivityDao {
             Criteria startCriteria = Criteria.where("createTime").gte(startTime);
             Criteria endCriteria = Criteria.where("createTime").lte(endTime);
 
-            Criteria queryCriteria = new Criteria().andOperator(statusCriteria, distanceCriteria, startCriteria, endCriteria, userCriteria, categoryCriteria);
+            Criteria queryCriteria = new Criteria().andOperator(statusCriteria, distanceCriteria, startCriteria, endCriteria, userCriteria, categoryCriteria, checkCriteria);
             Query query = new Query(queryCriteria).with(Sort.by(Sort.Direction.DESC, "createTime"));
             List<ActivityMongo> corgiActivities = mongoTemplate.find(query, ActivityMongo.class);
             if (corgiActivities.size() > 0) {
