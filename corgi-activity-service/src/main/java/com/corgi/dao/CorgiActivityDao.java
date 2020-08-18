@@ -146,7 +146,7 @@ public class CorgiActivityDao {
         Criteria userCriteria = Criteria.where("userId").ne(activityQuery.getUserId());
         Criteria categoryCriteria = Criteria.where("category").is(activityQuery.getCategory());
         Criteria statusCriteria = Criteria.where("status").ne(CorgiActivity.DELETED);
-        Criteria checkCriteria = Criteria.where("checkStatus").is("pass");
+        Criteria checkCriteria = Criteria.where("checkStatus").ne("fail");
         List<ActivityMongo> activityMongoList = new ArrayList<>();
 
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy/MM/dd HH:mm");
