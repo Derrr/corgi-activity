@@ -49,6 +49,7 @@ public class CorgiActivity implements Serializable {
     private String endTime;
     private String status;
     private String checkStatus;
+    private String recommend;
     private List<ActivityPic> pics;
     private List<String> topics;
 
