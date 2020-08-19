@@ -36,6 +36,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 import java.util.zip.CheckedOutputStream;
 
 /**
@@ -197,6 +198,9 @@ public class CorgiActivityDao {
             Query query = new Query(queryCriteria).with(Sort.by(Sort.Direction.DESC, "createTime"));
             List<ActivityMongo> corgiActivities = mongoTemplate.find(query, ActivityMongo.class);
             if (corgiActivities.size() > 0) {
+                List<String> userIds = corgiActivities.stream().map(activityMongo -> activityMongo.getUserId()).collect(Collectors.toList());
+                List<String> resultUserIds = corgiUserService.filterUser(userIds, activityQuery);
+                corgiActivities = corgiActivities.stream().filter(activityMongo -> resultUserIds.contains(activityMongo.getUserId())).collect(Collectors.toList());
                 activityMongoList.addAll(corgiActivities);
                 if (activityMongoList.size() > activityQuery.getPageSize()) {
                     break;
