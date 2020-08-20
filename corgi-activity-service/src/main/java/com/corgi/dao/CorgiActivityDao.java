@@ -99,11 +99,10 @@ public class CorgiActivityDao {
             Update update = new Update().set("checkStatus", corgiActivity.getCheckStatus());
             mongoTemplate.updateFirst(query, update, ActivityMongo.class);
         }
-        if (!StringUtils.isEmpty(corgiActivity.getRStatus())) {
-            Update update = new Update().set("rStatus", corgiActivity.getRStatus());
+        if (!StringUtils.isEmpty(corgiActivity.getRecommend())) {
+            Update update = new Update().set("recommend", corgiActivity.getRecommend());
             mongoTemplate.updateFirst(query, update, ActivityMongo.class);
         }
-
 
     }
 
