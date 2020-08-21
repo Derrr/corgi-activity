@@ -356,6 +356,9 @@ public class CorgiActivityDao {
     public List<ActivityMongo> searchActivity(CorgiActivity activity, Integer start, Integer size) {
         Date now = new Date();
         Criteria statusCriteria = Criteria.where("status").is(CorgiActivity.CREATED);
+        if(CorgiActivity.NOT_DELETED.equals(activity.getStatus())){
+            statusCriteria = Criteria.where("status").ne(CorgiActivity.DELETED);
+        }
         Criteria titleCriteria = Criteria.where("title").regex("^.*" + activity.getTitle() + ".*$");
         Criteria contentCriteria = Criteria.where("content").regex("^.*" + activity.getTitle() + ".*$");
         Criteria addressCriteria = Criteria.where("address").regex("^.*" + activity.getTitle() + ".*$");
