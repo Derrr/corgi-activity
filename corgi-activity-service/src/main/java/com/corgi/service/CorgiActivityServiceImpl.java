@@ -189,6 +189,7 @@ public class CorgiActivityServiceImpl implements CorgiActivityService {
         ActivityPage page = new ActivityPage();
         page.setDPage(activityQuery.getDPage());
         page.setTPage(activityQuery.getTPage());
+        page.setRPage(activityQuery.getRPage());
         page.setCorgiActivityList(convertActivity(mongos, false));
         return page;
     }

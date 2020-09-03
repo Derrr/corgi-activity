@@ -10,4 +10,5 @@ public class ActivityPage implements Serializable {
     List<CorgiActivity> corgiActivityList;
     Integer tPage;
     Integer dPage;
+    Integer rPage;
 }

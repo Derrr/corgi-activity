@@ -206,7 +206,60 @@ public class CorgiActivityDao {
                 }
             }
         }
+        if (activityMongoList.size() > 5) {
+            List<ActivityMongo> businessList = getRecommendBusiness(activityQuery, activityMongoList.size() / 5);
+            activityQuery.setRPage(activityQuery.getRPage() + businessList.size());
+            return mergeActivity(activityMongoList, businessList);
+        }
         return activityMongoList;
+    }
+
+    private List<ActivityMongo> mergeActivity(List<ActivityMongo> activityList, List<ActivityMongo> businessList) {
+        List<Integer> takenPositions = new ArrayList<>();
+        Random random = new Random();
+        int bound = activityList.size();
+        for (ActivityMongo business : businessList) {
+            int position = random.nextInt(bound);
+            int index = findPosition(position, bound, takenPositions);
+            activityList.add(index, business);
+        }
+        return activityList;
+    }
+
+    //将商户活动随机混入人员活动中，商户活动不能连续
+    private int findPosition(int oldPosition, int bound, List<Integer> takenPositions) {
+        int step = oldPosition <= bound / 2 ? 1 : -1;
+        for (int i = 0; i < takenPositions.size(); i++) {
+            if (takenPositions.contains(oldPosition)) {
+                oldPosition += step;
+            } else {
+                break;
+            }
+        }
+        takenPositions.add(oldPosition);
+
+        int offset = 0;
+        for (Integer takenPosition : takenPositions) {
+            if (takenPosition < oldPosition) {
+                offset++;
+            }
+        }
+        return oldPosition + offset;
+    }
+
+    private List<ActivityMongo> getRecommendBusiness(ActivityQuery activityQuery, Integer size) {
+        List<Criteria> criteriaList = new ArrayList<>();
+        criteriaList.add(Criteria.where("category").regex(CorgiActivity.CAT_BUSINESS));
+        criteriaList.add(Criteria.where("recommend").is("enable"));
+        if (!StringUtils.isEmpty(activityQuery.getCity())) {
+            criteriaList.add(Criteria.where("city").regex(activityQuery.getCity() + ".*"));
+        }
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm");
+        String time = sdf.format(new Date());
+        criteriaList.add(Criteria.where("startTime").lte(time));
+        criteriaList.add(Criteria.where("endTime").gte(time));
+        Query query = getDescIdQuery(new Criteria().andOperator(criteriaList.toArray(new Criteria[0])), activityQuery.getRPage(), size);
+        return mongoTemplate.find(query, ActivityMongo.class);
     }
 
     public List<ActivityMongo> getNearActivities(double lng, double lat, double range, ActivityQuery activityQuery) {
@@ -379,7 +432,7 @@ public class CorgiActivityDao {
     public List<ActivityMongo> searchActivity(CorgiActivity activity, Integer start, Integer size) {
         Date now = new Date();
         Criteria statusCriteria = Criteria.where("status").is(CorgiActivity.CREATED);
-        if(CorgiActivity.NOT_DELETED.equals(activity.getStatus())){
+        if (CorgiActivity.NOT_DELETED.equals(activity.getStatus())) {
             statusCriteria = Criteria.where("status").ne(CorgiActivity.DELETED);
         }
         Criteria titleCriteria = Criteria.where("title").regex("^.*" + activity.getTitle() + ".*$");
@@ -420,29 +473,30 @@ public class CorgiActivityDao {
     }
 
     public List<ActivityMongo> getBarActivity(CorgiActivity activity) {
-        List<Criteria> criteras = new ArrayList<>();
+        List<Criteria> criterias = new ArrayList<>();
         Criteria criteria = Criteria.where("category").is(CorgiActivity.CAT_BUSINESS);
         Criteria criteriaUserId = Criteria.where("userId").is(activity.getUserId());
-        criteras.add(criteria);
-        criteras.add(criteriaUserId);
+        criterias.add(criteria);
+        criterias.add(criteriaUserId);
         String status = activity.getStatus();
         if (!StringUtils.isEmpty(status)) {
             Criteria criteriaStatus = Criteria.where("status").is(status);
-            criteras.add(criteriaStatus);
+            criterias.add(criteriaStatus);
             if (!StringUtils.isEmpty(activity.getStartTime())) {
                 Criteria startTime = Criteria.where("startTime").lte(activity.getStartTime());
-                criteras.add(startTime);
+                criterias.add(startTime);
             }
             if (!StringUtils.isEmpty(activity.getEndTime())) {
                 Criteria endTime = Criteria.where("endTime").gte(activity.getEndTime());
-                criteras.add(endTime);
+                criterias.add(endTime);
             }
         }
-        criteria = new Criteria().andOperator(criteras.toArray(new Criteria[0]));
+        criteria = new Criteria().andOperator(criterias.toArray(new Criteria[0]));
         return mongoTemplate.find(new Query(criteria), ActivityMongo.class);
     }
 
-    public List<ActivityMongo> getActivityByUserIds(List<String> userIds, String status, Integer start, Integer size) {
+    public List<ActivityMongo> getActivityByUserIds(List<String> userIds, String status, Integer start, Integer
+            size) {
         Criteria c = Criteria.where("userId").in(userIds);
         if (CorgiActivity.CREATED.equals(status)) {
             Criteria signUp = Criteria.where(ActivityMongo.SIGN_UP_TIME).gte(new SimpleDateFormat("yyyy/MM/dd HH:mm").format(new Date()));
@@ -456,7 +510,8 @@ public class CorgiActivityDao {
         return mongoTemplate.find(query, ActivityMongo.class);
     }
 
-    public List<ActivityMongo> getAllActivityByUserIds(String loginUserId, List<String> userIds, String status, Integer start, Integer size) {
+    public List<ActivityMongo> getAllActivityByUserIds(String loginUserId, List<String> userIds, String
+            status, Integer start, Integer size) {
         userIds.add(loginUserId);
         Criteria c = new Criteria().andOperator(Criteria.where("userId").in(userIds), Criteria.where("checkStatus").is("pass"));
         if (CorgiActivity.CREATED.equals(status)) {
@@ -533,10 +588,10 @@ public class CorgiActivityDao {
                         }
                     } else if ("city".equals(fieldName)) {
                         criteriaList.add(Criteria.where("city").regex("^" + value + ".*"));
-                    }else if ("title".equals(fieldName)) {
+                    } else if ("title".equals(fieldName)) {
                         criteriaList.add(new Criteria().
                                 orOperator(Criteria.where("title").regex("^" + value + ".*"),
-                                Criteria.where("content").regex("^" + value + ".*")));
+                                        Criteria.where("content").regex("^" + value + ".*")));
                     } else if ("createTime".equals(fieldName)) {
                         criteriaList.add(Criteria.where("createTime").regex("^" + value + ".*"));
                     } else if ("updateTime".equals(fieldName)) {
