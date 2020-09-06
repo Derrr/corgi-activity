@@ -206,7 +206,7 @@ public class CorgiActivityDao {
                 }
             }
         }
-        if (activityMongoList.size() > 5) {
+        if (activityMongoList.size() > 5 && activityQuery.getRPage() != null) {
             List<ActivityMongo> businessList = getRecommendBusiness(activityQuery, activityMongoList.size() / 5);
             activityQuery.setRPage(activityQuery.getRPage() + businessList.size());
             return mergeActivity(activityMongoList, businessList);
