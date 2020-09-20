@@ -422,12 +422,21 @@ public class CorgiActivityDao {
         }
         if (CollectionUtils.isNotEmpty(mongos)) {
             String nowTime = new SimpleDateFormat("yyyy/MM/dd HH:mm").format(new Date());
-            for (ActivityMongo activityMongo : mongos) {
+            Iterator<ActivityMongo> it = mongos.iterator();
+            while (it.hasNext()) {
+                ActivityMongo activityMongo = it.next();
                 activityMongo.setCurrentTime(nowTime);
+                if (activity.getPeopleCount() > 0) {
+                    long count = corgiUserActivityService.countSignUpUser(activity.getId());
+                    if (count < activity.getPeopleCount()) {
+                        it.remove();
+                    }
+                }
             }
         }
         return mongos;
     }
+
 
     public List<ActivityMongo> searchActivity(CorgiActivity activity, Integer start, Integer size) {
         Date now = new Date();
@@ -600,6 +609,8 @@ public class CorgiActivityDao {
                         criteriaList.add(Criteria.where(ActivityMongo.SIGN_UP_TIME).lte(value));
                     } else if (LIKE_FIELDS.contains(fieldName)) {
                         criteriaList.add(Criteria.where(field.getName()).regex("^.*" + value + ".*$"));
+                    } else if ("peopleCount".equals(fieldName)) {
+                        //peopleCount单独处理
                     } else if (int.class.equals(field.getType()) && (int) value != 0) {
                         criteriaList.add(Criteria.where(field.getName()).is(value));
                     } else if (!int.class.equals(field.getType())) {
