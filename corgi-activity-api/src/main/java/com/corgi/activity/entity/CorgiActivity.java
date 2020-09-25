@@ -53,6 +53,7 @@ public class CorgiActivity implements Serializable {
     private String refActivityId;
     private String refActivityPic;
     private String refActivityAddress;
+    private String refActivityTitle;
     private List<ActivityPic> pics;
     private List<String> topics;
 
