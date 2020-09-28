@@ -575,11 +575,15 @@ public class CorgiActivityDao {
                     if ("id".equals(fieldName)) {
                         criteriaList.add(Criteria.where("mongoId").is(new ObjectId(value.toString())));
                     } else if ("status".equals(fieldName)) {
+                        String currentTime = activity.getCurrentTime();
+                        if (StringUtils.isEmpty(currentTime)) {
+                            currentTime = new SimpleDateFormat("yyyy/MM/dd HH:mm").format(new Date());
+                        }
                         if (CorgiActivity.ENDED.equals(value)) {
-                            criteriaList.add(Criteria.where(ActivityMongo.SIGN_UP_TIME).lte(new SimpleDateFormat("yyyy/MM/dd HH:mm").format(new Date())));
+                            criteriaList.add(Criteria.where(ActivityMongo.SIGN_UP_TIME).lte(currentTime));
                             criteriaList.add(Criteria.where("status").ne(CorgiActivity.DELETED));
                         } else if (CorgiActivity.CREATED.equals(value)) {
-                            criteriaList.add(Criteria.where(ActivityMongo.SIGN_UP_TIME).gte(new SimpleDateFormat("yyyy/MM/dd HH:mm").format(new Date())));
+                            criteriaList.add(Criteria.where(ActivityMongo.SIGN_UP_TIME).gte(currentTime));
                             criteriaList.add(Criteria.where("status").ne(CorgiActivity.DELETED));
                         } else if (CorgiActivity.NOT_DELETED.equals(value)) {
                             criteriaList.add(Criteria.where("status").ne(CorgiActivity.DELETED));
