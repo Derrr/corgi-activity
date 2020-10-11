@@ -306,10 +306,10 @@ public class CorgiActivityDao {
             criteriaList.add(Criteria.where("payType").in(activityQuery.getPayType()));
         }
 
-        if (!StringUtils.isEmpty(activityQuery.getCity())) {
-            criteriaList.add(Criteria.where("city").regex(activityQuery.getCity() + ".*"));
-        } else if (!StringUtils.isEmpty(activityQuery.getNotCity())) {
+        if (!StringUtils.isEmpty(activityQuery.getNotCity())) {
             criteriaList.add(Criteria.where("city").ne(activityQuery.getCity()));
+        }else if (!StringUtils.isEmpty(activityQuery.getCity())) {
+            criteriaList.add(Criteria.where("city").regex(activityQuery.getCity() + ".*"));
         }
 
         if (!StringUtils.isEmpty(activityQuery.getAdname())) {
