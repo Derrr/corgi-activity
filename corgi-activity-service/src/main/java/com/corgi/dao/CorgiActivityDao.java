@@ -3,11 +3,11 @@ package com.corgi.dao;
 
 import com.alibaba.dubbo.common.utils.CollectionUtils;
 import com.alibaba.dubbo.config.annotation.Reference;
-import com.corgi.activity.entity.ActivityPage;
 import com.corgi.activity.entity.CorgiActivity;
 import com.corgi.entity.ActivityMongo;
 import com.corgi.entity.ActivityQuery;
 import com.corgi.user.api.CorgiFavorActivityService;
+import com.corgi.user.api.CorgiToolService;
 import com.corgi.user.api.CorgiUserActivityService;
 import com.corgi.user.api.CorgiUserService;
 import com.corgi.util.ActivityUtil;
@@ -23,21 +23,18 @@ import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.aggregation.Aggregation;
 import org.springframework.data.mongodb.core.aggregation.AggregationResults;
 import org.springframework.data.mongodb.core.query.Criteria;
-import org.springframework.data.mongodb.core.query.NearQuery;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
-import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
-import java.util.zip.CheckedOutputStream;
 
 /**
  * @author tairanliu
@@ -53,6 +50,8 @@ public class CorgiActivityDao {
     private CorgiFavorActivityService corgiFavorActivityService;
     @Reference
     private CorgiUserActivityService corgiUserActivityService;
+    @Reference
+    private CorgiToolService corgiToolService;
 
     private final static Double RADIUS = 6371.0;
 
@@ -271,13 +270,6 @@ public class CorgiActivityDao {
         }
         criteriaList.add(distanceCriteria);
 
-//        if (StringUtils.isEmpty(activityQuery.getVersion())) {
-//            criteriaList.add(signUpCriteria);
-//        } else {
-//            Criteria businessCriteria = Criteria.where("category").is(CorgiActivity.CAT_BUSINESS);
-//            Criteria imageCriteria = Criteria.where("category").is(CorgiActivity.CAT_IMAGE);
-//            criteriaList.add(new Criteria().orOperator(signUpCriteria, businessCriteria, imageCriteria));
-//        }
         if (StringUtils.isEmpty(activityQuery.getCategory())) {
             Criteria imageCriteria = Criteria.where("category").is(CorgiActivity.CAT_IMAGE);
             Criteria signUpCriteria = Criteria.where(ActivityMongo.SIGN_UP_TIME).gte(new SimpleDateFormat("yyyy/MM/dd HH:mm").format(new Date()));
@@ -300,7 +292,14 @@ public class CorgiActivityDao {
             criteriaList.add(Criteria.where(ActivityMongo.SIGN_UP_TIME).gte(new SimpleDateFormat("yyyy/MM/dd HH:mm").format(new Date())));
         }
         if (!StringUtils.isEmpty(activityQuery.getType())) {
-            criteriaList.add(Criteria.where("activityType").is(activityQuery.getType()));
+            if ("其他".equals(activityQuery.getType())) {
+                List<String> types = corgiToolService.getActivityTypes();
+                for (String type : types) {
+                    criteriaList.add(Criteria.where("activityType").ne(type));
+                }
+            } else {
+                criteriaList.add(Criteria.where("activityType").is(activityQuery.getType()));
+            }
         }
         if (CollectionUtils.isNotEmpty(activityQuery.getPayType())) {
             criteriaList.add(Criteria.where("payType").in(activityQuery.getPayType()));
@@ -308,7 +307,7 @@ public class CorgiActivityDao {
 
         if (!StringUtils.isEmpty(activityQuery.getNotCity())) {
             criteriaList.add(Criteria.where("city").ne(activityQuery.getCity()));
-        }else if (!StringUtils.isEmpty(activityQuery.getCity())) {
+        } else if (!StringUtils.isEmpty(activityQuery.getCity())) {
             criteriaList.add(Criteria.where("city").regex(activityQuery.getCity() + ".*"));
         }
 
@@ -333,6 +332,9 @@ public class CorgiActivityDao {
         if (!StringUtils.isEmpty(activityQuery.getEndTime())) {
             criteriaList.add(Criteria.where(ActivityMongo.SIGN_UP_TIME).lte(activityQuery.getEndTime()));
         }
+        if (!StringUtils.isEmpty(activityQuery.getTopic())) {
+            criteriaList.add(Criteria.where("topics").is(activityQuery.getTopic()));
+        }
 
 
         Criteria queryCriteria = new Criteria().andOperator(criteriaList.toArray(new Criteria[0]));
@@ -341,10 +343,10 @@ public class CorgiActivityDao {
         if (activityQuery.getPageSize() != null && activityQuery.getPageSize() > 0) {
             size = activityQuery.getPageSize();
         }
-        if (activityQuery.getOffset() != null && activityQuery.getOffset() > 0) {
-            skip = activityQuery.getOffset();
-        } else if (activityQuery.getPage() != null && activityQuery.getPage() > 0) {
+        if (activityQuery.getPage() != null && activityQuery.getPage() > 0) {
             skip = (activityQuery.getPage() - 1) * size;
+        } else if (activityQuery.getOffset() != null && activityQuery.getOffset() > 0) {
+            skip = activityQuery.getOffset();
         }
 
         Query query = new Query(queryCriteria).skip(skip).limit(size);
