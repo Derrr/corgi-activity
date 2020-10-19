@@ -180,7 +180,7 @@ public class CorgiActivityDao {
         }
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy/MM/dd HH:mm");
         while (true) {
-            if (activityQuery.getTPage() * tStep > 24 * 10 + tStep * tPage) {
+            if (activityQuery.getTPage() * tStep > 24 * 3 + tStep * tPage) {
                 break;
             }
             //翻页
