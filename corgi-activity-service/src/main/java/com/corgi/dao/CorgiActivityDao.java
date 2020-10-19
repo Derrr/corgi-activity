@@ -159,6 +159,7 @@ public class CorgiActivityDao {
 
     public List<ActivityMongo> getRecommendActivities(double lng, double lat, ActivityQuery activityQuery) {
         Double dStep = 100.0;
+
         Integer tStep = 12;
         if (activityQuery.getDPage() == null) {
             activityQuery.setDPage(0);
@@ -166,6 +167,8 @@ public class CorgiActivityDao {
         if (activityQuery.getTPage() == null) {
             activityQuery.setTPage(0);
         }
+
+        Integer tPage = activityQuery.getTPage();
         Criteria userCriteria = Criteria.where("userId").ne(activityQuery.getUserId());
         Criteria categoryCriteria = Criteria.where("category").is(activityQuery.getCategory());
         Criteria statusCriteria = Criteria.where("status").ne(CorgiActivity.DELETED);
@@ -177,7 +180,7 @@ public class CorgiActivityDao {
         }
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy/MM/dd HH:mm");
         while (true) {
-            if (activityQuery.getTPage() * tStep > 24 * 90) {
+            if (activityQuery.getTPage() * tStep > 24 * 10 + tStep * tPage) {
                 break;
             }
             //翻页
