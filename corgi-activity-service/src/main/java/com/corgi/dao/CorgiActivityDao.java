@@ -193,6 +193,9 @@ public class CorgiActivityDao {
             Criteria endCriteria = Criteria.where("createTime").lte(endTime);
 
             Criteria queryCriteria = new Criteria().andOperator(statusCriteria, distanceCriteria, startCriteria, endCriteria, userCriteria, categoryCriteria, checkCriteria);
+            if (!StringUtils.isEmpty(activityQuery.getTopic())) {
+                queryCriteria.andOperator(Criteria.where("topics").is(activityQuery.getTopic()));
+            }
             Query query = new Query(queryCriteria).with(Sort.by(Sort.Direction.DESC, "createTime"));
             List<ActivityMongo> corgiActivities = mongoTemplate.find(query, ActivityMongo.class);
             if (corgiActivities.size() > 0) {
