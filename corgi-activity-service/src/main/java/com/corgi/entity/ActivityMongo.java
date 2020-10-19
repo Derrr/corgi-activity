@@ -21,7 +21,8 @@ import java.lang.reflect.Method;
 @CompoundIndexes(
         {
                 @CompoundIndex(name = "activity_location", def = "{'location':'2dsphere'}"),
-                @CompoundIndex(name = "activity_creator", def = "{'userId':1}")
+                @CompoundIndex(name = "activity_creator", def = "{'userId':1}"),
+                @CompoundIndex(name = "topics", def = "{'topics':1}")
         })
 public class ActivityMongo extends CorgiActivity {
     public static final String SIGN_UP_TIME = "signUpTime";
