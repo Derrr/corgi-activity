@@ -332,9 +332,6 @@ public class CorgiActivityDao {
         if (!StringUtils.isEmpty(activityQuery.getEndTime())) {
             criteriaList.add(Criteria.where(ActivityMongo.SIGN_UP_TIME).lte(activityQuery.getEndTime()));
         }
-        if (!StringUtils.isEmpty(activityQuery.getTopic())) {
-            criteriaList.add(Criteria.where("topics").is(activityQuery.getTopic()));
-        }
 
 
         Criteria queryCriteria = new Criteria().andOperator(criteriaList.toArray(new Criteria[0]));
