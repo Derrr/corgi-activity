@@ -298,7 +298,14 @@ public class CorgiActivityDao {
             criteriaList.add(Criteria.where(ActivityMongo.SIGN_UP_TIME).gte(new SimpleDateFormat("yyyy/MM/dd HH:mm").format(new Date())));
         }
         if (!StringUtils.isEmpty(activityQuery.getType())) {
-            criteriaList.add(Criteria.where("activityType").is(activityQuery.getType()));
+            if ("其他".equals(activityQuery.getType())) {
+                List<String> types = corgiToolService.getActivityTypes();
+                for (String type : types) {
+                    criteriaList.add(Criteria.where("activityType").ne(type));
+                }
+            } else {
+                criteriaList.add(Criteria.where("activityType").is(activityQuery.getType()));
+            }
         }
         if (CollectionUtils.isNotEmpty(activityQuery.getPayType())) {
             criteriaList.add(Criteria.where("payType").in(activityQuery.getPayType()));
@@ -331,7 +338,9 @@ public class CorgiActivityDao {
         if (!StringUtils.isEmpty(activityQuery.getEndTime())) {
             criteriaList.add(Criteria.where(ActivityMongo.SIGN_UP_TIME).lte(activityQuery.getEndTime()));
         }
-
+        if (!StringUtils.isEmpty(activityQuery.getTopic())) {
+            criteriaList.add(Criteria.where("topics").is(activityQuery.getTopic()));
+        }
 
         Criteria queryCriteria = new Criteria().andOperator(criteriaList.toArray(new Criteria[0]));
         int skip = 0;
