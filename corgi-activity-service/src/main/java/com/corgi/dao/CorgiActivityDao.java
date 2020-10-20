@@ -503,9 +503,11 @@ public class CorgiActivityDao {
             if (!StringUtils.isEmpty(activity.getStartTime())) {
                 Criteria startTime = Criteria.where("startTime").lte(activity.getStartTime());
                 criterias.add(startTime);
+                Criteria endTime = Criteria.where("endTime").gte(activity.getEndTime());
+                criterias.add(endTime);
             }
             if (!StringUtils.isEmpty(activity.getEndTime())) {
-                Criteria endTime = Criteria.where("endTime").gte(activity.getEndTime());
+                Criteria endTime = Criteria.where("endTime").lte(activity.getEndTime());
                 criterias.add(endTime);
             }
         }
