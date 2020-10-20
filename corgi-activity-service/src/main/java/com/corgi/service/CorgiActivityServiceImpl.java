@@ -97,6 +97,10 @@ public class CorgiActivityServiceImpl implements CorgiActivityService {
 
     @Override
     public CorgiActivity updateCorgiActivity(CorgiActivity corgiActivity) {
+        ActivityMongo mongo = corgiActivityDao.getActivityById(corgiActivity.getId());
+        if (mongo == null || !mongo.getUserId().equals(corgiActivity.getUserId())) {
+            return corgiActivity;
+        }
         ActivityMongo activityMongo = corgiActivityDao.updateActivity(corgiActivity);
         corgiToolService.updateActivityTopic(activityMongo.getMongoId().toHexString(), corgiActivity.getTopics());
         return activityMongo.getActivity();
