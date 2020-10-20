@@ -1,5 +1,6 @@
 package com.corgi.service;
 
+import com.alibaba.dubbo.common.utils.StringUtils;
 import com.alibaba.dubbo.config.annotation.Reference;
 import com.alibaba.dubbo.config.annotation.Service;
 import com.corgi.activity.api.CorgiActivityService;
@@ -205,6 +206,11 @@ public class CorgiActivityServiceImpl implements CorgiActivityService {
                 }
                 activity.setPics(activityPics);
                 corgiActivities.add(activity);
+                if (StringUtils.isNotEmpty(activity.getRefActivityId()) && StringUtils.isEmpty(activity.getRefActivityTitle())) {
+                    String activityId = activity.getRefActivityId();
+                    ActivityMongo refMongo = corgiActivityDao.getActivityById(activityId);
+                    activity.setRefActivityTitle(refMongo.getTitle());
+                }
             }
         }
         return corgiActivities;
