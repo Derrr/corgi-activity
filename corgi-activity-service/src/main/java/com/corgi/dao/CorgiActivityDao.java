@@ -159,7 +159,6 @@ public class CorgiActivityDao {
 
     public List<ActivityMongo> getRecommendActivities(double lng, double lat, ActivityQuery activityQuery) {
         Double dStep = 100.0;
-
         Integer tStep = 12;
         if (activityQuery.getDPage() == null) {
             activityQuery.setDPage(0);
@@ -167,50 +166,46 @@ public class CorgiActivityDao {
         if (activityQuery.getTPage() == null) {
             activityQuery.setTPage(0);
         }
-
-        Integer tPage = activityQuery.getTPage();
-        Criteria userCriteria = Criteria.where("userId").ne(activityQuery.getUserId());
         Criteria categoryCriteria = Criteria.where("category").is(activityQuery.getCategory());
         Criteria statusCriteria = Criteria.where("status").ne(CorgiActivity.DELETED);
         Criteria checkCriteria = Criteria.where("checkStatus").is("pass");
         List<ActivityMongo> activityMongoList = new ArrayList<>();
-        Criteria topicCriteria = Criteria.where("topics").ne("-1");
-        if (!StringUtils.isEmpty(activityQuery.getTopic())) {
-            topicCriteria = Criteria.where("topics").is(activityQuery.getTopic());
-        }
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy/MM/dd HH:mm");
-        while (true) {
-            if (activityQuery.getTPage() * tStep > 24 * 3 + tStep * tPage) {
-                break;
-            }
-            //翻页
-            ActivityUtil.addPage(activityQuery);
-            //获取距离条件
-            Calendar calendar = Calendar.getInstance();
-            Criteria distanceCriteria = Criteria.where("location").nearSphere(new Point(lng, lat));
-            distanceCriteria.minDistance(dStep * (activityQuery.getDPage() - 1) / RADIUS);
-            distanceCriteria.maxDistance(dStep * activityQuery.getDPage() / RADIUS);
-            //获取时间条件
-            calendar.add(Calendar.HOUR, -1 * tStep * activityQuery.getTPage());
-            String startTime = sdf.format(calendar.getTime());
-            calendar.add(Calendar.HOUR, tStep);
-            String endTime = sdf.format(calendar.getTime());
-            Criteria startCriteria = Criteria.where("createTime").gte(startTime);
-            Criteria endCriteria = Criteria.where("createTime").lte(endTime);
-            Criteria queryCriteria = new Criteria().andOperator(statusCriteria, distanceCriteria, startCriteria, endCriteria, userCriteria, categoryCriteria, checkCriteria, topicCriteria);
 
-            Query query = new Query(queryCriteria).with(Sort.by(Sort.Direction.DESC, "createTime"));
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy/MM/dd HH:mm");
+//        while (true) {
+//            if (activityQuery.getTPage() * tStep > 24 * 90) {
+//                break;
+//            }
+            //翻页
+//            ActivityUtil.addPage(activityQuery);
+            //获取距离条件
+//            Calendar calendar = Calendar.getInstance();
+//            Criteria distanceCriteria = Criteria.where("location").nearSphere(new Point(lng, lat));
+//            distanceCriteria.minDistance(dStep * (activityQuery.getDPage() - 1) / RADIUS);
+//            distanceCriteria.maxDistance(dStep * activityQuery.getDPage() / RADIUS);
+            //获取时间条件
+//            calendar.add(Calendar.HOUR, -1 * tStep * activityQuery.getTPage());
+//            String startTime = sdf.format(calendar.getTime());
+//            calendar.add(Calendar.HOUR, tStep);
+//            String endTime = sdf.format(calendar.getTime());
+//            Criteria startCriteria = Criteria.where("createTime").gte(startTime);
+//            Criteria endCriteria = Criteria.where("createTime").lte(endTime);
+
+//            Criteria queryCriteria = new Criteria().andOperator(statusCriteria, distanceCriteria, startCriteria, endCriteria, categoryCriteria, checkCriteria);
+            Criteria queryCriteria = new Criteria().andOperator(statusCriteria, categoryCriteria, checkCriteria);
+            Query query = new Query(queryCriteria).with(Sort.by(Sort.Direction.DESC, "createTime")).skip(activityQuery.getTPage()).limit(activityQuery.getPageSize());
+            activityQuery.setTPage(activityQuery.getTPage() + activityQuery.getPageSize());
             List<ActivityMongo> corgiActivities = mongoTemplate.find(query, ActivityMongo.class);
             if (corgiActivities.size() > 0) {
                 List<String> userIds = corgiActivities.stream().map(activityMongo -> activityMongo.getUserId()).collect(Collectors.toList());
                 List<String> resultUserIds = corgiUserService.filterUser(userIds, activityQuery);
                 corgiActivities = corgiActivities.stream().filter(activityMongo -> resultUserIds.contains(activityMongo.getUserId())).collect(Collectors.toList());
                 activityMongoList.addAll(corgiActivities);
-                if (activityMongoList.size() > activityQuery.getPageSize()) {
-                    break;
-                }
+//                if (activityMongoList.size() >= activityQuery.getPageSize()) {
+//                    break;
+//                }
             }
-        }
+//        }
         if (activityMongoList.size() > 5 && activityQuery.getRPage() != null) {
             List<ActivityMongo> businessList = getRecommendBusiness(activityQuery, activityMongoList.size() / 5);
             activityQuery.setRPage(activityQuery.getRPage() + businessList.size());
@@ -298,14 +293,7 @@ public class CorgiActivityDao {
             criteriaList.add(Criteria.where(ActivityMongo.SIGN_UP_TIME).gte(new SimpleDateFormat("yyyy/MM/dd HH:mm").format(new Date())));
         }
         if (!StringUtils.isEmpty(activityQuery.getType())) {
-            if ("其他".equals(activityQuery.getType())) {
-                List<String> types = corgiToolService.getActivityTypes();
-                for (String type : types) {
-                    criteriaList.add(Criteria.where("activityType").ne(type));
-                }
-            } else {
-                criteriaList.add(Criteria.where("activityType").is(activityQuery.getType()));
-            }
+            criteriaList.add(Criteria.where("activityType").is(activityQuery.getType()));
         }
         if (CollectionUtils.isNotEmpty(activityQuery.getPayType())) {
             criteriaList.add(Criteria.where("payType").in(activityQuery.getPayType()));
@@ -338,9 +326,7 @@ public class CorgiActivityDao {
         if (!StringUtils.isEmpty(activityQuery.getEndTime())) {
             criteriaList.add(Criteria.where(ActivityMongo.SIGN_UP_TIME).lte(activityQuery.getEndTime()));
         }
-        if (!StringUtils.isEmpty(activityQuery.getTopic())) {
-            criteriaList.add(Criteria.where("topics").is(activityQuery.getTopic()));
-        }
+
 
         Criteria queryCriteria = new Criteria().andOperator(criteriaList.toArray(new Criteria[0]));
         int skip = 0;
@@ -500,18 +486,15 @@ public class CorgiActivityDao {
         if (!StringUtils.isEmpty(status)) {
             Criteria criteriaStatus = Criteria.where("status").is(status);
             criterias.add(criteriaStatus);
+            if (!StringUtils.isEmpty(activity.getStartTime())) {
+                Criteria startTime = Criteria.where("startTime").lte(activity.getStartTime());
+                criterias.add(startTime);
+            }
+            if (!StringUtils.isEmpty(activity.getEndTime())) {
+                Criteria endTime = Criteria.where("endTime").gte(activity.getEndTime());
+                criterias.add(endTime);
+            }
         }
-        if (!StringUtils.isEmpty(activity.getStartTime())) {
-            Criteria startTime = Criteria.where("startTime").lte(activity.getStartTime());
-            criterias.add(startTime);
-            Criteria endTime = Criteria.where("endTime").gte(activity.getStartTime());
-            criterias.add(endTime);
-        }
-        if (!StringUtils.isEmpty(activity.getEndTime())) {
-            Criteria endTime = Criteria.where("endTime").lte(activity.getEndTime());
-            criterias.add(endTime);
-        }
-
         criteria = new Criteria().andOperator(criterias.toArray(new Criteria[0]));
         return mongoTemplate.find(new Query(criteria), ActivityMongo.class);
     }
