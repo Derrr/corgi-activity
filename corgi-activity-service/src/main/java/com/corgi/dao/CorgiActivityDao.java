@@ -286,9 +286,9 @@ public class CorgiActivityDao {
             criteriaList.add(Criteria.where("checkStatus").is("pass"));
         }
 
-        if (!StringUtils.isEmpty(activityQuery.getUserId())) {
-            criteriaList.add(Criteria.where("userId").ne(activityQuery.getUserId()));
-        }
+//        if (!StringUtils.isEmpty(activityQuery.getUserId())) {
+//            criteriaList.add(Criteria.where("userId").ne(activityQuery.getUserId()));
+//        }
 
         if (!StringUtils.isEmpty(activityQuery.getCategory())) {
             criteriaList.add(Criteria.where("category").is(activityQuery.getCategory()));
