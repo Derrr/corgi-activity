@@ -169,6 +169,10 @@ public class CorgiActivityDao {
         Criteria categoryCriteria = Criteria.where("category").is(activityQuery.getCategory());
         Criteria statusCriteria = Criteria.where("status").ne(CorgiActivity.DELETED);
         Criteria checkCriteria = Criteria.where("checkStatus").is("pass");
+        Criteria topicCriteria = Criteria.where("topics").ne("-1");
+        if (!StringUtils.isEmpty(activityQuery.getTopic())) {
+            topicCriteria = Criteria.where("topics").is(activityQuery.getTopic());
+        }
         List<ActivityMongo> activityMongoList = new ArrayList<>();
 
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy/MM/dd HH:mm");
@@ -176,14 +180,14 @@ public class CorgiActivityDao {
 //            if (activityQuery.getTPage() * tStep > 24 * 90) {
 //                break;
 //            }
-            //翻页
+        //翻页
 //            ActivityUtil.addPage(activityQuery);
-            //获取距离条件
+        //获取距离条件
 //            Calendar calendar = Calendar.getInstance();
 //            Criteria distanceCriteria = Criteria.where("location").nearSphere(new Point(lng, lat));
 //            distanceCriteria.minDistance(dStep * (activityQuery.getDPage() - 1) / RADIUS);
 //            distanceCriteria.maxDistance(dStep * activityQuery.getDPage() / RADIUS);
-            //获取时间条件
+        //获取时间条件
 //            calendar.add(Calendar.HOUR, -1 * tStep * activityQuery.getTPage());
 //            String startTime = sdf.format(calendar.getTime());
 //            calendar.add(Calendar.HOUR, tStep);
@@ -191,20 +195,20 @@ public class CorgiActivityDao {
 //            Criteria startCriteria = Criteria.where("createTime").gte(startTime);
 //            Criteria endCriteria = Criteria.where("createTime").lte(endTime);
 
-//            Criteria queryCriteria = new Criteria().andOperator(statusCriteria, distanceCriteria, startCriteria, endCriteria, categoryCriteria, checkCriteria);
-            Criteria queryCriteria = new Criteria().andOperator(statusCriteria, categoryCriteria, checkCriteria);
-            Query query = new Query(queryCriteria).with(Sort.by(Sort.Direction.DESC, "createTime")).skip(activityQuery.getTPage()).limit(activityQuery.getPageSize());
-            activityQuery.setTPage(activityQuery.getTPage() + activityQuery.getPageSize());
-            List<ActivityMongo> corgiActivities = mongoTemplate.find(query, ActivityMongo.class);
-            if (corgiActivities.size() > 0) {
-                List<String> userIds = corgiActivities.stream().map(activityMongo -> activityMongo.getUserId()).collect(Collectors.toList());
-                List<String> resultUserIds = corgiUserService.filterUser(userIds, activityQuery);
-                corgiActivities = corgiActivities.stream().filter(activityMongo -> resultUserIds.contains(activityMongo.getUserId())).collect(Collectors.toList());
-                activityMongoList.addAll(corgiActivities);
+//            Criteria queryCriteria = new Criteria().andOperator(statusCriteria, distanceCriteria, startCriteria, endCriteria, categoryCriteria, checkCriteria, topicCriteria);
+        Criteria queryCriteria = new Criteria().andOperator(statusCriteria, categoryCriteria, checkCriteria, topicCriteria);
+        Query query = new Query(queryCriteria).with(Sort.by(Sort.Direction.DESC, "createTime")).skip(activityQuery.getTPage()).limit(activityQuery.getPageSize());
+        activityQuery.setTPage(activityQuery.getTPage() + activityQuery.getPageSize());
+        List<ActivityMongo> corgiActivities = mongoTemplate.find(query, ActivityMongo.class);
+        if (corgiActivities.size() > 0) {
+            List<String> userIds = corgiActivities.stream().map(activityMongo -> activityMongo.getUserId()).collect(Collectors.toList());
+            List<String> resultUserIds = corgiUserService.filterUser(userIds, activityQuery);
+            corgiActivities = corgiActivities.stream().filter(activityMongo -> resultUserIds.contains(activityMongo.getUserId())).collect(Collectors.toList());
+            activityMongoList.addAll(corgiActivities);
 //                if (activityMongoList.size() >= activityQuery.getPageSize()) {
 //                    break;
 //                }
-            }
+        }
 //        }
         if (activityMongoList.size() > 5 && activityQuery.getRPage() != null) {
             List<ActivityMongo> businessList = getRecommendBusiness(activityQuery, activityMongoList.size() / 5);
