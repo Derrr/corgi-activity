@@ -218,6 +218,16 @@ public class CorgiActivityDao {
         return activityMongoList;
     }
 
+    public List<ActivityMongo> getCityRecommendActivity(String city) {
+        Criteria categoryCriteria = Criteria.where("category").in(CorgiActivity.CAT_ACTIVITY, CorgiActivity.CAT_BUSINESS);
+        Criteria statusCriteria = Criteria.where("status").is(CorgiActivity.CREATED);
+        Criteria timeCriteria = new Criteria().orOperator(
+                Criteria.where("endTime").gte(new SimpleDateFormat("yyyy-MM-dd HH:mm").format(new Date()))
+                , Criteria.where(ActivityMongo.SIGN_UP_TIME).gte(new SimpleDateFormat("yyyy/MM/dd HH:mm").format(new Date())));
+        Criteria cityCriteria = Criteria.where("city").is(city);
+        return mongoTemplate.find(new Query(new Criteria().andOperator(categoryCriteria,statusCriteria,timeCriteria,cityCriteria)), ActivityMongo.class);
+    }
+
     private List<ActivityMongo> mergeActivity(List<ActivityMongo> activityList, List<ActivityMongo> businessList) {
         List<Integer> takenPositions = new ArrayList<>();
         Random random = new Random();
@@ -672,4 +682,6 @@ public class CorgiActivityDao {
         AggregationResults<HashMap> results = mongoTemplate.aggregate(agg, ActivityMongo.class, HashMap.class);
         return results.getMappedResults();
     }
+
+
 }

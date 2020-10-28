@@ -199,6 +199,11 @@ public class CorgiActivityServiceImpl implements CorgiActivityService {
         return page;
     }
 
+    @Override
+    public List<CorgiActivity> getCityRecommendActivity(String city, ActivityQuery activityQuery) {
+        return convertActivity(corgiActivityDao.getCityRecommendActivity(city));
+    }
+
     List<CorgiActivity> convertActivity(List<ActivityMongo> activityMongoList, boolean checkPic) {
         List<CorgiActivity> corgiActivities = new ArrayList<>();
         if (activityMongoList != null) {

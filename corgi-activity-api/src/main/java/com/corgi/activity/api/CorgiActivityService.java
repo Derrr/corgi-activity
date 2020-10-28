@@ -58,4 +58,6 @@ public interface CorgiActivityService {
     List<CorgiActivity> getBarActivity(CorgiActivity activity);
 
     ActivityPage getRecommendActivity(Double lat, Double lng, ActivityQuery activityQuery);
+
+    List<CorgiActivity> getCityRecommendActivity(String city, ActivityQuery activityQuery);
 }
