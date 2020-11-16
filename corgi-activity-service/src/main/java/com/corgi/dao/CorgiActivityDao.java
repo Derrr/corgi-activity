@@ -225,7 +225,7 @@ public class CorgiActivityDao {
                 Criteria.where("endTime").gte(new SimpleDateFormat("yyyy-MM-dd HH:mm").format(new Date()))
                 , Criteria.where(ActivityMongo.SIGN_UP_TIME).gte(new SimpleDateFormat("yyyy/MM/dd HH:mm").format(new Date())));
         Criteria cityCriteria = Criteria.where("city").is(city);
-        return mongoTemplate.find(new Query(new Criteria().andOperator(categoryCriteria,statusCriteria,timeCriteria,cityCriteria)), ActivityMongo.class);
+        return mongoTemplate.find(new Query(new Criteria().andOperator(categoryCriteria, statusCriteria, timeCriteria, cityCriteria)), ActivityMongo.class);
     }
 
     private List<ActivityMongo> mergeActivity(List<ActivityMongo> activityList, List<ActivityMongo> businessList) {
@@ -284,34 +284,71 @@ public class CorgiActivityDao {
             distanceCriteria.maxDistance(range / RADIUS);
         }
         criteriaList.add(distanceCriteria);
-
-        if (StringUtils.isEmpty(activityQuery.getCategory())) {
-            Criteria imageCriteria = Criteria.where("category").is(CorgiActivity.CAT_IMAGE);
-            Criteria signUpCriteria = Criteria.where(ActivityMongo.SIGN_UP_TIME).gte(new SimpleDateFormat("yyyy/MM/dd HH:mm").format(new Date()));
-            criteriaList.add(new Criteria().orOperator(signUpCriteria, imageCriteria));
-        }
+        Criteria typeCriteria = new Criteria().orOperator(Criteria.where("refActivityId").exists(true)
+                , Criteria.where("category").in(CorgiActivity.CAT_BUSINESS, CorgiActivity.CAT_ACTIVITY));
+        criteriaList.add(typeCriteria);
 
         criteriaList.add(Criteria.where("status").is(CorgiActivity.CREATED));
-        if (!CorgiActivity.CAT_BUSINESS.equals(activityQuery.getCategory())) {
-            criteriaList.add(Criteria.where("checkStatus").is("pass"));
-        }
 
-//        if (!StringUtils.isEmpty(activityQuery.getUserId())) {
-//            criteriaList.add(Criteria.where("userId").ne(activityQuery.getUserId()));
+        criteriaList.add(new Criteria().orOperator(Criteria.where("checkStatus").exists(false), Criteria.where("checkStatus").is("pass")));
+//        if (StringUtils.isEmpty(activityQuery.getCategory())) {
+//            Criteria imageCriteria = Criteria.where("category").is(CorgiActivity.CAT_IMAGE);
+//            Criteria signUpCriteria = Criteria.where(ActivityMongo.SIGN_UP_TIME).gte(new SimpleDateFormat("yyyy/MM/dd HH:mm").format(new Date()));
+//            criteriaList.add(new Criteria().orOperator(signUpCriteria, imageCriteria));
+//        }
+//
+//        criteriaList.add(Criteria.where("status").is(CorgiActivity.CREATED));
+//        if (!CorgiActivity.CAT_BUSINESS.equals(activityQuery.getCategory())) {
+//            criteriaList.add(Criteria.where("checkStatus").is("pass"));
+//        }
+//
+//        if (!StringUtils.isEmpty(activityQuery.getCategory())) {
+//            criteriaList.add(Criteria.where("category").is(activityQuery.getCategory()));
+//        }
+//        if (CorgiActivity.CAT_ACTIVITY.equals(activityQuery.getCategory())) {
+//            criteriaList.add(Criteria.where(ActivityMongo.SIGN_UP_TIME).gte(new SimpleDateFormat("yyyy/MM/dd HH:mm").format(new Date())));
 //        }
 
-        if (!StringUtils.isEmpty(activityQuery.getCategory())) {
-            criteriaList.add(Criteria.where("category").is(activityQuery.getCategory()));
+        Query query = getQueryByCriteria(activityQuery, criteriaList);
+        List<ActivityMongo> corgiActivities = mongoTemplate.find(query, ActivityMongo.class);
+        log.info("near size... {} ", corgiActivities.size());
+        if (CollectionUtils.isNotEmpty(corgiActivities) && !StringUtils.isEmpty(activityQuery.getUserId())) {
+            List<String> userIds = new ArrayList<>();
+            List<String> barIds = new ArrayList<>();
+            for (ActivityMongo mongo : corgiActivities) {
+                if (CorgiActivity.CAT_BUSINESS.equals(mongo.getCategory())) {
+                    barIds.add(mongo.getUserId());
+                } else {
+                    userIds.add(mongo.getUserId());
+                }
+            }
+            List<String> resultUserIds = corgiUserService.filterUser(userIds, activityQuery);
+            if (CollectionUtils.isEmpty(resultUserIds) && CollectionUtils.isEmpty(barIds)) {
+                return new ArrayList<>();
+            }
+            Iterator<ActivityMongo> iterator = corgiActivities.iterator();
+            while (iterator.hasNext()) {
+                ActivityMongo mongo = iterator.next();
+                if (CorgiActivity.CAT_BUSINESS.equals(mongo.getCategory()) || resultUserIds.contains(mongo.getUserId())) {
+                    continue;
+                }
+                iterator.remove();
+            }
         }
-        if (CorgiActivity.CAT_ACTIVITY.equals(activityQuery.getCategory())) {
-            criteriaList.add(Criteria.where(ActivityMongo.SIGN_UP_TIME).gte(new SimpleDateFormat("yyyy/MM/dd HH:mm").format(new Date())));
-        }
+        log.info("near final size... {} ", corgiActivities.size());
+        return corgiActivities;
+    }
+
+    private Query getQueryByCriteria(ActivityQuery activityQuery, List<Criteria> criteriaList) {
         if (!StringUtils.isEmpty(activityQuery.getType())) {
             if ("其他".equals(activityQuery.getType())) {
                 List<String> types = corgiToolService.getActivityTypes();
                 for (String type : types) {
                     criteriaList.add(Criteria.where("activityType").ne(type));
                 }
+            } else if ("酒吧".equals(activityQuery.getType())) {
+                criteriaList.add(new Criteria().orOperator(Criteria.where("activityType").is(activityQuery.getType()),
+                        Criteria.where("category").is(CorgiActivity.CAT_BUSINESS)));
             } else {
                 criteriaList.add(Criteria.where("activityType").is(activityQuery.getType()));
             }
@@ -351,7 +388,6 @@ public class CorgiActivityDao {
             criteriaList.add(Criteria.where("topics").is(activityQuery.getTopic()));
         }
 
-
         Criteria queryCriteria = new Criteria().andOperator(criteriaList.toArray(new Criteria[0]));
         int skip = 0;
         int size = 1000;
@@ -368,33 +404,8 @@ public class CorgiActivityDao {
         if (ActivityQuery.SORT_TIME.equals(activityQuery.getSort())) {
             query.with(Sort.by(Sort.Direction.DESC, "createTime"));
         }
-        List<ActivityMongo> corgiActivities = mongoTemplate.find(query, ActivityMongo.class);
-        log.info("near size... {} ", corgiActivities.size());
-        if (CollectionUtils.isNotEmpty(corgiActivities) && !StringUtils.isEmpty(activityQuery.getUserId())) {
-            List<String> userIds = new ArrayList<>();
-            List<String> barIds = new ArrayList<>();
-            for (ActivityMongo mongo : corgiActivities) {
-                if (CorgiActivity.CAT_BUSINESS.equals(mongo.getCategory())) {
-                    barIds.add(mongo.getUserId());
-                } else {
-                    userIds.add(mongo.getUserId());
-                }
-            }
-            List<String> resultUserIds = corgiUserService.filterUser(userIds, activityQuery);
-            if (CollectionUtils.isEmpty(resultUserIds) && CollectionUtils.isEmpty(barIds)) {
-                return new ArrayList<>();
-            }
-            Iterator<ActivityMongo> iterator = corgiActivities.iterator();
-            while (iterator.hasNext()) {
-                ActivityMongo mongo = iterator.next();
-                if (CorgiActivity.CAT_BUSINESS.equals(mongo.getCategory()) || resultUserIds.contains(mongo.getUserId())) {
-                    continue;
-                }
-                iterator.remove();
-            }
-        }
-        log.info("near final size... {} ", corgiActivities.size());
-        return corgiActivities;
+
+        return query;
     }
 
     public List<ActivityMongo> getRunningActivities(String userId, Integer start, Integer size) {
