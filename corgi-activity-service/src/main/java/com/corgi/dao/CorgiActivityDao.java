@@ -346,9 +346,6 @@ public class CorgiActivityDao {
                 for (String type : types) {
                     criteriaList.add(Criteria.where("activityType").ne(type));
                 }
-            } else if ("酒吧".equals(activityQuery.getType())) {
-                criteriaList.add(new Criteria().orOperator(Criteria.where("activityType").is(activityQuery.getType()),
-                        Criteria.where("category").is(CorgiActivity.CAT_BUSINESS)));
             } else {
                 criteriaList.add(Criteria.where("activityType").is(activityQuery.getType()));
             }
