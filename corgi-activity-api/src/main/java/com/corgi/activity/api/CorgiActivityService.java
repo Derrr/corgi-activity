@@ -60,4 +60,6 @@ public interface CorgiActivityService {
     ActivityPage getRecommendActivity(Double lat, Double lng, ActivityQuery activityQuery);
 
     List<CorgiActivity> getCityRecommendActivity(String city, ActivityQuery activityQuery);
+
+    void refreshActivity();
 }

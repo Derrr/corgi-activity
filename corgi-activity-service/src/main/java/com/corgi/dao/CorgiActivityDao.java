@@ -691,5 +691,20 @@ public class CorgiActivityDao {
         return results.getMappedResults();
     }
 
+    public void refreshActivity() {
+        Query query = new Query(Criteria.where("refActivityId").exists(true));
+        List<ActivityMongo> mongos = mongoTemplate.find(query, ActivityMongo.class);
+        for (ActivityMongo mongo : mongos) {
+            String activityId = mongo.getRefActivityId();
+            if (!StringUtils.isEmpty(activityId)) {
+                ActivityMongo activityMongo = mongoTemplate.findById(new ObjectId(activityId), ActivityMongo.class);
+                if (!StringUtils.isEmpty(activityMongo.getActivityType())) {
+                    Query idQuery = new Query(Criteria.where("mongoId").is(mongo.getMongoId()));
+                    Update update = new Update().set("activityType", activityMongo.getActivityType());
+                    mongoTemplate.updateFirst(idQuery, update, ActivityMongo.class);
+                }
+            }
+        }
+    }
 
 }
