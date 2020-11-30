@@ -171,7 +171,11 @@ public class CorgiActivityDao {
         Criteria checkCriteria = Criteria.where("checkStatus").is("pass");
         Criteria topicCriteria = Criteria.where("topics").ne("-1");
         if (!StringUtils.isEmpty(activityQuery.getTopic())) {
-            topicCriteria = Criteria.where("topics").is(activityQuery.getTopic());
+            if ("20".equals(activityQuery.getTopic())) {
+                topicCriteria = Criteria.where("topics").in("20", "21", "22");
+            } else {
+                topicCriteria = Criteria.where("topics").is(activityQuery.getTopic());
+            }
         }
         List<ActivityMongo> activityMongoList = new ArrayList<>();
 
