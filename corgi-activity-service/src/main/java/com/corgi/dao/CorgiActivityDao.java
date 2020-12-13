@@ -457,12 +457,12 @@ public class CorgiActivityDao {
             while (it.hasNext()) {
                 ActivityMongo activityMongo = it.next();
                 activityMongo.setCurrentTime(nowTime);
-                if (activity.getPeopleCount() > 0) {
-                    long count = corgiUserActivityService.countSignUpUser(activity.getId());
-                    if (count < activity.getPeopleCount()) {
-                        it.remove();
-                    }
-                }
+//                if (activity.getPeopleCount() > 0) {
+//                    long count = corgiUserActivityService.countSignUpUser(activity.getId());
+//                    if (count < activity.getPeopleCount()) {
+//                        it.remove();
+//                    }
+//                }
             }
         }
         return mongos;
