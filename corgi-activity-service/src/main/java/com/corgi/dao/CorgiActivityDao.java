@@ -62,11 +62,13 @@ public class CorgiActivityDao {
     private static List<String> LIKE_FIELDS = Arrays.asList("title", "content", "address");
 
     public ActivityMongo getActivityById(String activityId) {
-        ActivityMongo mongo = null;
+        ActivityMongo mongo = new ActivityMongo();
         try {
             mongo = mongoTemplate.findById(new ObjectId(activityId), ActivityMongo.class);
             if (mongo != null) {
                 mongo.setCurrentTime(new SimpleDateFormat("yyyy/MM/dd HH:mm").format(new Date()));
+            } else {
+                mongo = new ActivityMongo();
             }
         } catch (Exception e) {
             log.error(e.getMessage(), e);
@@ -294,7 +296,7 @@ public class CorgiActivityDao {
 
         criteriaList.add(Criteria.where("status").is(CorgiActivity.CREATED));
 
-        criteriaList.add(new Criteria().orOperator(Criteria.where("checkStatus").exists(false), Criteria.where("checkStatus").is("pass")));
+        criteriaList.add(new Criteria().orOperator(Criteria.where("checkStatus").exists(false), Criteria.where("checkStatus").ne("fail")));
 //        if (StringUtils.isEmpty(activityQuery.getCategory())) {
 //            Criteria imageCriteria = Criteria.where("category").is(CorgiActivity.CAT_IMAGE);
 //            Criteria signUpCriteria = Criteria.where(ActivityMongo.SIGN_UP_TIME).gte(new SimpleDateFormat("yyyy/MM/dd HH:mm").format(new Date()));

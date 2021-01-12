@@ -20,6 +20,8 @@ public class CorgiActivity implements Serializable {
     public static final String CAT_ACTIVITY = "activity";
     public static final String CAT_BUSINESS = "business";
     public static final String CAT_ATTENDANCE = "attendance";
+    public static final String CAT_VIDEO = "video";
+    public static final String CAT_GOODS = "goods";
 
     private String id;
     private String barId;
@@ -54,6 +56,7 @@ public class CorgiActivity implements Serializable {
     private String refActivityPic;
     private String refActivityAddress;
     private String refActivityTitle;
+    private String videoUrl;
     private List<ActivityPic> pics;
     private List<String> topics;
 
