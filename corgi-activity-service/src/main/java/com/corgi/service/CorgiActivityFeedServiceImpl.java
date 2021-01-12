@@ -1,10 +1,8 @@
 package com.corgi.service;
 
-import com.alibaba.dubbo.common.utils.StringUtils;
 import com.alibaba.dubbo.config.annotation.Reference;
 import com.alibaba.dubbo.config.annotation.Service;
 import com.corgi.activity.api.CorgiActivityFeedService;
-import com.corgi.activity.api.CorgiActivityService;
 import com.corgi.activity.entity.ActivityPage;
 import com.corgi.activity.entity.ActivityPic;
 import com.corgi.activity.entity.CorgiActivity;
@@ -27,7 +25,7 @@ import java.util.List;
  * @author tairanliu
  */
 @Slf4j
-@Service(interfaceClass = CorgiActivityService.class)
+@Service(interfaceClass = CorgiActivityFeedService.class)
 @Component
 public class CorgiActivityFeedServiceImpl implements CorgiActivityFeedService {
     @Autowired
