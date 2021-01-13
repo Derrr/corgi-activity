@@ -39,9 +39,6 @@ public class CorgiActivity implements Serializable {
     private double lat;
     private double lng;
     private String city;
-    private String adname;
-    private String businessArea;
-    private String station;
     private String payType;
     private Integer budget;
     private String createTime;
@@ -57,6 +54,8 @@ public class CorgiActivity implements Serializable {
     private String refActivityAddress;
     private String refActivityTitle;
     private String videoUrl;
+    private String coverUrl;
+    private String videoId;
     private List<ActivityPic> pics;
     private List<String> topics;
 
