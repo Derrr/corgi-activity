@@ -27,7 +27,7 @@ import java.util.List;
  * @author tairanliu
  */
 @Slf4j
-@Service(interfaceClass = CorgiActivityService.class)
+@Service(interfaceClass = CorgiActivityFeedService.class)
 @Component
 public class CorgiActivityFeedServiceImpl implements CorgiActivityFeedService {
     @Autowired
