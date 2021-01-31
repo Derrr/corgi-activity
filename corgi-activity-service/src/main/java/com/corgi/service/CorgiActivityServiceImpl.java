@@ -92,7 +92,7 @@ public class CorgiActivityServiceImpl implements CorgiActivityService {
                 }
             }
         }
-        return convertActivity(mongoList);
+        return convertActivity(mongoList, false);
     }
 
     @Override
