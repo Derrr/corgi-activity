@@ -689,7 +689,12 @@ public class CorgiActivityDao {
     }
 
     public void updateActivityByColumn(String activityId, String column, String value) {
-        Update update = new Update().set(column, value);
+        Update update;
+        if ("likeCount".equals(column)) {
+            update = new Update().set(column, Long.valueOf(value));
+        } else {
+            update = new Update().set(column, value);
+        }
         Query query = new Query(Criteria.where("mongoId").is(new ObjectId(activityId)));
         mongoTemplate.updateFirst(query, update, ActivityMongo.class);
     }
