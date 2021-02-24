@@ -41,6 +41,7 @@ public class CorgiActivity implements Serializable {
     private String city;
     private String payType;
     private Integer budget;
+    private Long likeCount;
     private String createTime;
     private String updateTime;
     private String currentTime;

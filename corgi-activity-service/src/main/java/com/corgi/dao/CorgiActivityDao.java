@@ -448,7 +448,12 @@ public class CorgiActivityDao {
         List<Criteria> criteriaList = getCriteriaList(activity);
         List<ActivityMongo> mongos;
         if (criteriaList.size() > 0) {
-            Query query = getDescIdQuery(new Criteria().andOperator(criteriaList.toArray(new Criteria[0])), start, size);
+            Query query;
+            if (CorgiActivity.CAT_VIDEO.equals(activity.getCategory()) && activity.getLikeCount() != null && activity.getLikeCount() < 0) {
+                query = getDescLikeCountQuery(new Criteria().andOperator(criteriaList.toArray(new Criteria[0])), start, size);
+            } else {
+                query = getDescIdQuery(new Criteria().andOperator(criteriaList.toArray(new Criteria[0])), start, size);
+            }
             mongos = mongoTemplate.find(query, ActivityMongo.class);
         } else {
             mongos = mongoTemplate.find(new Query().with(Sort.by(Sort.Direction.DESC, "_id")).skip(start).limit(size), ActivityMongo.class);
@@ -557,7 +562,7 @@ public class CorgiActivityDao {
     public List<ActivityMongo> getAllActivityByUserIds(String loginUserId, List<String> userIds, String
             status, Integer start, Integer size) {
         userIds.add(loginUserId);
-        Criteria c = new Criteria().andOperator(Criteria.where("userId").in(userIds), Criteria.where("checkStatus").in("pass","not_good"));
+        Criteria c = new Criteria().andOperator(Criteria.where("userId").in(userIds), Criteria.where("checkStatus").in("pass", "not_good"));
         if (CorgiActivity.CREATED.equals(status)) {
             Criteria signUp = Criteria.where(ActivityMongo.SIGN_UP_TIME).gte(new SimpleDateFormat("yyyy/MM/dd HH:mm").format(new Date()));
             Criteria image = Criteria.where("category").is(CorgiActivity.CAT_IMAGE);
@@ -600,6 +605,11 @@ public class CorgiActivityDao {
 
     private Query getDescIdQuery(Criteria criteria, Integer start, Integer size) {
         Query query = new Query(criteria).with(Sort.by(Sort.Direction.DESC, "mongoId")).skip(start).limit(size);
+        return query;
+    }
+
+    private Query getDescLikeCountQuery(Criteria criteria, Integer start, Integer size) {
+        Query query = new Query(criteria).with(Sort.by(Sort.Direction.DESC, "likeCount")).skip(start).limit(size);
         return query;
     }
 
@@ -648,8 +658,8 @@ public class CorgiActivityDao {
                         criteriaList.add(Criteria.where(ActivityMongo.SIGN_UP_TIME).lte(value));
                     } else if (LIKE_FIELDS.contains(fieldName)) {
                         criteriaList.add(Criteria.where(field.getName()).regex("^.*" + value + ".*$"));
-                    } else if ("peopleCount".equals(fieldName)) {
-                        //peopleCount单独处理
+                    } else if ("likeCount".equals(fieldName)) {
+
                     } else if (int.class.equals(field.getType()) && (int) value != 0) {
                         criteriaList.add(Criteria.where(field.getName()).is(value));
                     } else if (!int.class.equals(field.getType())) {
