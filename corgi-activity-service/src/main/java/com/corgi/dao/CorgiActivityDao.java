@@ -304,9 +304,10 @@ public class CorgiActivityDao {
 //        }
 //
 //        criteriaList.add(Criteria.where("status").is(CorgiActivity.CREATED));
-//        if (!CorgiActivity.CAT_BUSINESS.equals(activityQuery.getCategory())) {
-//            criteriaList.add(Criteria.where("checkStatus").is("pass"));
-//        }
+        if (CorgiActivity.CAT_BUSINESS.equals(activityQuery.getCategory())
+                && !StringUtils.isEmpty(activityQuery.getStartTime())) {
+            criteriaList.add(Criteria.where("createTime").gte(activityQuery.getStartTime()));
+        }
 //
 //        if (!StringUtils.isEmpty(activityQuery.getCategory())) {
 //            criteriaList.add(Criteria.where("category").is(activityQuery.getCategory()));
@@ -381,9 +382,9 @@ public class CorgiActivityDao {
         if (activityQuery.getEndBudget() > 0) {
             criteriaList.add(Criteria.where("budget").lte(activityQuery.getEndBudget()));
         }
-        if (!StringUtils.isEmpty(activityQuery.getStartTime())) {
-            criteriaList.add(Criteria.where(ActivityMongo.SIGN_UP_TIME).gte(activityQuery.getStartTime()));
-        }
+//        if (!StringUtils.isEmpty(activityQuery.getStartTime())) {
+//            criteriaList.add(Criteria.where(ActivityMongo.SIGN_UP_TIME).gte(activityQuery.getStartTime()));
+//        }
         if (!StringUtils.isEmpty(activityQuery.getEndTime())) {
             criteriaList.add(Criteria.where(ActivityMongo.SIGN_UP_TIME).lte(activityQuery.getEndTime()));
         }
@@ -557,7 +558,7 @@ public class CorgiActivityDao {
     public List<ActivityMongo> getAllActivityByUserIds(String loginUserId, List<String> userIds, String
             status, Integer start, Integer size) {
         userIds.add(loginUserId);
-        Criteria c = new Criteria().andOperator(Criteria.where("userId").in(userIds), Criteria.where("checkStatus").in("pass","not_good"));
+        Criteria c = new Criteria().andOperator(Criteria.where("userId").in(userIds), Criteria.where("checkStatus").in("pass", "not_good"));
         if (CorgiActivity.CREATED.equals(status)) {
             Criteria signUp = Criteria.where(ActivityMongo.SIGN_UP_TIME).gte(new SimpleDateFormat("yyyy/MM/dd HH:mm").format(new Date()));
             Criteria image = Criteria.where("category").is(CorgiActivity.CAT_IMAGE);
