@@ -21,6 +21,8 @@ public class CorgiActivity implements Serializable {
     public static final String CAT_BUSINESS = "business";
     public static final String CAT_ATTENDANCE = "attendance";
     public static final String CAT_VIDEO = "video";
+    public static final String CAT_TEXT = "text";
+    public static final String CAT_USER = "user";
     public static final String CAT_GOODS = "goods";
 
     private String id;
