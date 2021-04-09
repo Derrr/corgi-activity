@@ -215,7 +215,7 @@ public class CorgiActivityServiceImpl implements CorgiActivityService {
             for (ActivityMongo mongo : activityMongoList) {
                 CorgiActivity activity = mongo.getActivity();
                 List<ActivityPic> activityPics = corgiPicService.getActivityPic(activity.getId());
-                if (checkPic && CollectionUtils.isEmpty(activityPics)) {
+                if (checkPic && CorgiActivity.CAT_IMAGE.equals(mongo.getCategory()) && CollectionUtils.isEmpty(activityPics)) {
                     continue;
                 }
                 activity.setPics(activityPics);
