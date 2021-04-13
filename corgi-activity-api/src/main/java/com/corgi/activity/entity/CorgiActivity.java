@@ -1,5 +1,6 @@
 package com.corgi.activity.entity;
 
+import com.corgi.entity.CorgiTopic;
 import lombok.Data;
 
 import java.io.Serializable;
@@ -61,6 +62,7 @@ public class CorgiActivity implements Serializable {
     private String videoId;
     private List<ActivityPic> pics;
     private List<String> topics;
+    private List<CorgiTopic> topicDetails;
 
 
     public String getStatus() {

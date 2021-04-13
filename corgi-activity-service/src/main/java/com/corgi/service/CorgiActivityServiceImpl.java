@@ -220,7 +220,7 @@ public class CorgiActivityServiceImpl implements CorgiActivityService {
                 }
                 activity.setPics(activityPics);
                 corgiActivities.add(activity);
-                activity.setTopics(corgiToolService.getActivityTopic(activity.getId()));
+                activity.setTopicDetails(corgiToolService.getActivityTopicDetails(activity.getId()));
                 if (StringUtils.isNotEmpty(activity.getRefActivityId()) && StringUtils.isEmpty(activity.getRefActivityTitle())) {
                     String activityId = activity.getRefActivityId();
                     ActivityMongo refMongo = corgiActivityDao.getActivityById(activityId);
