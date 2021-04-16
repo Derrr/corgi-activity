@@ -37,6 +37,7 @@ public class CorgiActivity implements Serializable {
     private String checkActivityType;
     private String userId;
     private String address;
+    private String addressDetail;
     private String signUpTime;
     private int peopleCount;
     private double lat;
