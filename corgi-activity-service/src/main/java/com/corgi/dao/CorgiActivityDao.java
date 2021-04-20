@@ -563,13 +563,14 @@ public class CorgiActivityDao {
     public List<ActivityMongo> getAllActivityByUserIds(String loginUserId, List<String> userIds, String
             status, Integer start, Integer size) {
         userIds.add(loginUserId);
-        Criteria c = new Criteria().andOperator(Criteria.where("userId").in(userIds), Criteria.where("checkStatus").in("pass", "not_good"));
+        Criteria c = new Criteria().andOperator(Criteria.where("userId").in(userIds), Criteria.where("checkStatus").in("pass"));
         if (CorgiActivity.CREATED.equals(status)) {
-            Criteria signUp = Criteria.where(ActivityMongo.SIGN_UP_TIME).gte(new SimpleDateFormat("yyyy/MM/dd HH:mm").format(new Date()));
             Criteria image = Criteria.where("category").is(CorgiActivity.CAT_IMAGE);
+            Criteria video = Criteria.where("category").is(CorgiActivity.CAT_VIDEO);
+            Criteria text = Criteria.where("category").is(CorgiActivity.CAT_TEXT);
             Criteria business = Criteria.where("category").is(CorgiActivity.CAT_BUSINESS);
             Criteria attendance = Criteria.where("category").is(CorgiActivity.CAT_ATTENDANCE);
-            c = new Criteria().andOperator(c, new Criteria().orOperator(signUp, image, business, attendance), Criteria.where("status").ne(CorgiActivity.DELETED));
+            c = new Criteria().andOperator(c, new Criteria().orOperator(image, business, attendance, text, video), Criteria.where("status").ne(CorgiActivity.DELETED));
         } else if (CorgiActivity.ENDED.equals(status)) {
             c = new Criteria().andOperator(c, Criteria.where(ActivityMongo.SIGN_UP_TIME).lte(new SimpleDateFormat("yyyy/MM/dd HH:mm").format(new Date())));
         } else {
