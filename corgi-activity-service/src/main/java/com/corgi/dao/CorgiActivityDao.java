@@ -424,11 +424,12 @@ public class CorgiActivityDao {
     public List<ActivityMongo> getAllRunningActivities(String userId, Integer start, Integer size) {
         Criteria userCriteria = Criteria.where("userId").is(userId);
         Criteria statusCriteria = Criteria.where("status").ne(CorgiActivity.DELETED);
-        Criteria signUpCriteria = Criteria.where(ActivityMongo.SIGN_UP_TIME).gte(new SimpleDateFormat("yyyy/MM/dd HH:mm").format(new Date()));
         Criteria categoryCriteria1 = Criteria.where("category").is(CorgiActivity.CAT_IMAGE);
         Criteria categoryCriteria2 = Criteria.where("category").is(CorgiActivity.CAT_BUSINESS);
         Criteria categoryCriteria3 = Criteria.where("category").is(CorgiActivity.CAT_ATTENDANCE);
-        Criteria orCriteria = new Criteria().orOperator(signUpCriteria, categoryCriteria1, categoryCriteria2, categoryCriteria3);
+        Criteria categoryCriteria4 = Criteria.where("category").is(CorgiActivity.CAT_VIDEO);
+
+        Criteria orCriteria = new Criteria().orOperator(categoryCriteria1, categoryCriteria2, categoryCriteria3, categoryCriteria4);
         Query query = getDescIdQuery(new Criteria().andOperator(userCriteria, statusCriteria, orCriteria), start, size);
         List<ActivityMongo> corgiActivities = mongoTemplate.find(query, ActivityMongo.class);
         return corgiActivities;
