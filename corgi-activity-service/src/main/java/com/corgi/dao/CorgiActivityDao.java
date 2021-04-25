@@ -554,6 +554,9 @@ public class CorgiActivityDao {
             c = new Criteria().andOperator(c, signUp, Criteria.where("status").ne(CorgiActivity.DELETED));
         } else if (CorgiActivity.ENDED.equals(status)) {
             c = new Criteria().andOperator(c, Criteria.where(ActivityMongo.SIGN_UP_TIME).lte(new SimpleDateFormat("yyyy/MM/dd HH:mm").format(new Date())));
+        } else if (CorgiActivity.CAT_IMAGE.equals(status)) {
+            Criteria image = Criteria.where("category").is(CorgiActivity.CAT_IMAGE);
+            c = new Criteria().andOperator(c, image, Criteria.where("status").ne(CorgiActivity.DELETED));
         } else {
             c = new Criteria().andOperator(c, Criteria.where("status").ne(CorgiActivity.DELETED));
         }
@@ -574,6 +577,9 @@ public class CorgiActivityDao {
             c = new Criteria().andOperator(c, new Criteria().orOperator(image, business, attendance, text, video), Criteria.where("status").ne(CorgiActivity.DELETED));
         } else if (CorgiActivity.ENDED.equals(status)) {
             c = new Criteria().andOperator(c, Criteria.where(ActivityMongo.SIGN_UP_TIME).lte(new SimpleDateFormat("yyyy/MM/dd HH:mm").format(new Date())));
+        } else if (CorgiActivity.CAT_IMAGE.equals(status)) {
+            Criteria image = Criteria.where("category").is(CorgiActivity.CAT_IMAGE);
+            c = new Criteria().andOperator(c, new Criteria().orOperator(image), Criteria.where("status").ne(CorgiActivity.DELETED));
         } else {
             c = new Criteria().andOperator(c, Criteria.where("status").ne(CorgiActivity.DELETED));
         }
