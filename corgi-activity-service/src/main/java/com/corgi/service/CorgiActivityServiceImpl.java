@@ -58,6 +58,12 @@ public class CorgiActivityServiceImpl implements CorgiActivityService {
     }
 
     @Override
+    public List<CorgiActivity> getCityCorgiActivityByRange(double lng, double lat, double range, ActivityQuery activityQuery) {
+        List<ActivityMongo> find = corgiActivityDao.getCityNearActivities(lng, lat, range, activityQuery);
+        return convertActivity(find, false);
+    }
+
+    @Override
     public List<CorgiActivity> getCorgiActivityByRange(double lng, double lat, double range, ActivityQuery activityQuery) {
         List<ActivityMongo> find = corgiActivityDao.getNearActivities(lng, lat, range, activityQuery);
         return convertActivity(find, false);

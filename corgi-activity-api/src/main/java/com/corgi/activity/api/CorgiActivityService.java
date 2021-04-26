@@ -13,6 +13,8 @@ import java.util.List;
 public interface CorgiActivityService {
     CorgiActivity addCorgiActivity(CorgiActivity corgiActivity);
 
+    List<CorgiActivity> getCityCorgiActivityByRange(double lng, double lat, double range, ActivityQuery activityQuery);
+
     List<CorgiActivity> getCorgiActivityByRange(double lng, double lat, double range, ActivityQuery activityQuery);
 
     List<CorgiActivity> getUserRunningActivity(String userId, Integer page, Integer size);

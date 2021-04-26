@@ -282,6 +282,44 @@ public class CorgiActivityDao {
         return mongoTemplate.find(query, ActivityMongo.class);
     }
 
+    public List<ActivityMongo> getCityNearActivities(double lng, double lat, double range, ActivityQuery activityQuery) {
+        List<Criteria> criteriaList = new ArrayList<>();
+        Criteria distanceCriteria = Criteria.where("location").nearSphere(new Point(lng, lat));
+
+        if (range > 0) {
+            distanceCriteria.maxDistance(range / RADIUS);
+        }
+        criteriaList.add(distanceCriteria);
+        Criteria typeCriteria = new Criteria().orOperator(Criteria.where("refActivityId").exists(true)
+                , Criteria.where("category").in(CorgiActivity.CAT_BUSINESS, CorgiActivity.CAT_ACTIVITY));
+        criteriaList.add(typeCriteria);
+
+        criteriaList.add(Criteria.where("status").is(CorgiActivity.CREATED));
+
+        criteriaList.add(new Criteria().orOperator(Criteria.where("checkStatus").exists(false), Criteria.where("checkStatus").ne("fail")));
+        if (CorgiActivity.CAT_BUSINESS.equals(activityQuery.getCategory())
+                && !StringUtils.isEmpty(activityQuery.getStartTime())) {
+            criteriaList.add(Criteria.where("createTime").gte(activityQuery.getStartTime()));
+        }
+
+        Query query = getQueryByCriteria(activityQuery, criteriaList);
+        List<ActivityMongo> corgiActivities = mongoTemplate.find(query, ActivityMongo.class);
+        log.info("near size... {} ", corgiActivities.size());
+        if (CollectionUtils.isNotEmpty(corgiActivities) && !StringUtils.isEmpty(activityQuery.getUserId())) {
+            List<String> userIds = new ArrayList<>();
+            List<String> barIds = new ArrayList<>();
+            for (ActivityMongo mongo : corgiActivities) {
+                if (CorgiActivity.CAT_BUSINESS.equals(mongo.getCategory())) {
+                    barIds.add(mongo.getUserId());
+                } else {
+                    userIds.add(mongo.getUserId());
+                }
+            }
+        }
+        log.info("near final size... {} ", corgiActivities.size());
+        return corgiActivities;
+    }
+
     public List<ActivityMongo> getNearActivities(double lng, double lat, double range, ActivityQuery activityQuery) {
         List<Criteria> criteriaList = new ArrayList<>();
         Criteria distanceCriteria = Criteria.where("location").nearSphere(new Point(lng, lat));
