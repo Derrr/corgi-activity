@@ -290,8 +290,7 @@ public class CorgiActivityDao {
             distanceCriteria.maxDistance(range / RADIUS);
         }
         criteriaList.add(distanceCriteria);
-        Criteria typeCriteria = new Criteria().orOperator(Criteria.where("refActivityId").exists(true)
-                , Criteria.where("category").in(CorgiActivity.CAT_BUSINESS, CorgiActivity.CAT_ACTIVITY));
+        Criteria typeCriteria = Criteria.where("category").is(CorgiActivity.CAT_BUSINESS);
         criteriaList.add(typeCriteria);
 
         criteriaList.add(Criteria.where("status").is(CorgiActivity.CREATED));
@@ -329,18 +328,18 @@ public class CorgiActivityDao {
                     userIds.add(mongo.getUserId());
                 }
             }
-            List<String> resultUserIds = corgiUserService.filterUser(userIds, activityQuery);
-            if (CollectionUtils.isEmpty(resultUserIds) && CollectionUtils.isEmpty(barIds)) {
-                return new ArrayList<>();
-            }
-            Iterator<ActivityMongo> iterator = corgiActivities.iterator();
-            while (iterator.hasNext()) {
-                ActivityMongo mongo = iterator.next();
-                if (CorgiActivity.CAT_BUSINESS.equals(mongo.getCategory()) || resultUserIds.contains(mongo.getUserId())) {
-                    continue;
-                }
-                iterator.remove();
-            }
+//            List<String> resultUserIds = corgiUserService.filterUser(userIds, activityQuery);
+//            if (CollectionUtils.isEmpty(resultUserIds) && CollectionUtils.isEmpty(barIds)) {
+//                return new ArrayList<>();
+//            }
+//            Iterator<ActivityMongo> iterator = corgiActivities.iterator();
+//            while (iterator.hasNext()) {
+//                ActivityMongo mongo = iterator.next();
+//                if (CorgiActivity.CAT_BUSINESS.equals(mongo.getCategory()) || resultUserIds.contains(mongo.getUserId())) {
+//                    continue;
+//                }
+//                iterator.remove();
+//            }
         }
         log.info("near final size... {} ", corgiActivities.size());
         return corgiActivities;
