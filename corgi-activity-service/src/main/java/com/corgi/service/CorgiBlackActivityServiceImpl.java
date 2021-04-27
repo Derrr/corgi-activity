@@ -52,7 +52,7 @@ public class CorgiBlackActivityServiceImpl implements CorgiBlackActivityService 
     @Override
     public boolean checkActivity(String userId, String blackId, String activityId) {
         ActivityMongo activityMongo = corgiActivityDao.getActivityById(activityId);
-        if (activityMongo != null && activityMongo.getUserId().equals(blackId)) {
+        if (activityMongo != null && blackId.equals(activityMongo.getUserId())) {
             if (activityMongo.getStatus().equals(CorgiActivity.FULL)) {
                 List<UserProfile> userProfiles = corgiUserActivityService.getUsers(activityId, null, "");
                 int count = 0;
