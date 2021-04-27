@@ -352,8 +352,26 @@ public class CorgiActivityDao {
 //        if (CorgiActivity.CAT_ACTIVITY.equals(activityQuery.getCategory())) {
 //            criteriaList.add(Criteria.where(ActivityMongo.SIGN_UP_TIME).gte(new SimpleDateFormat("yyyy/MM/dd HH:mm").format(new Date())));
 //        }
-
-        Query query = getQueryByCriteria(activityQuery, criteriaList);
+        if (!StringUtils.isEmpty(activityQuery.getNotCity())) {
+            criteriaList.add(Criteria.where("city").ne(activityQuery.getCity()));
+        } else if (!StringUtils.isEmpty(activityQuery.getCity())) {
+            criteriaList.add(Criteria.where("city").regex(activityQuery.getCity() + ".*"));
+        }
+        int skip = 0;
+        int size = 1000;
+        if (activityQuery.getPageSize() != null && activityQuery.getPageSize() > 0) {
+            size = activityQuery.getPageSize();
+        }
+        if (activityQuery.getPage() != null && activityQuery.getPage() > 0) {
+            skip = (activityQuery.getPage() - 1) * size;
+        } else if (activityQuery.getOffset() != null && activityQuery.getOffset() > 0) {
+            skip = activityQuery.getOffset();
+        }
+        Criteria queryCriteria = new Criteria().andOperator(criteriaList.toArray(new Criteria[0]));
+        Query query = new Query(queryCriteria).skip(skip).limit(size);
+        if (ActivityQuery.SORT_TIME.equals(activityQuery.getSort())) {
+            query.with(Sort.by(Sort.Direction.DESC, "createTime"));
+        }
         List<ActivityMongo> corgiActivities = mongoTemplate.find(query, ActivityMongo.class);
         log.info("near size... {} ", corgiActivities.size());
         if (CollectionUtils.isNotEmpty(corgiActivities) && !StringUtils.isEmpty(activityQuery.getUserId())) {
