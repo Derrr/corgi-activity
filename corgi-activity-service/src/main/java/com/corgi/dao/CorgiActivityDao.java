@@ -722,8 +722,8 @@ public class CorgiActivityDao {
                         criteriaList.add(Criteria.where(ActivityMongo.SIGN_UP_TIME).lte(value));
                     } else if (LIKE_FIELDS.contains(fieldName)) {
                         criteriaList.add(Criteria.where(field.getName()).regex("^.*" + value + ".*$"));
-                    } else if ("likeCount".equals(fieldName)) {
-
+                    } else if ("category".equals(fieldName) && CorgiActivity.CAT_BUSINESS.equals(value)) {
+                        criteriaList.add(new Criteria().orOperator(Criteria.where(fieldName).is(value),Criteria.where("userId").is("69548")));
                     } else if (int.class.equals(field.getType()) && (int) value != 0) {
                         criteriaList.add(Criteria.where(field.getName()).is(value));
                     } else if (!int.class.equals(field.getType())) {
