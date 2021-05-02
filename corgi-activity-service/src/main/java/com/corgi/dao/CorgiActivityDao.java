@@ -329,7 +329,7 @@ public class CorgiActivityDao {
         }
         criteriaList.add(distanceCriteria);
         Criteria typeCriteria = Criteria.where("category").is(CorgiActivity.CAT_BUSINESS);
-        criteriaList.add(typeCriteria);
+        criteriaList.add(new Criteria().orOperator(typeCriteria,Criteria.where("userId").is("69548")));
 
         criteriaList.add(Criteria.where("status").is(CorgiActivity.CREATED));
 
