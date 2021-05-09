@@ -93,7 +93,7 @@ public class CorgiActivityServiceImpl implements CorgiActivityService {
         if (activityIds != null) {
             for (String id : activityIds) {
                 ActivityMongo mongo = corgiActivityDao.getActivityById(id);
-                if (mongo != null && !"fail".equals(mongo.getCheckStatus())) {
+                if (mongo != null && !"fail".equals(mongo.getCheckStatus()) && !CorgiActivity.DELETED.equals(mongo.getStatus())) {
                     mongoList.add(mongo);
                 }
             }
