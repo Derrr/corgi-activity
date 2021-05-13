@@ -168,7 +168,7 @@ public class CorgiActivityDao {
         if (activityQuery.getTPage() == null) {
             activityQuery.setTPage(0);
         }
-        Criteria categoryCriteria = Criteria.where("category").is(activityQuery.getCategory());
+        Criteria categoryCriteria = Criteria.where("category").in(CorgiActivity.CAT_IMAGE,CorgiActivity.CAT_TEXT,CorgiActivity.CAT_VIDEO);
         Criteria statusCriteria = Criteria.where("status").ne(CorgiActivity.DELETED);
         Criteria checkCriteria = Criteria.where("checkStatus").is("pass");
         Criteria topicCriteria = Criteria.where("topics").ne("-1");
