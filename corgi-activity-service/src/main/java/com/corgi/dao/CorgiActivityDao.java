@@ -589,15 +589,15 @@ public class CorgiActivityDao {
             Criteria criteriaStatus = Criteria.where("status").is(status);
             criterias.add(criteriaStatus);
         }
-        if (!StringUtils.isEmpty(activity.getStartTime())) {
-            Criteria startTime = Criteria.where("startTime").lte(activity.getStartTime());
-            criterias.add(startTime);
-            Criteria endTime = Criteria.where("endTime").gte(activity.getStartTime());
-            criterias.add(endTime);
-        } else if (!StringUtils.isEmpty(activity.getEndTime())) {
-            Criteria endTime = Criteria.where("startTime").gte(activity.getEndTime());
-            criterias.add(endTime);
-        }
+//        if (!StringUtils.isEmpty(activity.getStartTime())) {
+//            Criteria startTime = Criteria.where("startTime").lte(activity.getStartTime());
+//            criterias.add(startTime);
+//            Criteria endTime = Criteria.where("endTime").gte(activity.getStartTime());
+//            criterias.add(endTime);
+//        } else if (!StringUtils.isEmpty(activity.getEndTime())) {
+//            Criteria endTime = Criteria.where("startTime").gte(activity.getEndTime());
+//            criterias.add(endTime);
+//        }
 
         criteria = new Criteria().andOperator(criterias.toArray(new Criteria[0]));
         return mongoTemplate.find(new Query(criteria), ActivityMongo.class);
