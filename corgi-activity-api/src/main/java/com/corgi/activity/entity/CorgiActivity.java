@@ -43,6 +43,8 @@ public class CorgiActivity implements Serializable {
     private double lat;
     private double lng;
     private String city;
+    private Long height;
+    private Long width;
     private String payType;
     private Integer budget;
     private Long likeCount;
