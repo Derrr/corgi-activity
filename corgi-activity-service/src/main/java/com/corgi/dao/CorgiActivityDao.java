@@ -742,17 +742,17 @@ public class CorgiActivityDao {
 
     public void deleteActivityByUserId(String userId) {
         Query query = new Query(Criteria.where("userId").is(userId));
-        List<ActivityMongo> activityMongoList = mongoTemplate.findAllAndRemove(query, ActivityMongo.class);
+        List<ActivityMongo> activityMongoList = mongoTemplate.find(query, ActivityMongo.class);
         for (ActivityMongo mongo : activityMongoList) {
+            this.deleteActivityById(mongo.getMongoId().toString());
             corgiFavorActivityService.deleteByActivityId(mongo.getMongoId().toString());
             corgiUserActivityService.deleteActivityCreator(mongo.getMongoId().toString());
         }
     }
 
     public void removeActivity(String activityId) {
-        Query query = new Query(Criteria.where("mongoId").is(new ObjectId(activityId)));
         corgiFavorActivityService.deleteByActivityId(activityId);
-        mongoTemplate.remove(query, ActivityMongo.class);
+        this.deleteActivityById(activityId);
     }
 
     public void updateActivityByColumn(String activityId, String column, String value) {
