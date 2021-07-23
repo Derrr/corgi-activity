@@ -59,7 +59,7 @@ public class CorgiActivityDao {
 
     //private SimpleDateFormat created_sdf = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
 
-    private static List<String> LIKE_FIELDS = Arrays.asList("title", "content", "address");
+    private static List<String> LIKE_FIELDS = Arrays.asList("title", "content", "address", "coverUrl");
 
     public ActivityMongo getActivityById(String activityId) {
         ActivityMongo mongo = new ActivityMongo();
@@ -168,7 +168,7 @@ public class CorgiActivityDao {
         if (activityQuery.getTPage() == null) {
             activityQuery.setTPage(0);
         }
-        Criteria categoryCriteria = Criteria.where("category").in(CorgiActivity.CAT_IMAGE,CorgiActivity.CAT_TEXT,CorgiActivity.CAT_VIDEO);
+        Criteria categoryCriteria = Criteria.where("category").in(CorgiActivity.CAT_IMAGE, CorgiActivity.CAT_TEXT, CorgiActivity.CAT_VIDEO);
         Criteria statusCriteria = Criteria.where("status").ne(CorgiActivity.DELETED);
         Criteria checkCriteria = Criteria.where("checkStatus").is("pass");
         Criteria topicCriteria = Criteria.where("topics").ne("-1");
@@ -329,7 +329,7 @@ public class CorgiActivityDao {
         }
         criteriaList.add(distanceCriteria);
         Criteria typeCriteria = Criteria.where("category").is(CorgiActivity.CAT_BUSINESS);
-        Criteria corgiCriteria = new Criteria().andOperator(Criteria.where("userId").is("69548"),Criteria.where("category").is(CorgiActivity.CAT_ACTIVITY));
+        Criteria corgiCriteria = new Criteria().andOperator(Criteria.where("userId").is("69548"), Criteria.where("category").is(CorgiActivity.CAT_ACTIVITY));
         criteriaList.add(new Criteria().orOperator(typeCriteria, corgiCriteria));
 
         criteriaList.add(Criteria.where("status").is(CorgiActivity.CREATED));
@@ -725,8 +725,8 @@ public class CorgiActivityDao {
                     } else if (LIKE_FIELDS.contains(fieldName)) {
                         criteriaList.add(Criteria.where(field.getName()).regex("^.*" + value + ".*$"));
                     } else if ("category".equals(fieldName) && CorgiActivity.CAT_BUSINESS.equals(value)) {
-                        Criteria corgiCriteria = new Criteria().andOperator(Criteria.where("userId").is("69548"),Criteria.where("category").is(CorgiActivity.CAT_ACTIVITY));
-                        criteriaList.add(new Criteria().orOperator(Criteria.where(fieldName).is(value),corgiCriteria ));
+                        Criteria corgiCriteria = new Criteria().andOperator(Criteria.where("userId").is("69548"), Criteria.where("category").is(CorgiActivity.CAT_ACTIVITY));
+                        criteriaList.add(new Criteria().orOperator(Criteria.where(fieldName).is(value), corgiCriteria));
                     } else if (int.class.equals(field.getType()) && (int) value != 0) {
                         criteriaList.add(Criteria.where(field.getName()).is(value));
                     } else if (!int.class.equals(field.getType())) {
