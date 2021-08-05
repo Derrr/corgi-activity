@@ -16,6 +16,7 @@ import com.corgi.user.api.CorgiUserActivityService;
 import lombok.extern.slf4j.Slf4j;
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
@@ -208,6 +209,12 @@ public class CorgiActivityServiceImpl implements CorgiActivityService {
     @Override
     public List<CorgiActivity> getCityRecommendActivity(String city, ActivityQuery activityQuery) {
         return convertActivity(corgiActivityDao.getCityRecommendActivity(city));
+    }
+
+    @Override
+    public List<CorgiActivity> getFeedActivity(CorgiActivity corgiActivity, Integer size) {
+        Criteria cityCri = Criteria.where("city").is(corgiActivity.getCity());
+        return convertActivity(corgiActivityDao.getActivityByFeed(corgiActivity.getId(), cityCri, size));
     }
 
     @Override

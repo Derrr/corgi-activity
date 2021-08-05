@@ -603,6 +603,15 @@ public class CorgiActivityDao {
         return mongoTemplate.find(new Query(criteria), ActivityMongo.class);
     }
 
+    public List<ActivityMongo> getActivityByFeed(String mongoId, Criteria criteria, Integer size) {
+        Query query = new Query().addCriteria(criteria).limit(size).with(Sort.by(Sort.Direction.DESC, "mongoId"));
+        if (!StringUtils.isEmpty(mongoId)) {
+            Criteria idCri = Criteria.where("_id").lt(new ObjectId(mongoId));
+            query.addCriteria(idCri);
+        }
+        return mongoTemplate.find(query,ActivityMongo.class);
+    }
+
     public List<ActivityMongo> getActivityByUserIds(List<String> userIds, String status, Integer start, Integer
             size) {
         Criteria c = Criteria.where("userId").in(userIds);
@@ -612,7 +621,7 @@ public class CorgiActivityDao {
         } else if (CorgiActivity.ENDED.equals(status)) {
             c = new Criteria().andOperator(c, Criteria.where(ActivityMongo.SIGN_UP_TIME).lte(new SimpleDateFormat("yyyy/MM/dd HH:mm").format(new Date())));
         } else if (CorgiActivity.CAT_IMAGE.equals(status)) {
-            Criteria image = Criteria.where("category").is(CorgiActivity.CAT_IMAGE);
+            Criteria image = Criteria.where("category").in(CorgiActivity.CAT_IMAGE, CorgiActivity.CAT_VIDEO, CorgiActivity.CAT_TEXT);
             c = new Criteria().andOperator(c, image, Criteria.where("status").ne(CorgiActivity.DELETED));
         } else {
             c = new Criteria().andOperator(c, Criteria.where("status").ne(CorgiActivity.DELETED));
