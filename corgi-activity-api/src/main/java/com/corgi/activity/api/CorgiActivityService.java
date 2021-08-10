@@ -63,7 +63,7 @@ public interface CorgiActivityService {
 
     List<CorgiActivity> getCityRecommendActivity(String city, ActivityQuery activityQuery);
 
-    List<CorgiActivity> getFeedActivity(CorgiActivity corgiActivity, Integer size);
+    List<CorgiActivity> getFeedActivity(ActivityQuery query);
 
     void refreshActivity();
 }
