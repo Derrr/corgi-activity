@@ -614,7 +614,7 @@ public class CorgiActivityDao {
 
     public List<ActivityMongo> getActivityByUserIds(List<String> userIds, String status, Integer start, Integer
             size) {
-        Criteria c = Criteria.where("userId").in(userIds);
+        Criteria c = new Criteria().andOperator(Criteria.where("userId").in(userIds),Criteria.where("checkStatus").ne("fail"));
         if (CorgiActivity.CREATED.equals(status)) {
             Criteria signUp = Criteria.where(ActivityMongo.SIGN_UP_TIME).gte(new SimpleDateFormat("yyyy/MM/dd HH:mm").format(new Date()));
             c = new Criteria().andOperator(c, signUp, Criteria.where("status").ne(CorgiActivity.DELETED));
@@ -622,6 +622,9 @@ public class CorgiActivityDao {
             c = new Criteria().andOperator(c, Criteria.where(ActivityMongo.SIGN_UP_TIME).lte(new SimpleDateFormat("yyyy/MM/dd HH:mm").format(new Date())));
         } else if (CorgiActivity.CAT_IMAGE.equals(status)) {
             Criteria image = Criteria.where("category").in(CorgiActivity.CAT_IMAGE, CorgiActivity.CAT_VIDEO, CorgiActivity.CAT_TEXT);
+            c = new Criteria().andOperator(c, image, Criteria.where("status").ne(CorgiActivity.DELETED));
+        }else if (CorgiActivity.CAT_VIDEO.equals(status)) {
+            Criteria image = Criteria.where("category").in(CorgiActivity.CAT_VIDEO);
             c = new Criteria().andOperator(c, image, Criteria.where("status").ne(CorgiActivity.DELETED));
         } else {
             c = new Criteria().andOperator(c, Criteria.where("status").ne(CorgiActivity.DELETED));
