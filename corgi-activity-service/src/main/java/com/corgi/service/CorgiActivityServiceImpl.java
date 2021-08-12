@@ -213,10 +213,21 @@ public class CorgiActivityServiceImpl implements CorgiActivityService {
 
     @Override
     public List<CorgiActivity> getFeedActivity(ActivityQuery query) {
-        Criteria cityCri = Criteria.where("city").is(query.getCity());
         Criteria checkStatus = Criteria.where("checkStatus").ne("fail");
         Criteria StatusCri = Criteria.where("status").ne(CorgiActivity.DELETED);
-        Criteria result = new Criteria().andOperator(cityCri, checkStatus, StatusCri);
+        Criteria result = new Criteria().andOperator(checkStatus, StatusCri);
+        if (StringUtils.isNotEmpty(query.getUserId())) {
+            Criteria userCri = Criteria.where("userId").is(query.getUserId());
+            result.andOperator(userCri);
+        }
+        if (StringUtils.isNotEmpty(query.getCity())) {
+            Criteria cityCri = Criteria.where("city").is(query.getCity());
+            result.andOperator(cityCri);
+        }
+        if (StringUtils.isNotEmpty(query.getCategory())) {
+            Criteria categoryCri = Criteria.where("cateogyr").is(query.getCategory());
+            result.andOperator(categoryCri);
+        }
         return convertActivity(corgiActivityDao.getActivityByFeed(query.getActivityId(), result, query.getPageSize()));
     }
 
