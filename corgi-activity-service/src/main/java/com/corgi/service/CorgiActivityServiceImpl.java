@@ -224,10 +224,11 @@ public class CorgiActivityServiceImpl implements CorgiActivityService {
             Criteria cityCri = Criteria.where("city").is(query.getCity());
             result.andOperator(cityCri);
         }
+        Criteria categoryCri = Criteria.where("category").in(CorgiActivity.CAT_TEXT, CorgiActivity.CAT_VIDEO, CorgiActivity.CAT_IMAGE);
         if (StringUtils.isNotEmpty(query.getCategory())) {
-            Criteria categoryCri = Criteria.where("cateogyr").is(query.getCategory());
-            result.andOperator(categoryCri);
+            categoryCri = Criteria.where("category").is(query.getCategory());
         }
+        result.andOperator(categoryCri);
         return convertActivity(corgiActivityDao.getActivityByFeed(query.getActivityId(), result, query.getPageSize()));
     }
 
