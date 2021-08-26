@@ -213,23 +213,28 @@ public class CorgiActivityServiceImpl implements CorgiActivityService {
 
     @Override
     public List<CorgiActivity> getFeedActivity(ActivityQuery query) {
+        List<Criteria> resultList = new ArrayList<>();
         Criteria checkStatus = Criteria.where("checkStatus").ne("fail");
+        resultList.add(checkStatus);
         Criteria StatusCri = Criteria.where("status").ne(CorgiActivity.DELETED);
-        Criteria result = new Criteria().andOperator(checkStatus).andOperator(StatusCri);
+        resultList.add(StatusCri);
         if (StringUtils.isNotEmpty(query.getUserId())) {
             Criteria userCri = Criteria.where("userId").is(query.getUserId());
-            result.andOperator(userCri);
+            resultList.add(userCri);
         }
         if (StringUtils.isNotEmpty(query.getCity())) {
             Criteria cityCri = Criteria.where("city").is(query.getCity());
-            result.andOperator(cityCri);
+            resultList.add(cityCri);
         }
         Criteria categoryCri = Criteria.where("category").in(CorgiActivity.CAT_TEXT, CorgiActivity.CAT_VIDEO, CorgiActivity.CAT_IMAGE);
         if (StringUtils.isNotEmpty(query.getCategory())) {
             categoryCri = Criteria.where("category").is(query.getCategory());
         }
-        result.andOperator(categoryCri);
-        return convertActivity(corgiActivityDao.getActivityByFeed(query.getActivityId(), result, query.getPageSize()));
+        resultList.add(categoryCri);
+        resultList.toArray();
+        Criteria[] a = new Criteria[resultList.size()];
+        resultList.toArray(a);
+        return convertActivity(corgiActivityDao.getActivityByFeed(query.getActivityId(), new Criteria().andOperator(a), query.getPageSize()));
     }
 
     @Override
