@@ -215,7 +215,7 @@ public class CorgiActivityServiceImpl implements CorgiActivityService {
     public List<CorgiActivity> getFeedActivity(ActivityQuery query) {
         Criteria checkStatus = Criteria.where("checkStatus").ne("fail");
         Criteria StatusCri = Criteria.where("status").ne(CorgiActivity.DELETED);
-        Criteria result = new Criteria().andOperator(checkStatus, StatusCri);
+        Criteria result = new Criteria().andOperator(checkStatus).andOperator(StatusCri);
         if (StringUtils.isNotEmpty(query.getUserId())) {
             Criteria userCri = Criteria.where("userId").is(query.getUserId());
             result.andOperator(userCri);
