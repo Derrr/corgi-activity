@@ -66,7 +66,7 @@ public class CorgiActivityDao {
         query.addCriteria(Criteria.where("category").in("video", "text", "image"))
                 .addCriteria(Criteria.where("checkStatus").ne("fail"))
                 .addCriteria(Criteria.where("status").ne(CorgiActivity.DELETED));
-        if (StringUtils.isEmpty(activityId)) {
+        if (!StringUtils.isEmpty(activityId)) {
             query.addCriteria(Criteria.where("_id").lt(new ObjectId(activityId)));
         }
         return mongoTemplate.find(query, ActivityMongo.class);
