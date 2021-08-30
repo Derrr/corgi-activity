@@ -62,13 +62,14 @@ public class CorgiActivityDao {
     private static List<String> LIKE_FIELDS = Arrays.asList("title", "content", "address", "coverUrl");
 
     public List<ActivityMongo> getBarAppraisedActivityId(String barId, String activityId, Integer size) {
-        Criteria criteria = new Criteria();
-        criteria.andOperator(Criteria.where("barId").is(barId),
-                Criteria.where("_id").lt(new ObjectId(activityId)),
-                Criteria.where("category").in("video", "text", "image"),
-                Criteria.where("checkStatus").ne("fail"),
-                Criteria.where("status").ne(CorgiActivity.DELETED));
-        return mongoTemplate.find(getDescIdQuery(criteria, 0, size), ActivityMongo.class);
+        Query query = getDescIdQuery(Criteria.where("barId").is(barId), 0, size);
+        query.addCriteria(Criteria.where("category").in("video", "text", "image"))
+                .addCriteria(Criteria.where("checkStatus").ne("fail"))
+                .addCriteria(Criteria.where("status").ne(CorgiActivity.DELETED));
+        if (StringUtils.isEmpty(activityId)) {
+            query.addCriteria(Criteria.where("_id").lt(new ObjectId(activityId)));
+        }
+        return mongoTemplate.find(query, ActivityMongo.class);
     }
 
     public ActivityMongo getActivityById(String activityId) {
