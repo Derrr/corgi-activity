@@ -25,6 +25,8 @@ public interface CorgiActivityService {
 
     List<CorgiActivity> getActivityByIds(List<String> activityIds);
 
+    List<CorgiActivity> getBarAppraisedActivity(String barId, String activityId, Integer size);
+
     CorgiActivity updateCorgiActivity(CorgiActivity corgiActivity);
 
     void updateCorgiActivityStatus(CorgiActivity corgiActivity);

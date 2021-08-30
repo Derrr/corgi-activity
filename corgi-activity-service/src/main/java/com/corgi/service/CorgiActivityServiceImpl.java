@@ -103,6 +103,11 @@ public class CorgiActivityServiceImpl implements CorgiActivityService {
     }
 
     @Override
+    public List<CorgiActivity> getBarAppraisedActivity(String barId, String activityId, Integer size) {
+        return convertActivity(corgiActivityDao.getBarAppraisedActivityId(barId, activityId, size));
+    }
+
+    @Override
     public CorgiActivity updateCorgiActivity(CorgiActivity corgiActivity) {
         ActivityMongo mongo = corgiActivityDao.getActivityById(corgiActivity.getId());
         if (mongo == null || !mongo.getUserId().equals(corgiActivity.getUserId())) {
