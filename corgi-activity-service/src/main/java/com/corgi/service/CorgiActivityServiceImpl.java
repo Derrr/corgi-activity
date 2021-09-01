@@ -239,7 +239,11 @@ public class CorgiActivityServiceImpl implements CorgiActivityService {
         resultList.toArray();
         Criteria[] a = new Criteria[resultList.size()];
         resultList.toArray(a);
-        return convertActivity(corgiActivityDao.getActivityByFeed(query.getActivityId(), new Criteria().andOperator(a), query.getPageSize()));
+        int start = 0;
+        if (query.getPage() != null) {
+            start = (query.getPage() - 1) * query.getPageSize();
+        }
+        return convertActivity(corgiActivityDao.getActivityByFeed(query.getActivityId(), new Criteria().andOperator(a), start, query.getPageSize()));
     }
 
     @Override

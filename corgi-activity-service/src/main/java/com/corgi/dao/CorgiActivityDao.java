@@ -614,8 +614,8 @@ public class CorgiActivityDao {
         return mongoTemplate.find(new Query(criteria), ActivityMongo.class);
     }
 
-    public List<ActivityMongo> getActivityByFeed(String mongoId, Criteria criteria, Integer size) {
-        Query query = new Query().addCriteria(criteria).limit(size).with(Sort.by(Sort.Direction.DESC, "mongoId"));
+    public List<ActivityMongo> getActivityByFeed(String mongoId, Criteria criteria,Integer start, Integer size) {
+        Query query = new Query().addCriteria(criteria).skip(start).limit(size).with(Sort.by(Sort.Direction.DESC, "mongoId"));
         if (!StringUtils.isEmpty(mongoId)) {
             Criteria idCri = Criteria.where("_id").lt(new ObjectId(mongoId));
             query.addCriteria(idCri);
