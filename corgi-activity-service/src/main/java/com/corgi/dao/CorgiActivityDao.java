@@ -72,6 +72,14 @@ public class CorgiActivityDao {
         return mongoTemplate.find(query, ActivityMongo.class);
     }
 
+    public Long countBarAppraisedActivityId(String barId) {
+        Query query = new Query(Criteria.where("barId").is(barId));
+        query.addCriteria(Criteria.where("category").in("video", "text", "image"))
+                .addCriteria(Criteria.where("checkStatus").ne("fail"))
+                .addCriteria(Criteria.where("status").ne(CorgiActivity.DELETED));
+        return mongoTemplate.count(query, ActivityMongo.class);
+    }
+
     public ActivityMongo getActivityById(String activityId) {
         ActivityMongo mongo = new ActivityMongo();
         try {
