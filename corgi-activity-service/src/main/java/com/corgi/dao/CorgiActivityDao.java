@@ -625,7 +625,7 @@ public class CorgiActivityDao {
     public List<ActivityMongo> getActivityByFeed(String mongoId, Criteria criteria,Integer start, Integer size) {
         Query query = new Query().addCriteria(criteria).skip(start).limit(size).with(Sort.by(Sort.Direction.DESC, "mongoId"));
         if (!StringUtils.isEmpty(mongoId)) {
-            Criteria idCri = Criteria.where("mongoId").lt(mongoId);
+            Criteria idCri = Criteria.where("mongoId").lt(new ObjectId(mongoId));
             query.addCriteria(idCri);
         }
         return mongoTemplate.find(query, ActivityMongo.class);
