@@ -10,9 +10,11 @@ import com.corgi.activity.entity.CorgiActivity;
 import com.corgi.dao.CorgiActivityDao;
 import com.corgi.entity.ActivityMongo;
 import com.corgi.entity.ActivityQuery;
+import com.corgi.user.api.CorgiBlacklistService;
 import com.corgi.user.api.CorgiPicService;
 import com.corgi.user.api.CorgiToolService;
 import com.corgi.user.api.CorgiUserActivityService;
+import com.corgi.user.entity.UserBasic;
 import lombok.extern.slf4j.Slf4j;
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,6 +25,7 @@ import org.springframework.util.CollectionUtils;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * @author tairanliu
@@ -39,6 +42,8 @@ public class CorgiActivityServiceImpl implements CorgiActivityService {
     private CorgiToolService corgiToolService;
     @Reference
     private CorgiUserActivityService corgiUserActivityService;
+    @Reference
+    private CorgiBlacklistService corgiBlacklistService;
 
     @Override
     public CorgiActivity addCorgiActivity(CorgiActivity corgiActivity) {
@@ -239,6 +244,13 @@ public class CorgiActivityServiceImpl implements CorgiActivityService {
         Criteria categoryCri = Criteria.where("category").in(CorgiActivity.CAT_TEXT, CorgiActivity.CAT_VIDEO, CorgiActivity.CAT_IMAGE);
         if (StringUtils.isNotEmpty(query.getCategory())) {
             categoryCri = Criteria.where("category").is(query.getCategory());
+        }
+        if (StringUtils.isNotEmpty(query.getLoginUserId())) {
+            List<UserBasic> blackUsers = corgiBlacklistService.getBlackUser(query.getLoginUserId());
+            if (!CollectionUtils.isEmpty(blackUsers)) {
+                Criteria blackCri = Criteria.where("userId").nin(blackUsers.stream().map(u -> u.getUserId()).collect(Collectors.toList()));
+                resultList.add(blackCri);
+            }
         }
         resultList.add(categoryCri);
         resultList.toArray();
