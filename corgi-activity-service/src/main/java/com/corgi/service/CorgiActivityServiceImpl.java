@@ -281,14 +281,15 @@ public class CorgiActivityServiceImpl implements CorgiActivityService {
                 activity.setPics(activityPics);
                 corgiActivities.add(activity);
                 List<CorgiTopic> topics = corgiToolService.getActivityTopicDetails(activity.getId());
+                List<CorgiTopic> result = new ArrayList<>();
                 if (!CollectionUtils.isEmpty(topics)) {
                     for (CorgiTopic topic : topics) {
-                        if (topic != null && topic.getTopic() == null) {
-                            topic.setTopic("");
+                        if (topic != null && StringUtils.isNotEmpty(topic.getTopic())) {
+                            result.add(topic);
                         }
                     }
                 }
-                activity.setTopicDetails(corgiToolService.getActivityTopicDetails(activity.getId()));
+                activity.setTopicDetails(result);
                 if (StringUtils.isNotEmpty(activity.getRefActivityId()) && StringUtils.isEmpty(activity.getRefActivityTitle())) {
                     String activityId = activity.getRefActivityId();
                     ActivityMongo refMongo = corgiActivityDao.getActivityById(activityId);
