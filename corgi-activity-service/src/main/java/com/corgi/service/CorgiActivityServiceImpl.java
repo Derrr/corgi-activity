@@ -10,6 +10,7 @@ import com.corgi.activity.entity.CorgiActivity;
 import com.corgi.dao.CorgiActivityDao;
 import com.corgi.entity.ActivityMongo;
 import com.corgi.entity.ActivityQuery;
+import com.corgi.entity.CorgiTopic;
 import com.corgi.user.api.CorgiBlacklistService;
 import com.corgi.user.api.CorgiPicService;
 import com.corgi.user.api.CorgiToolService;
@@ -279,7 +280,16 @@ public class CorgiActivityServiceImpl implements CorgiActivityService {
                 }
                 activity.setPics(activityPics);
                 corgiActivities.add(activity);
-                activity.setTopicDetails(corgiToolService.getActivityTopicDetails(activity.getId()));
+                List<CorgiTopic> topics = corgiToolService.getActivityTopicDetails(activity.getId());
+                List<CorgiTopic> result = new ArrayList<>();
+                if (!CollectionUtils.isEmpty(topics)) {
+                    for (CorgiTopic topic : topics) {
+                        if (topic != null && StringUtils.isNotEmpty(topic.getTopic())) {
+                            result.add(topic);
+                        }
+                    }
+                }
+                activity.setTopicDetails(result);
                 if (StringUtils.isNotEmpty(activity.getRefActivityId()) && StringUtils.isEmpty(activity.getRefActivityTitle())) {
                     String activityId = activity.getRefActivityId();
                     ActivityMongo refMongo = corgiActivityDao.getActivityById(activityId);
