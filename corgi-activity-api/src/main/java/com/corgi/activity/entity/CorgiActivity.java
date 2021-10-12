@@ -68,6 +68,9 @@ public class CorgiActivity implements Serializable {
     private List<String> topics;
     private List<String> mentionUserIds;
     private List<CorgiTopic> topicDetails;
+    private String goodsName;
+    private String goodsUrl;
+    private String goodsImagePath;
 
 
     public String getStatus() {
