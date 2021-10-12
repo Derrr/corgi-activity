@@ -242,7 +242,7 @@ public class CorgiActivityServiceImpl implements CorgiActivityService {
             Criteria cityCri = Criteria.where("city").is(query.getCity());
             resultList.add(cityCri);
         }
-        Criteria categoryCri = Criteria.where("category").in(CorgiActivity.CAT_TEXT, CorgiActivity.CAT_VIDEO, CorgiActivity.CAT_IMAGE);
+        Criteria categoryCri = Criteria.where("category").in(CorgiActivity.CAT_TEXT, CorgiActivity.CAT_VIDEO, CorgiActivity.CAT_IMAGE, CorgiActivity.CAT_BUSINESS);
         if (StringUtils.isNotEmpty(query.getCategory())) {
             categoryCri = Criteria.where("category").is(query.getCategory());
         }
