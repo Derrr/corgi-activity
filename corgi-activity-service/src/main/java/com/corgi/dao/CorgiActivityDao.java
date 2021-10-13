@@ -507,12 +507,6 @@ public class CorgiActivityDao {
             while (it.hasNext()) {
                 ActivityMongo activityMongo = it.next();
                 activityMongo.setCurrentTime(nowTime);
-//                if (activity.getPeopleCount() > 0) {
-//                    long count = corgiUserActivityService.countSignUpUser(activity.getId());
-//                    if (count < activity.getPeopleCount()) {
-//                        it.remove();
-//                    }
-//                }
             }
         }
         return mongos;
@@ -706,6 +700,11 @@ public class CorgiActivityDao {
                             criteriaList.add(Criteria.where("status").ne(CorgiActivity.DELETED));
                         } else {
                             criteriaList.add(Criteria.where("status").is(value));
+                        }
+                    } else if ("topics".equals(fieldName)) {
+                        List<String> topics = (List<String>) value;
+                        if (CollectionUtils.isNotEmpty(topics)) {
+                            criteriaList.add(Criteria.where("topics").is(topics.get(0)));
                         }
                     } else if ("city".equals(fieldName)) {
                         criteriaList.add(Criteria.where("city").regex("^" + value + ".*"));
