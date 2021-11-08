@@ -1,6 +1,7 @@
 package com.corgi.activity.entity;
 
 import com.corgi.entity.CorgiTopic;
+import com.corgi.user.entity.CorgiHashtag;
 import lombok.Data;
 
 import java.io.Serializable;
@@ -66,8 +67,10 @@ public class CorgiActivity implements Serializable {
     private String conf;
     private List<ActivityPic> pics;
     private List<String> topics;
+    private List<String> hashtags;
     private List<String> mentionUserIds;
     private List<CorgiTopic> topicDetails;
+    private List<CorgiHashtag> hashtagDetails;
 
     public String getStatus() {
         if (!DELETED.equals(status)

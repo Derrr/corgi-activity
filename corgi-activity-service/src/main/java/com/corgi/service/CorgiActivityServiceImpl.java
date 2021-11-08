@@ -15,6 +15,7 @@ import com.corgi.user.api.CorgiBlacklistService;
 import com.corgi.user.api.CorgiPicService;
 import com.corgi.user.api.CorgiToolService;
 import com.corgi.user.api.CorgiUserActivityService;
+import com.corgi.user.entity.CorgiHashtag;
 import com.corgi.user.entity.UserBasic;
 import lombok.extern.slf4j.Slf4j;
 import org.bson.types.ObjectId;
@@ -281,15 +282,26 @@ public class CorgiActivityServiceImpl implements CorgiActivityService {
                 activity.setPics(activityPics);
                 corgiActivities.add(activity);
                 List<CorgiTopic> topics = corgiToolService.getActivityTopicDetails(activity.getId());
-                List<CorgiTopic> result = new ArrayList<>();
+                List<CorgiTopic> result1 = new ArrayList<>();
                 if (!CollectionUtils.isEmpty(topics)) {
                     for (CorgiTopic topic : topics) {
                         if (topic != null && StringUtils.isNotEmpty(topic.getTopic())) {
-                            result.add(topic);
+                            result1.add(topic);
                         }
                     }
                 }
-                activity.setTopicDetails(result);
+                activity.setTopicDetails(result1);
+
+                List<CorgiHashtag> hashtags = corgiToolService.getActivityHashTagDetails(activity.getId());
+                List<CorgiHashtag> result2 = new ArrayList<>();
+                if (!CollectionUtils.isEmpty(topics)) {
+                    for (CorgiHashtag hashtag : hashtags) {
+                        if (hashtag != null && StringUtils.isNotEmpty(hashtag.getHastagName())) {
+                            result2.add(hashtag);
+                        }
+                    }
+                }
+                activity.setHashtagDetails(result2);
                 if (StringUtils.isNotEmpty(activity.getRefActivityId()) && StringUtils.isEmpty(activity.getRefActivityTitle())) {
                     String activityId = activity.getRefActivityId();
                     ActivityMongo refMongo = corgiActivityDao.getActivityById(activityId);
