@@ -756,7 +756,9 @@ public class CorgiActivityDao {
         if ("likeCount".equals(column)) {
             update = new Update().set(column, Long.valueOf(value));
         } else if ("topics".equals(column)) {
-            update = new Update().set(column, Arrays.asList(value));
+            update = new Update().set(column, Arrays.asList(value.split(",")));
+        } else if ("hashtags".equals(column)) {
+            update = new Update().set(column, Arrays.asList(value.split(",")));
         } else {
             update = new Update().set(column, value);
         }

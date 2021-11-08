@@ -188,7 +188,7 @@ public class CorgiActivityServiceImpl implements CorgiActivityService {
     }
 
     @Override
-    public void updateByColumnn(String activity, String column, String value) {
+    public void updateByColumn(String activity, String column, String value) {
         corgiActivityDao.updateActivityByColumn(activity, column, value);
     }
 
@@ -296,7 +296,7 @@ public class CorgiActivityServiceImpl implements CorgiActivityService {
                 List<CorgiHashtag> result2 = new ArrayList<>();
                 if (!CollectionUtils.isEmpty(topics)) {
                     for (CorgiHashtag hashtag : hashtags) {
-                        if (hashtag != null && StringUtils.isNotEmpty(hashtag.getHastagName())) {
+                        if (hashtag != null && StringUtils.isNotEmpty(hashtag.getHashtagName())) {
                             result2.add(hashtag);
                         }
                     }
