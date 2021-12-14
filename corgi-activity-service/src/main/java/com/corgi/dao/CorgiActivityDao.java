@@ -398,9 +398,6 @@ public class CorgiActivityDao {
                 criteriaList.add(Criteria.where("activityType").is(activityQuery.getType()));
             }
         }
-        if (CollectionUtils.isNotEmpty(activityQuery.getPayType())) {
-            criteriaList.add(Criteria.where("payType").in(activityQuery.getPayType()));
-        }
 
         if (!StringUtils.isEmpty(activityQuery.getNotCity())) {
             criteriaList.add(Criteria.where("city").ne(activityQuery.getCity()));
@@ -408,21 +405,6 @@ public class CorgiActivityDao {
             criteriaList.add(Criteria.where("city").regex(activityQuery.getCity() + ".*"));
         }
 
-        if (!StringUtils.isEmpty(activityQuery.getAdname())) {
-            criteriaList.add(Criteria.where("adname").is(activityQuery.getAdname()));
-        }
-        if (!StringUtils.isEmpty(activityQuery.getBusinessArea())) {
-            criteriaList.add(Criteria.where("businessArea").is(activityQuery.getBusinessArea()));
-        }
-        if (!StringUtils.isEmpty(activityQuery.getStation())) {
-            criteriaList.add(Criteria.where("station").is(activityQuery.getStation()));
-        }
-        if (activityQuery.getStartBudget() > 0) {
-            criteriaList.add(Criteria.where("budget").gte(activityQuery.getStartBudget()));
-        }
-        if (activityQuery.getEndBudget() > 0) {
-            criteriaList.add(Criteria.where("budget").lte(activityQuery.getEndBudget()));
-        }
 //        if (!StringUtils.isEmpty(activityQuery.getStartTime())) {
 //            criteriaList.add(Criteria.where(ActivityMongo.SIGN_UP_TIME).gte(activityQuery.getStartTime()));
 //        }
