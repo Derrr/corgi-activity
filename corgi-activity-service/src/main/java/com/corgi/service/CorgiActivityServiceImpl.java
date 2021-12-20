@@ -230,8 +230,10 @@ public class CorgiActivityServiceImpl implements CorgiActivityService {
     @Override
     public List<CorgiActivity> getFeedActivity(ActivityQuery query) {
         List<Criteria> resultList = new ArrayList<>();
-        Criteria checkStatus = Criteria.where("checkStatus").ne("fail");
-        resultList.add(checkStatus);
+        if (StringUtils.isEmpty(query.getUserId()) || !query.getUserId().equals(query.getLoginUserId())) {
+            Criteria checkStatus = Criteria.where("checkStatus").ne("fail");
+            resultList.add(checkStatus);
+        }
         Criteria StatusCri = Criteria.where("status").ne(CorgiActivity.DELETED);
         resultList.add(StatusCri);
         if (StringUtils.isNotEmpty(query.getUserId())) {
