@@ -320,24 +320,10 @@ public class CorgiActivityDao {
         criteriaList.add(Criteria.where("status").is(CorgiActivity.CREATED));
 
         criteriaList.add(new Criteria().orOperator(Criteria.where("checkStatus").exists(false), Criteria.where("checkStatus").ne("fail")));
-//        if (StringUtils.isEmpty(activityQuery.getCategory())) {
-//            Criteria imageCriteria = Criteria.where("category").is(CorgiActivity.CAT_IMAGE);
-//            Criteria signUpCriteria = Criteria.where(ActivityMongo.SIGN_UP_TIME).gte(new SimpleDateFormat("yyyy/MM/dd HH:mm").format(new Date()));
-//            criteriaList.add(new Criteria().orOperator(signUpCriteria, imageCriteria));
-//        }
-//
-//        criteriaList.add(Criteria.where("status").is(CorgiActivity.CREATED));
         if (CorgiActivity.CAT_BUSINESS.equals(activityQuery.getCategory())
                 && !StringUtils.isEmpty(activityQuery.getStartTime())) {
             criteriaList.add(Criteria.where("createTime").gte(activityQuery.getStartTime()));
         }
-//
-//        if (!StringUtils.isEmpty(activityQuery.getCategory())) {
-//            criteriaList.add(Criteria.where("category").is(activityQuery.getCategory()));
-//        }
-//        if (CorgiActivity.CAT_ACTIVITY.equals(activityQuery.getCategory())) {
-//            criteriaList.add(Criteria.where(ActivityMongo.SIGN_UP_TIME).gte(new SimpleDateFormat("yyyy/MM/dd HH:mm").format(new Date())));
-//        }
         if (!StringUtils.isEmpty(activityQuery.getNotCity())) {
             criteriaList.add(Criteria.where("city").ne(activityQuery.getCity()));
         } else if (!StringUtils.isEmpty(activityQuery.getCity())) {
@@ -738,7 +724,9 @@ public class CorgiActivityDao {
         if ("likeCount".equals(column)) {
             update = new Update().set(column, Long.valueOf(value));
         } else if ("topics".equals(column)) {
-            update = new Update().set(column, Arrays.asList(value));
+            update = new Update().set(column, Arrays.asList(value.split(",")));
+        } else if ("hashtags".equals(column)) {
+            update = new Update().set(column, Arrays.asList(value.split(",")));
         } else {
             update = new Update().set(column, value);
         }

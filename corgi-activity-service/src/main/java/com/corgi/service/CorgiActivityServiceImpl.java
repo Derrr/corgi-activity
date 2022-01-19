@@ -15,6 +15,7 @@ import com.corgi.user.api.CorgiBlacklistService;
 import com.corgi.user.api.CorgiPicService;
 import com.corgi.user.api.CorgiToolService;
 import com.corgi.user.api.CorgiUserActivityService;
+import com.corgi.user.entity.CorgiHashtag;
 import com.corgi.user.entity.UserBasic;
 import lombok.extern.slf4j.Slf4j;
 import org.bson.types.ObjectId;
@@ -187,7 +188,7 @@ public class CorgiActivityServiceImpl implements CorgiActivityService {
     }
 
     @Override
-    public void updateByColumnn(String activity, String column, String value) {
+    public void updateByColumn(String activity, String column, String value) {
         corgiActivityDao.updateActivityByColumn(activity, column, value);
     }
 
@@ -244,7 +245,7 @@ public class CorgiActivityServiceImpl implements CorgiActivityService {
             Criteria cityCri = Criteria.where("city").is(query.getCity());
             resultList.add(cityCri);
         }
-        Criteria categoryCri = Criteria.where("category").in(CorgiActivity.CAT_TEXT, CorgiActivity.CAT_VIDEO, CorgiActivity.CAT_IMAGE, CorgiActivity.CAT_BUSINESS);
+        Criteria categoryCri = Criteria.where("category").in(CorgiActivity.CAT_TEXT, CorgiActivity.CAT_VIDEO, CorgiActivity.CAT_IMAGE, CorgiActivity.CAT_BUSINESS, CorgiActivity.CAT_PAYING);
         if (StringUtils.isNotEmpty(query.getCategory())) {
             categoryCri = Criteria.where("category").is(query.getCategory());
         }
@@ -283,15 +284,26 @@ public class CorgiActivityServiceImpl implements CorgiActivityService {
                 activity.setPics(activityPics);
                 corgiActivities.add(activity);
                 List<CorgiTopic> topics = corgiToolService.getActivityTopicDetails(activity.getId());
-                List<CorgiTopic> result = new ArrayList<>();
+                List<CorgiTopic> result1 = new ArrayList<>();
                 if (!CollectionUtils.isEmpty(topics)) {
                     for (CorgiTopic topic : topics) {
                         if (topic != null && StringUtils.isNotEmpty(topic.getTopic())) {
-                            result.add(topic);
+                            result1.add(topic);
                         }
                     }
                 }
-                activity.setTopicDetails(result);
+                activity.setTopicDetails(result1);
+
+                List<CorgiHashtag> hashtags = corgiToolService.getActivityHashTagDetails(activity.getId());
+                List<CorgiHashtag> result2 = new ArrayList<>();
+                if (!CollectionUtils.isEmpty(topics)) {
+                    for (CorgiHashtag hashtag : hashtags) {
+                        if (hashtag != null && StringUtils.isNotEmpty(hashtag.getHashtagName())) {
+                            result2.add(hashtag);
+                        }
+                    }
+                }
+                activity.setHashtagDetails(result2);
                 if (StringUtils.isNotEmpty(activity.getRefActivityId()) && StringUtils.isEmpty(activity.getRefActivityTitle())) {
                     String activityId = activity.getRefActivityId();
                     ActivityMongo refMongo = corgiActivityDao.getActivityById(activityId);
