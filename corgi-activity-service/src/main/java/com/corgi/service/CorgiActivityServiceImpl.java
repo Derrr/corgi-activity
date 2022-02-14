@@ -110,6 +110,23 @@ public class CorgiActivityServiceImpl implements CorgiActivityService {
     }
 
     @Override
+    public CorgiActivity getActivityById(String activityId) {
+        List<ActivityMongo> mongoList = new ArrayList<>();
+        if (activityId != null) {
+            ActivityMongo mongo = corgiActivityDao.getActivityById(activityId);
+            if (mongo != null && !CorgiActivity.DELETED.equals(mongo.getStatus())) {
+                mongoList.add(mongo);
+            }
+            List<CorgiActivity> activities = convertActivity(mongoList, false);
+            if (CollectionUtils.isEmpty(activities)) {
+                return null;
+            }
+            return activities.get(0);
+        }
+        return null;
+    }
+
+    @Override
     public List<CorgiActivity> getBarAppraisedActivity(String barId, String activityId, Integer size) {
         return convertActivity(corgiActivityDao.getBarAppraisedActivityId(barId, activityId, size));
     }

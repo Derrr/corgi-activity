@@ -25,6 +25,8 @@ public interface CorgiActivityService {
 
     List<CorgiActivity> getActivityByIds(List<String> activityIds);
 
+    CorgiActivity getActivityById(String activityId);
+
     List<CorgiActivity> getBarAppraisedActivity(String barId, String activityId, Integer size);
 
     Long countBarAppraisedActivity(String barId);
