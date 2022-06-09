@@ -133,7 +133,8 @@ public class CorgiActivityServiceImpl implements CorgiActivityService {
 
     @Override
     public Long countBarAppraisedActivity(String barId) {
-        return corgiActivityDao.countBarAppraisedActivityId(barId);
+        return 0l;
+        //return corgiActivityDao.countBarAppraisedActivityId(barId);
     }
 
     @Override
