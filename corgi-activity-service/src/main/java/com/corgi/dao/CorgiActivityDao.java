@@ -197,7 +197,7 @@ public class CorgiActivityDao {
         List<ActivityMongo> activityMongoList = new ArrayList<>();
 
         Criteria queryCriteria = new Criteria().andOperator(statusCriteria, categoryCriteria, checkCriteria, topicCriteria);
-        Query query = new Query(queryCriteria).with(Sort.by(Sort.Direction.DESC, "createTime")).skip(activityQuery.getTPage()).limit(activityQuery.getPageSize());
+        Query query = new Query(queryCriteria).with(Sort.by(Sort.Direction.DESC, "_id")).skip(activityQuery.getTPage()).limit(activityQuery.getPageSize());
         activityQuery.setTPage(activityQuery.getTPage() + activityQuery.getPageSize());
         List<ActivityMongo> corgiActivities = mongoTemplate.find(query, ActivityMongo.class);
         if (corgiActivities.size() > 0) {
@@ -312,7 +312,7 @@ public class CorgiActivityDao {
         if (range > 0) {
             distanceCriteria.maxDistance(range / RADIUS);
         }
-        criteriaList.add(distanceCriteria);
+
         Criteria typeCriteria = Criteria.where("category").is(CorgiActivity.CAT_BUSINESS);
         Criteria corgiCriteria = new Criteria().andOperator(Criteria.where("userId").is("69548"), Criteria.where("category").is(CorgiActivity.CAT_ACTIVITY));
         criteriaList.add(new Criteria().orOperator(typeCriteria, corgiCriteria));
@@ -342,7 +342,9 @@ public class CorgiActivityDao {
         Criteria queryCriteria = new Criteria().andOperator(criteriaList.toArray(new Criteria[0]));
         Query query = new Query(queryCriteria).skip(skip).limit(size);
         if (ActivityQuery.SORT_TIME.equals(activityQuery.getSort())) {
-            query.with(Sort.by(Sort.Direction.DESC, "createTime"));
+            query.with(Sort.by(Sort.Direction.DESC, "_id"));
+        } else {
+            criteriaList.add(distanceCriteria);
         }
         List<ActivityMongo> corgiActivities = mongoTemplate.find(query, ActivityMongo.class);
         log.info("near size... {} ", corgiActivities.size());
@@ -415,7 +417,7 @@ public class CorgiActivityDao {
 
         Query query = new Query(queryCriteria).skip(skip).limit(size);
         if (ActivityQuery.SORT_TIME.equals(activityQuery.getSort())) {
-            query.with(Sort.by(Sort.Direction.DESC, "createTime"));
+            query.with(Sort.by(Sort.Direction.DESC, "_id"));
         }
 
         return query;
