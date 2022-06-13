@@ -342,7 +342,7 @@ public class CorgiActivityDao {
         Criteria queryCriteria = new Criteria().andOperator(criteriaList.toArray(new Criteria[0]));
         Query query = new Query(queryCriteria).skip(skip).limit(size);
         if (ActivityQuery.SORT_TIME.equals(activityQuery.getSort())) {
-            query.with(Sort.by(Sort.Direction.DESC, "_id"));
+            query.with(Sort.by(Sort.Direction.DESC, "mongoId"));
         } else {
             criteriaList.add(distanceCriteria);
         }
