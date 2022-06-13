@@ -197,7 +197,7 @@ public class CorgiActivityDao {
         List<ActivityMongo> activityMongoList = new ArrayList<>();
 
         Criteria queryCriteria = new Criteria().andOperator(statusCriteria, categoryCriteria, checkCriteria, topicCriteria);
-        Query query = new Query(queryCriteria).with(Sort.by(Sort.Direction.DESC, "_id")).skip(activityQuery.getTPage()).limit(activityQuery.getPageSize());
+        Query query = new Query(queryCriteria).with(Sort.by(Sort.Direction.DESC, "mongoId")).skip(activityQuery.getTPage()).limit(activityQuery.getPageSize());
         activityQuery.setTPage(activityQuery.getTPage() + activityQuery.getPageSize());
         List<ActivityMongo> corgiActivities = mongoTemplate.find(query, ActivityMongo.class);
         if (corgiActivities.size() > 0) {
@@ -342,7 +342,7 @@ public class CorgiActivityDao {
         Criteria queryCriteria = new Criteria().andOperator(criteriaList.toArray(new Criteria[0]));
         Query query = new Query(queryCriteria).skip(skip).limit(size);
         if (ActivityQuery.SORT_TIME.equals(activityQuery.getSort())) {
-            query.with(Sort.by(Sort.Direction.DESC, "_id"));
+            query.with(Sort.by(Sort.Direction.DESC, "mongoId"));
         } else {
             criteriaList.add(distanceCriteria);
         }
@@ -417,7 +417,7 @@ public class CorgiActivityDao {
 
         Query query = new Query(queryCriteria).skip(skip).limit(size);
         if (ActivityQuery.SORT_TIME.equals(activityQuery.getSort())) {
-            query.with(Sort.by(Sort.Direction.DESC, "_id"));
+            query.with(Sort.by(Sort.Direction.DESC, "mongoId"));
         }
 
         return query;
@@ -469,7 +469,7 @@ public class CorgiActivityDao {
             }
             mongos = mongoTemplate.find(query, ActivityMongo.class);
         } else {
-            mongos = mongoTemplate.find(new Query().with(Sort.by(Sort.Direction.DESC, "_id")).skip(start).limit(size), ActivityMongo.class);
+            mongos = mongoTemplate.find(new Query().with(Sort.by(Sort.Direction.DESC, "mongoId")).skip(start).limit(size), ActivityMongo.class);
         }
         if (CollectionUtils.isNotEmpty(mongos)) {
             String nowTime = new SimpleDateFormat("yyyy/MM/dd HH:mm").format(new Date());
