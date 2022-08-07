@@ -265,7 +265,11 @@ public class CorgiActivityServiceImpl implements CorgiActivityService {
         }
         Criteria categoryCri = Criteria.where("category").in(CorgiActivity.CAT_TEXT, CorgiActivity.CAT_VIDEO, CorgiActivity.CAT_IMAGE, CorgiActivity.CAT_BUSINESS, CorgiActivity.CAT_PAYING);
         if (StringUtils.isNotEmpty(query.getCategory())) {
-            categoryCri = Criteria.where("category").is(query.getCategory());
+            if (query.getCategory().startsWith("not_")) {
+                categoryCri = Criteria.where("category").ne(query.getCategory().split("_")[1]);
+            } else {
+                categoryCri = Criteria.where("category").is(query.getCategory());
+            }
         }
         if (StringUtils.isNotEmpty(query.getLoginUserId())) {
             List<UserBasic> blackUsers = corgiBlacklistService.getBlackUser(query.getLoginUserId());
