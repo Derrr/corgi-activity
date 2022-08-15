@@ -24,6 +24,7 @@ public class CorgiMatchServiceImpl implements CorgiMatchService {
 
     @Override
     public void updateUser(UserDetail userDetail) {
+        log.info("adding..."+userDetail);
         corgiUserDao.updateUser(userDetail);
         if (redisTemplate.opsForValue().setIfAbsent("2", "2", 24l, TimeUnit.HOURS)) {
             corgiUserDao.addIndex();
