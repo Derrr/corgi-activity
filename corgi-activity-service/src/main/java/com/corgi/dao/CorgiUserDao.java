@@ -35,13 +35,16 @@ public class CorgiUserDao {
     private final static Double RADIUS = 6371.0;
 
     public void updateUser(UserDetail userDetail) {
-        UserMongo userMongo = new UserMongo(userDetail);
-        UserOnlineMongo userOnlineMongo = new UserOnlineMongo(userDetail);
-        BeanUtils.copyProperties(userDetail, userMongo);
-        BeanUtils.copyProperties(userDetail, userOnlineMongo);
-        mongoTemplate.save(userOnlineMongo);
-        mongoTemplate.findAllAndRemove(new Query(Criteria.where("userId").is(userDetail.getUserId())), UserMongo.class);
-        mongoTemplate.save(userMongo);
+        if(userDetail.getLng() != null && userDetail.getLng() < 180
+        && userDetail.getLat() != null && userDetail.getLat() < 90) {
+            UserMongo userMongo = new UserMongo(userDetail);
+            UserOnlineMongo userOnlineMongo = new UserOnlineMongo(userDetail);
+            BeanUtils.copyProperties(userDetail, userMongo);
+            BeanUtils.copyProperties(userDetail, userOnlineMongo);
+            mongoTemplate.save(userOnlineMongo);
+            mongoTemplate.findAllAndRemove(new Query(Criteria.where("userId").is(userDetail.getUserId())), UserMongo.class);
+            mongoTemplate.save(userMongo);
+        }
     }
 
     public void addIndex() {
