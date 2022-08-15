@@ -6,6 +6,7 @@ import com.corgi.entity.UserMongo;
 import com.corgi.entity.UserOnlineMongo;
 import com.corgi.user.api.CorgiUserService;
 import com.corgi.user.entity.UserDetail;
+import com.corgi.user.entity.UserMatchItem;
 import com.corgi.user.entity.UserQuery;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
@@ -17,9 +18,14 @@ import org.springframework.data.mongodb.core.index.GeospatialIndex;
 import org.springframework.data.mongodb.core.index.Index;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Component;
+import org.springframework.util.CollectionUtils;
+import org.springframework.util.StringUtils;
 
+import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @author tairanliu
@@ -29,14 +35,17 @@ import java.util.*;
 public class CorgiUserDao {
     @Autowired
     MongoTemplate mongoTemplate;
+
+    @Autowired
+    private StringRedisTemplate redisTemplate;
     @Reference
     private CorgiUserService corgiUserService;
 
     private final static Double RADIUS = 6371.0;
 
     public void updateUser(UserDetail userDetail) {
-        if(userDetail.getLng() != null && userDetail.getLng() < 180
-        && userDetail.getLat() != null && userDetail.getLat() < 90) {
+        if (userDetail.getLng() != null && userDetail.getLng() < 180
+                && userDetail.getLat() != null && userDetail.getLat() < 90) {
             UserMongo userMongo = new UserMongo(userDetail);
             UserOnlineMongo userOnlineMongo = new UserOnlineMongo(userDetail);
             BeanUtils.copyProperties(userDetail, userMongo);
@@ -47,33 +56,144 @@ public class CorgiUserDao {
         }
     }
 
-    public void addIndex() {
-        GeospatialIndex geospatialIndex = new GeospatialIndex("location").named("user_location");
-        Index index = new Index("time", Sort.Direction.ASC).named("user_time").expire(7 * 24 * 3600);
-        mongoTemplate.indexOps("User").ensureIndex(geospatialIndex);
-        mongoTemplate.indexOps("User").ensureIndex(index);
-
-        Index indexOnline = new Index("time", Sort.Direction.ASC).named("user_time").expire(5 * 60);
-        mongoTemplate.indexOps("UserOnline").ensureIndex(geospatialIndex);
-        mongoTemplate.indexOps("UserOnline").ensureIndex(indexOnline);
+    public List<UserMatchItem> findUser(UserQuery userQuery) {
+        Query query = this.getQuery(userQuery);
+        List<UserOnlineMongo> onlineMongos = mongoTemplate.find(query, UserOnlineMongo.class);
+        List<UserMatchItem> items = this.filterUsers(onlineMongos, userQuery, 6);
+        if (items.size() >= 6) {
+            return items;
+        }
+        List<UserMongo> userMongos = mongoTemplate.find(query, UserMongo.class);
+        return this.filterUsers(userMongos, userQuery, 6);
     }
 
-    public List<UserDetail> findUser(UserQuery userQuery) {
-        Query query = new Query(Criteria.where("location").nearSphere(new Point(userQuery.getLng(), userQuery.getLat())))
-                .limit(6);
-        List<UserDetail> userDetails = new ArrayList<>();
-        List<UserOnlineMongo> userOnlines = mongoTemplate.find(query, UserOnlineMongo.class);
-        if (userOnlines.size() < 6) {
-            List<UserMongo> users = mongoTemplate.find(query, UserMongo.class);
-            for (UserMongo userMongo : users) {
-                userDetails.add(userMongo.getUserDetail());
-            }
+    private Query getQuery(UserQuery query) {
+        Query q = new Query().limit(5000);
+        q.addCriteria(Criteria.where("location").nearSphere(new Point(query.getLng(), query.getLat())));
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy/MM/dd");
+        if (!CollectionUtils.isEmpty(query.getDateStatus())) {
+            query.getDateStatus().add("");
+            q.addCriteria(Criteria.where("dateStatus").in(query.getDateStatus()));
         } else {
-            for (UserOnlineMongo onlineMongo : userOnlines) {
-                userDetails.add(onlineMongo.getUserDetail());
+            q.addCriteria(Criteria.where("dateStatus").ne("免打扰"));
+        }
+        if (!CollectionUtils.isEmpty(query.getGroup())) {
+            q.addCriteria(Criteria.where("group").in(query.getGroup()));
+        }
+        if (!CollectionUtils.isEmpty(query.getRole())) {
+            q.addCriteria(Criteria.where("role").in(query.getRole()));
+        }
+        if (query.getStartAge() != null && query.getStartAge() > 18) {
+            Calendar calendar = Calendar.getInstance();
+            calendar.add(Calendar.YEAR, -1 * query.getStartAge());
+            q.addCriteria(Criteria.where("birthday").lt(sdf.format(calendar.getTime())));
+        }
+        if (query.getEndAge() != null && query.getEndAge() < 70) {
+            Calendar calendar = Calendar.getInstance();
+            calendar.add(Calendar.YEAR, -1 * query.getEndAge());
+            q.addCriteria(Criteria.where("birthday").gt(sdf.format(calendar.getTime())));
+        }
+        if ("verify".equals(query.getType())) {
+            q.addCriteria(Criteria.where("avatarCheckStatus").is("verified"));
+        }
+        return q;
+    }
+
+    private List<UserMatchItem> filterUsers(List<? extends UserDetail> mongos, UserQuery userQuery, Integer size) {
+        String userId = userQuery.getUserId();
+        List<UserMatchItem> result = new ArrayList<>();
+        String dateStr = new SimpleDateFormat("yyyy-MM-dd").format(new Date());
+        List<String> matchViews = redisTemplate.opsForList().range("user_match_view_" + dateStr + userId, 0, -1);
+        String matchKey = "user_match_" + userId;
+        List<String> matchUsers = redisTemplate.opsForList().range(matchKey, 0, -1);
+        Long nowTime = System.currentTimeMillis();
+        Long threshold = nowTime - 14 * 24 * 3600 * 1000l;
+        for (UserDetail mongo : mongos) {
+            if (matchViews.contains(mongo.getUserId())) {
+                continue;
+            }
+            boolean contains = false;
+            for (String matchStr : matchUsers) {
+                String[] matchArr = matchStr.split("-");
+                String matchId = matchArr[0];
+                Long matchTime = 0l;
+                try {
+                    matchTime = Long.valueOf(matchArr[1]);
+                } catch (Exception e) {
+                    redisTemplate.opsForList().remove(matchKey, 1, matchStr);
+                }
+                if (matchTime < threshold) {
+                    redisTemplate.opsForList().remove(matchKey, 1, matchStr);
+                }
+                if (mongo.getUserId().equals(matchId)) {
+                    contains = true;
+                    break;
+                }
+            }
+            redisTemplate.expire(matchKey, 14l, TimeUnit.DAYS);
+            if (contains) {
+                continue;
+            }
+            UserMatchItem item = new UserMatchItem();
+
+            BeanUtils.copyProperties(mongo, item);
+            item.setDistance(this.getDistance(mongo.getLng(), mongo.getLat(), userQuery));
+            if (StringUtils.isEmpty(item.getDateStatus())) {
+                item.setDateStatus("想聊天");
+            }
+            if (StringUtils.isEmpty(item.getAvatarStatus()) || "-".equals(item.getAvatarStatus())) {
+                item.setAvatarStatus("");
+            } else if ("influencer".equals(item.getAvatarStatus())) {
+                item.setAvatarStatus("influencer");
+            } else if (dateStr.compareTo(item.getAvatarStatus()) <= 0) {
+                item.setAvatarStatus("vip");
+            } else {
+                item.setAvatarStatus("");
+            }
+            item.setTimeShow("本周");
+            Long timestamp = mongo.getTime();
+            if (timestamp != null) {
+                Long diff = nowTime - timestamp;
+                if (diff < 5 * 60 * 1000) {
+                    item.setTimeShow("在线");
+                } else if (diff < 2 * 3600 * 1000) {
+                    item.setTimeShow("刚刚");
+                } else if (diff < 3 * 24 * 3600 * 1000) {
+                    item.setTimeShow("今日");
+                }
+            }
+            result.add(item);
+            size--;
+            if (size <= 0) {
+                break;
             }
         }
-        return userDetails;
+        return result;
     }
 
+    private String getDistance(Double lng, Double lat, UserQuery userQuery) {
+        String distance = "0km";
+        try {
+            double radLat1 = rad(lat);
+            double radLat2 = rad(userQuery.getLat());
+            double a = radLat1 - radLat2;
+
+            double b = rad(lng) - rad(userQuery.getLng());
+
+            double s = RADIUS * 2 * Math.asin(Math.sqrt(Math.pow(Math.sin(a / 2), 2) + Math.cos(radLat1) * Math.cos(radLat2) * Math.pow(Math.sin(b / 2), 2)));
+            Long dis = Math.round(s);
+            if (dis > 100) {
+                distance = ">100km";
+            } else {
+                distance = dis + "km";
+            }
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
+        }
+        return distance;
+    }
+
+    private static double rad(double d) {
+        return d * Math.PI / 180.0;
+    }
 }
