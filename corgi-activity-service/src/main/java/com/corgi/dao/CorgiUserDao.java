@@ -1,43 +1,25 @@
 package com.corgi.dao;
 
 
-import com.alibaba.dubbo.common.utils.CollectionUtils;
 import com.alibaba.dubbo.config.annotation.Reference;
-import com.corgi.activity.entity.CorgiActivity;
-import com.corgi.entity.ActivityMongo;
-import com.corgi.entity.ActivityQuery;
 import com.corgi.entity.UserMongo;
 import com.corgi.entity.UserOnlineMongo;
-import com.corgi.user.api.CorgiFavorActivityService;
-import com.corgi.user.api.CorgiToolService;
-import com.corgi.user.api.CorgiUserActivityService;
 import com.corgi.user.api.CorgiUserService;
 import com.corgi.user.entity.UserDetail;
 import com.corgi.user.entity.UserQuery;
-import com.corgi.util.ActivityUtil;
 import lombok.extern.slf4j.Slf4j;
-import org.bson.types.ObjectId;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
-import org.springframework.data.geo.Circle;
-import org.springframework.data.geo.Distance;
-import org.springframework.data.geo.Metrics;
 import org.springframework.data.geo.Point;
 import org.springframework.data.mongodb.core.MongoTemplate;
-import org.springframework.data.mongodb.core.aggregation.*;
+import org.springframework.data.mongodb.core.index.GeospatialIndex;
+import org.springframework.data.mongodb.core.index.Index;
 import org.springframework.data.mongodb.core.query.Criteria;
-import org.springframework.data.mongodb.core.query.NearQuery;
 import org.springframework.data.mongodb.core.query.Query;
-import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.stereotype.Component;
-import org.springframework.util.StringUtils;
 
-import java.lang.reflect.Modifier;
-import java.text.SimpleDateFormat;
 import java.util.*;
-import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 
 /**
  * @author tairanliu
@@ -60,6 +42,17 @@ public class CorgiUserDao {
         mongoTemplate.save(userOnlineMongo);
         mongoTemplate.findAllAndRemove(new Query(Criteria.where("userId").is(userDetail.getUserId())), UserMongo.class);
         mongoTemplate.save(userMongo);
+    }
+
+    public void addIndex() {
+        GeospatialIndex geospatialIndex = new GeospatialIndex("location").named("user_location");
+        Index index = new Index("time", Sort.Direction.ASC).named("user_time").expire(7 * 24 * 3600);
+        mongoTemplate.indexOps("User").ensureIndex(geospatialIndex);
+        mongoTemplate.indexOps("User").ensureIndex(index);
+
+        Index indexOnline = new Index("time", Sort.Direction.ASC).named("user_time").expire(5 * 60);
+        mongoTemplate.indexOps("UserOnline").ensureIndex(geospatialIndex);
+        mongoTemplate.indexOps("UserOnline").ensureIndex(indexOnline);
     }
 
     public List<UserDetail> findUser(UserQuery userQuery) {

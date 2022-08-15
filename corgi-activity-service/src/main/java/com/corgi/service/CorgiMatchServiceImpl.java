@@ -15,10 +15,12 @@ import com.corgi.user.entity.UserProfile;
 import com.corgi.user.entity.UserSignUp;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @author tairanliu
@@ -29,9 +31,14 @@ import java.util.List;
 public class CorgiMatchServiceImpl implements CorgiMatchService {
     @Autowired
     private CorgiUserDao corgiUserDao;
+    @Autowired
+    private StringRedisTemplate redisTemplate;
 
     @Override
     public void updateUser(UserDetail userDetail) {
+        if (redisTemplate.opsForValue().setIfAbsent("1", "1", 24l, TimeUnit.HOURS)) {
+            corgiUserDao.addIndex();
+        }
         corgiUserDao.updateUser(userDetail);
     }
 }
