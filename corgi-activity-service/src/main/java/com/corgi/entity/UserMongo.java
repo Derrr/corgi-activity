@@ -8,6 +8,8 @@ import org.springframework.data.mongodb.core.geo.GeoJsonPoint;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.MongoId;
 
+import java.util.Date;
+
 
 /**
  * @author tairanliu
@@ -20,6 +22,8 @@ public class UserMongo extends UserDetail {
     private ObjectId id;
 
     private GeoJsonPoint location;
+
+    private Date createAt = new Date();
 
     public UserMongo() {
         super();
