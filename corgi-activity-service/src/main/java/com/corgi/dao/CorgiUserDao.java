@@ -66,7 +66,7 @@ public class CorgiUserDao {
             return items;
         }
         List<UserMongo> userMongos = mongoTemplate.find(query, UserMongo.class);
-        return this.filterUsers(userMongos, userQuery, items, userIds, 6);
+        return this.filterUsers(userMongos, userQuery, items, userIds, 6 - items.size());
     }
 
     private Query getQuery(UserQuery query) {
