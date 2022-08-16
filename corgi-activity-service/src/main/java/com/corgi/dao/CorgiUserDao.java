@@ -59,12 +59,14 @@ public class CorgiUserDao {
     public List<UserMatchItem> findUser(UserQuery userQuery) {
         Query query = this.getQuery(userQuery);
         List<UserOnlineMongo> onlineMongos = mongoTemplate.find(query, UserOnlineMongo.class);
-        List<UserMatchItem> items = this.filterUsers(onlineMongos, userQuery, 6);
+        List<String> userIds = new ArrayList<>();
+        List<UserMatchItem> items = new ArrayList<>();
+        items = this.filterUsers(onlineMongos, userQuery, items, userIds, 6);
         if (items.size() >= 6) {
             return items;
         }
         List<UserMongo> userMongos = mongoTemplate.find(query, UserMongo.class);
-        return this.filterUsers(userMongos, userQuery, 6);
+        return this.filterUsers(userMongos, userQuery, items, userIds, 6);
     }
 
     private Query getQuery(UserQuery query) {
@@ -100,9 +102,8 @@ public class CorgiUserDao {
         return q;
     }
 
-    private List<UserMatchItem> filterUsers(List<? extends UserDetail> mongos, UserQuery userQuery, Integer size) {
+    private List<UserMatchItem> filterUsers(List<? extends UserDetail> mongos, UserQuery userQuery, List<UserMatchItem> result, List<String> userIds, Integer size) {
         String userId = userQuery.getUserId();
-        List<UserMatchItem> result = new ArrayList<>();
         String dateStr = new SimpleDateFormat("yyyy-MM-dd").format(new Date());
         List<String> matchViews = redisTemplate.opsForList().range("user_match_view_" + dateStr + userId, 0, -1);
         String matchKey = "user_match_" + userId;
@@ -111,6 +112,9 @@ public class CorgiUserDao {
         Long threshold = nowTime - 14 * 24 * 3600 * 1000l;
         for (UserDetail mongo : mongos) {
             if (matchViews.contains(mongo.getUserId())) {
+                continue;
+            }
+            if (userIds.contains(mongo.getUserId())) {
                 continue;
             }
             boolean contains = false;
@@ -164,6 +168,7 @@ public class CorgiUserDao {
                 }
             }
             result.add(item);
+            userIds.add(item.getUserId());
             size--;
             if (size <= 0) {
                 break;
