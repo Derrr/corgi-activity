@@ -33,6 +33,6 @@ public class CorgiMatchServiceImpl implements CorgiMatchService {
 
     @Override
     public List<UserMatchItem> getMatchItems(UserQuery userQuery) {
-        return null;
+        return corgiUserDao.findUser(userQuery);
     }
 }

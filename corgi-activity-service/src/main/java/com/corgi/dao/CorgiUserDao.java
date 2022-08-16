@@ -70,6 +70,7 @@ public class CorgiUserDao {
     private Query getQuery(UserQuery query) {
         Query q = new Query().limit(5000);
         q.addCriteria(Criteria.where("location").nearSphere(new Point(query.getLng(), query.getLat())));
+        q.addCriteria(Criteria.where("userId").ne(query.getUserId()));
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy/MM/dd");
         if (!CollectionUtils.isEmpty(query.getDateStatus())) {
             query.getDateStatus().add("");
