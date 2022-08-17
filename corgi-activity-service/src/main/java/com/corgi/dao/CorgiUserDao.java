@@ -106,76 +106,82 @@ public class CorgiUserDao {
         String userId = userQuery.getUserId();
         String dateStr = new SimpleDateFormat("yyyy-MM-dd").format(new Date());
         String viewKey = "user_match_view_" + dateStr + userId;
-        Long viewSize = redisTemplate.opsForSet().size(viewKey);
-        List<String> matchViews = redisTemplate.opsForSet().randomMembers(viewKey, viewSize);
         String matchKey = "user_match_" + userId;
-        Long matchSize = redisTemplate.opsForSet().size(matchKey);
-        List<String> matchUsers = redisTemplate.opsForSet().randomMembers(matchKey, matchSize);
-        Long nowTime = System.currentTimeMillis();
-        Long threshold = nowTime - 14 * 24 * 3600 * 1000l;
-        for (UserDetail mongo : mongos) {
-            if (matchViews.contains(mongo.getUserId())) {
-                continue;
-            }
-            if (userIds.contains(mongo.getUserId())) {
-                continue;
-            }
-            boolean contains = false;
-            for (String matchStr : matchUsers) {
-                String[] matchArr = matchStr.split("-");
-                String matchId = matchArr[0];
-                Long matchTime = 0l;
-                try {
-                    matchTime = Long.valueOf(matchArr[1]);
-                } catch (Exception e) {
-                    redisTemplate.opsForList().remove(matchKey, 1, matchStr);
+        try {
+            Long viewSize = redisTemplate.opsForSet().size(viewKey);
+            List<String> matchViews = redisTemplate.opsForSet().randomMembers(viewKey, viewSize);
+
+            Long matchSize = redisTemplate.opsForSet().size(matchKey);
+            List<String> matchUsers = redisTemplate.opsForSet().randomMembers(matchKey, matchSize);
+            Long nowTime = System.currentTimeMillis();
+            Long threshold = nowTime - 14 * 24 * 3600 * 1000l;
+            for (UserDetail mongo : mongos) {
+                if (matchViews.contains(mongo.getUserId())) {
+                    continue;
                 }
-                if (matchTime < threshold) {
-                    redisTemplate.opsForList().remove(matchKey, 1, matchStr);
+                if (userIds.contains(mongo.getUserId())) {
+                    continue;
                 }
-                if (mongo.getUserId().equals(matchId)) {
-                    contains = true;
+                boolean contains = false;
+                for (String matchStr : matchUsers) {
+                    String[] matchArr = matchStr.split("-");
+                    String matchId = matchArr[0];
+                    Long matchTime = 0l;
+                    try {
+                        matchTime = Long.valueOf(matchArr[1]);
+                    } catch (Exception e) {
+                        redisTemplate.opsForList().remove(matchKey, 1, matchStr);
+                    }
+                    if (matchTime < threshold) {
+                        redisTemplate.opsForList().remove(matchKey, 1, matchStr);
+                    }
+                    if (mongo.getUserId().equals(matchId)) {
+                        contains = true;
+                        break;
+                    }
+                }
+                redisTemplate.expire(matchKey, 14l, TimeUnit.DAYS);
+                if (contains) {
+                    continue;
+                }
+                UserMatchItem item = new UserMatchItem();
+
+                BeanUtils.copyProperties(mongo, item);
+                item.setDistance(this.getDistance(mongo.getLng(), mongo.getLat(), userQuery));
+                if (StringUtils.isEmpty(item.getDateStatus())) {
+                    item.setDateStatus("想聊天");
+                }
+                if (StringUtils.isEmpty(item.getAvatarStatus()) || "-".equals(item.getAvatarStatus())) {
+                    item.setAvatarStatus("");
+                } else if ("influencer".equals(item.getAvatarStatus())) {
+                    item.setAvatarStatus("influencer");
+                } else if (dateStr.compareTo(item.getAvatarStatus()) <= 0) {
+                    item.setAvatarStatus("vip");
+                } else {
+                    item.setAvatarStatus("");
+                }
+                item.setTimeShow("本周");
+                Long timestamp = mongo.getTime();
+                if (timestamp != null) {
+                    Long diff = nowTime - timestamp;
+                    if (diff < 5 * 60 * 1000) {
+                        item.setTimeShow("在线");
+                    } else if (diff < 2 * 3600 * 1000) {
+                        item.setTimeShow("刚刚");
+                    } else if (diff < 3 * 24 * 3600 * 1000) {
+                        item.setTimeShow("今日");
+                    }
+                }
+                result.add(item);
+                userIds.add(item.getUserId());
+                size--;
+                if (size <= 0) {
                     break;
                 }
             }
-            redisTemplate.expire(matchKey, 14l, TimeUnit.DAYS);
-            if (contains) {
-                continue;
-            }
-            UserMatchItem item = new UserMatchItem();
-
-            BeanUtils.copyProperties(mongo, item);
-            item.setDistance(this.getDistance(mongo.getLng(), mongo.getLat(), userQuery));
-            if (StringUtils.isEmpty(item.getDateStatus())) {
-                item.setDateStatus("想聊天");
-            }
-            if (StringUtils.isEmpty(item.getAvatarStatus()) || "-".equals(item.getAvatarStatus())) {
-                item.setAvatarStatus("");
-            } else if ("influencer".equals(item.getAvatarStatus())) {
-                item.setAvatarStatus("influencer");
-            } else if (dateStr.compareTo(item.getAvatarStatus()) <= 0) {
-                item.setAvatarStatus("vip");
-            } else {
-                item.setAvatarStatus("");
-            }
-            item.setTimeShow("本周");
-            Long timestamp = mongo.getTime();
-            if (timestamp != null) {
-                Long diff = nowTime - timestamp;
-                if (diff < 5 * 60 * 1000) {
-                    item.setTimeShow("在线");
-                } else if (diff < 2 * 3600 * 1000) {
-                    item.setTimeShow("刚刚");
-                } else if (diff < 3 * 24 * 3600 * 1000) {
-                    item.setTimeShow("今日");
-                }
-            }
-            result.add(item);
-            userIds.add(item.getUserId());
-            size--;
-            if (size <= 0) {
-                break;
-            }
+        } catch (Exception e) {
+            redisTemplate.delete(matchKey);
+            redisTemplate.delete(viewKey);
         }
         return result;
     }
