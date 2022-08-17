@@ -108,11 +108,8 @@ public class CorgiUserDao {
         String viewKey = "user_match_view_" + dateStr + userId;
         String matchKey = "user_match_" + userId;
         try {
-            Long viewSize = redisTemplate.opsForSet().size(viewKey);
-            List<String> matchViews = redisTemplate.opsForSet().randomMembers(viewKey, viewSize);
-
-            Long matchSize = redisTemplate.opsForSet().size(matchKey);
-            List<String> matchUsers = redisTemplate.opsForSet().randomMembers(matchKey, matchSize);
+            List<String> matchViews = redisTemplate.opsForList().range(viewKey, 0,-1);
+            List<String> matchUsers = redisTemplate.opsForList().range(matchKey,0,-1);
             Long nowTime = System.currentTimeMillis();
             Long threshold = nowTime - 14 * 24 * 3600 * 1000l;
             for (UserDetail mongo : mongos) {
