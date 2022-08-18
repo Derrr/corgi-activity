@@ -56,6 +56,10 @@ public class CorgiUserDao {
         }
     }
 
+    public void deleteUser(String userId) {
+        mongoTemplate.findAllAndRemove(new Query(Criteria.where("userId").is(userId)), UserMongo.class);
+    }
+
     public List<UserMatchItem> findUser(UserQuery userQuery) {
         Query query = this.getQuery(userQuery);
         List<UserOnlineMongo> onlineMongos = mongoTemplate.find(query, UserOnlineMongo.class);
@@ -98,12 +102,12 @@ public class CorgiUserDao {
             calendar.add(Calendar.YEAR, -1 * query.getEndAge());
             startYear = sdf.format(calendar.getTime());
         }
-        if(!StringUtils.isEmpty(startYear) || !StringUtils.isEmpty(endYear)) {
+        if (!StringUtils.isEmpty(startYear) || !StringUtils.isEmpty(endYear)) {
             Criteria yearCri = Criteria.where("birthday");
-            if(!StringUtils.isEmpty(startYear)){
+            if (!StringUtils.isEmpty(startYear)) {
                 yearCri.gt(startYear);
             }
-            if(!StringUtils.isEmpty(endYear)){
+            if (!StringUtils.isEmpty(endYear)) {
                 yearCri.lt(endYear);
             }
             q.addCriteria(yearCri);
@@ -120,8 +124,8 @@ public class CorgiUserDao {
         String viewKey = "user_match_view_" + dateStr + userId;
         String matchKey = "user_match_" + userId;
         try {
-            List<String> matchViews = redisTemplate.opsForList().range(viewKey, 0,-1);
-            List<String> matchUsers = redisTemplate.opsForList().range(matchKey,0,-1);
+            List<String> matchViews = redisTemplate.opsForList().range(viewKey, 0, -1);
+            List<String> matchUsers = redisTemplate.opsForList().range(matchKey, 0, -1);
             Long nowTime = System.currentTimeMillis();
             Long threshold = nowTime - 14 * 24 * 3600 * 1000l;
             for (UserDetail mongo : mongos) {

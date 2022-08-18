@@ -17,4 +17,6 @@ public interface CorgiMatchService {
     void updateUser(UserDetail userDetail);
 
     List<UserMatchItem> getMatchItems(UserQuery userQuery);
+
+    void deleteUser(String userId);
 }

@@ -23,8 +23,6 @@ import java.util.concurrent.TimeUnit;
 public class CorgiMatchServiceImpl implements CorgiMatchService {
     @Autowired
     private CorgiUserDao corgiUserDao;
-    @Autowired
-    private StringRedisTemplate redisTemplate;
 
     @Override
     public void updateUser(UserDetail userDetail) {
@@ -34,5 +32,10 @@ public class CorgiMatchServiceImpl implements CorgiMatchService {
     @Override
     public List<UserMatchItem> getMatchItems(UserQuery userQuery) {
         return corgiUserDao.findUser(userQuery);
+    }
+
+    @Override
+    public void deleteUser(String userId) {
+        corgiUserDao.deleteUser(userId);
     }
 }
