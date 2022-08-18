@@ -86,15 +86,27 @@ public class CorgiUserDao {
         if (!CollectionUtils.isEmpty(query.getRole())) {
             q.addCriteria(Criteria.where("role").in(query.getRole()));
         }
+        String startYear = "";
+        String endYear = "";
         if (query.getStartAge() != null && query.getStartAge() > 18) {
             Calendar calendar = Calendar.getInstance();
             calendar.add(Calendar.YEAR, -1 * query.getStartAge());
-            q.addCriteria(Criteria.where("birthday").lt(sdf.format(calendar.getTime())));
+            endYear = sdf.format(calendar.getTime());
         }
         if (query.getEndAge() != null && query.getEndAge() < 70) {
             Calendar calendar = Calendar.getInstance();
             calendar.add(Calendar.YEAR, -1 * query.getEndAge());
-            q.addCriteria(Criteria.where("birthday").gt(sdf.format(calendar.getTime())));
+            startYear = sdf.format(calendar.getTime());
+        }
+        if(!StringUtils.isEmpty(startYear) || !StringUtils.isEmpty(endYear)) {
+            Criteria yearCri = Criteria.where("birthday");
+            if(!StringUtils.isEmpty(startYear)){
+                yearCri.gt(startYear);
+            }
+            if(!StringUtils.isEmpty(endYear)){
+                yearCri.lt(endYear);
+            }
+            q.addCriteria(yearCri);
         }
         if ("verify".equals(query.getType())) {
             q.addCriteria(Criteria.where("avatarCheckStatus").is("verified"));
