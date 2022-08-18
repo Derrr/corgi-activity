@@ -8,11 +8,11 @@ import com.corgi.user.entity.UserMatchItem;
 import com.corgi.user.entity.UserQuery;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.redis.core.StringRedisTemplate;
+
 import org.springframework.stereotype.Component;
 
 import java.util.List;
-import java.util.concurrent.TimeUnit;
+
 
 /**
  * @author tairanliu
