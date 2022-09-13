@@ -393,9 +393,6 @@ public class CorgiActivityDao {
             criteriaList.add(Criteria.where("city").regex(activityQuery.getCity() + ".*"));
         }
 
-//        if (!StringUtils.isEmpty(activityQuery.getStartTime())) {
-//            criteriaList.add(Criteria.where(ActivityMongo.SIGN_UP_TIME).gte(activityQuery.getStartTime()));
-//        }
         if (!StringUtils.isEmpty(activityQuery.getEndTime())) {
             criteriaList.add(Criteria.where(ActivityMongo.SIGN_UP_TIME).lte(activityQuery.getEndTime()));
         }
@@ -455,6 +452,18 @@ public class CorgiActivityDao {
         Query query = getDescIdQuery(new Criteria().andOperator(userCriteria, statusCriteria), start, size);
         List<ActivityMongo> corgiActivities = mongoTemplate.find(query, ActivityMongo.class);
         return corgiActivities;
+    }
+
+    public List<ActivityMongo> queryFeedActivity(ActivityQuery activityQuery) {
+        List<Criteria> criteriaList = new ArrayList<>();
+        if (!StringUtils.isEmpty(activityQuery.getCity())) {
+            criteriaList.add(Criteria.where("city").regex(activityQuery.getCity() + ".*"));
+        }
+        if (!StringUtils.isEmpty(activityQuery.getActivityId())) {
+            criteriaList.add(Criteria.where("_id").lt(activityQuery.getActivityId()));
+        }
+        Query query = new Query(new Criteria().andOperator(criteriaList.toArray(new Criteria[0]))).with(Sort.by(Sort.Direction.DESC, "mongoId")).limit(activityQuery.getPageSize());
+        return mongoTemplate.find(query, ActivityMongo.class);
     }
 
     public List<ActivityMongo> queryActivities(CorgiActivity activity, Integer start, Integer size) {

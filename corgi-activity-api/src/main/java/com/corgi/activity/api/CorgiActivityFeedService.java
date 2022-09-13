@@ -14,4 +14,6 @@ public interface CorgiActivityFeedService {
     CorgiActivity addFeedActivity(CorgiActivity corgiActivity);
 
     CorgiActivity getActivityById(String id);
+
+    List<CorgiActivity> queryActivityFeed(ActivityQuery activityQuery);
 }
