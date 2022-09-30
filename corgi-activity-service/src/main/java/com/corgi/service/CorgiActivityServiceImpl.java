@@ -251,6 +251,7 @@ public class CorgiActivityServiceImpl implements CorgiActivityService {
         List<Criteria> resultList = new ArrayList<>();
         if (StringUtils.isEmpty(query.getUserId()) || !query.getUserId().equals(query.getLoginUserId())) {
             resultList.add(Criteria.where("checkStatus").ne("check"));
+            resultList.add(Criteria.where("checkStatus").ne("not_good"));
         }
         resultList.add(Criteria.where("checkStatus").ne("fail"));
         Criteria StatusCri = Criteria.where("status").ne(CorgiActivity.DELETED);
@@ -278,6 +279,10 @@ public class CorgiActivityServiceImpl implements CorgiActivityService {
                 resultList.add(blackCri);
             }
         }
+        if (StringUtils.isNotEmpty(query.getTopic())) {
+            resultList.add(Criteria.where("topics").is(query.getTopic()));
+        }
+
         resultList.add(categoryCri);
         resultList.toArray();
         Criteria[] a = new Criteria[resultList.size()];
