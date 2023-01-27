@@ -494,10 +494,10 @@ public class CorgiActivityDao {
 
     public List<ActivityMongo> searchActivity(CorgiActivity activity, Integer start, Integer size) {
         //Date now = new Date();
-        Criteria statusCriteria = Criteria.where("status").is(CorgiActivity.CREATED);
-        if (CorgiActivity.NOT_DELETED.equals(activity.getStatus())) {
-            statusCriteria = Criteria.where("status").ne(CorgiActivity.DELETED);
-        }
+//        Criteria statusCriteria = Criteria.where("status").is(CorgiActivity.CREATED);
+//        if (CorgiActivity.NOT_DELETED.equals(activity.getStatus())) {
+//            statusCriteria = Criteria.where("status").ne(CorgiActivity.DELETED);
+//        }
         Criteria titleCriteria = Criteria.where("title").regex("^.*" + activity.getTitle() + ".*$");
         Criteria contentCriteria = Criteria.where("content").regex("^.*" + activity.getTitle() + ".*$");
         //Criteria addressCriteria = Criteria.where("address").regex("^.*" + activity.getTitle() + ".*$");
@@ -505,7 +505,10 @@ public class CorgiActivityDao {
         //Criteria endTimeCriteria = Criteria.where("endTime").gte(new SimpleDateFormat("yyyy-MM-dd HH:mm").format(now));
         Criteria contentCri = new Criteria().orOperator(titleCriteria, contentCriteria);
         //Criteria categoryCri = new Criteria().orOperator(endTimeCriteria, signUpCriteria);
-        Criteria andCri = new Criteria().andOperator(contentCri, statusCriteria);
+        Criteria andCri = new Criteria().andOperator(contentCri,
+                Criteria.where("status").ne(CorgiActivity.DELETED),
+                Criteria.where("status").ne("not_good"),
+                Criteria.where("status").ne("fail"));
         Query query = getDescIdQuery(andCri, start, size);
         List<ActivityMongo> mongos = mongoTemplate.find(query, ActivityMongo.class);
         if (CollectionUtils.isNotEmpty(mongos)) {
