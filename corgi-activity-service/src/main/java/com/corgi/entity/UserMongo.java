@@ -3,6 +3,7 @@ package com.corgi.entity;
 import com.corgi.user.entity.UserDetail;
 import com.corgi.user.entity.UserExtra;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.bson.types.ObjectId;
 import org.springframework.beans.BeanUtils;
 import org.springframework.data.mongodb.core.geo.GeoJsonPoint;
@@ -17,6 +18,7 @@ import java.util.Date;
  */
 @Data
 @Document(collection = "User")
+@NoArgsConstructor
 public class UserMongo extends UserMongoBase {
 
     @MongoId
