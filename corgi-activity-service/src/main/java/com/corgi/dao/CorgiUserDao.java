@@ -83,10 +83,8 @@ public class CorgiUserDao {
         List<UserMongo> userMongos = mongoTemplate.find(query, UserMongo.class);
         UserDetail detail = corgiUserService.getUserDetailBasic(userQuery.getUserId());
         if (UserDetail.VERIFIED.equals(detail.getAvatarCheckStatus()) || "normal".equals(detail.getAvatarCheckStatus())) {
-            log.info("match has face...");
             return filterFace(userQuery, onlineMongos, userMongos);
         } else {
-            log.info("match no face...");
             return filterNoFace(userQuery, onlineMongos, userMongos);
         }
     }
@@ -349,7 +347,6 @@ public class CorgiUserDao {
             redisTemplate.delete(matchKey);
             redisTemplate.delete(viewKey);
         }
-        log.info("match type:{} size:{} remain:{}", filterType, result.size(), remain.size());
         return remain;
     }
 
