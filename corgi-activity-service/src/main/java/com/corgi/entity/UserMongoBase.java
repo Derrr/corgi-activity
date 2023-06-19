@@ -16,16 +16,20 @@ import java.util.Date;
  * @author tairanliu
  */
 @Data
-@Document(collection = "User")
-public class UserMongo extends UserMongoBase {
+public class UserMongoBase extends UserDetail {
 
-    @MongoId
-    private ObjectId id;
+    private UserExtra userExtra;
 
-    private GeoJsonPoint location;
+    private Date createAt = new Date();
 
-    public UserMongo(UserDetail detail) {
-        this.location = new GeoJsonPoint(detail.getLng(), detail.getLat());
+    public UserMongoBase() {
+        super();
+    }
+
+    public UserDetail getUserDetail() {
+        UserDetail detail = new UserDetail();
+        BeanUtils.copyProperties(this, detail);
+        return detail;
     }
 
 }

@@ -1,6 +1,7 @@
 package com.corgi.entity;
 
 import com.corgi.user.entity.UserDetail;
+import com.corgi.user.entity.UserExtra;
 import lombok.Data;
 import org.bson.types.ObjectId;
 import org.springframework.beans.BeanUtils;
@@ -16,27 +17,15 @@ import java.util.Date;
  */
 @Data
 @Document(collection = "UserOnline")
-public class UserOnlineMongo extends UserDetail {
+public class UserOnlineMongo extends UserMongoBase {
 
     @MongoId
     private ObjectId id;
 
     private GeoJsonPoint location;
 
-    private Date createAt = new Date();
-
-    public UserOnlineMongo() {
-        super();
-    }
-
     public UserOnlineMongo(UserDetail detail) {
         this.location = new GeoJsonPoint(detail.getLng(), detail.getLat());
-    }
-
-    public UserDetail getUserDetail() {
-        UserDetail detail = new UserDetail();
-        BeanUtils.copyProperties(this, detail);
-        return detail;
     }
 
 }

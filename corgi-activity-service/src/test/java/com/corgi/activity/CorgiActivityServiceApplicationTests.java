@@ -7,6 +7,7 @@ import org.springframework.data.mongodb.core.query.Criteria;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 //@SpringBootTest
@@ -24,7 +25,7 @@ class CorgiActivityServiceApplicationTests {
 	}
 
 	public static void main(String[] args) {
-		contextLoads();
+		System.out.println("[\"1\", \"2\",'3']".replaceAll("[\\]\\[\"'\\s]",""));
 	}
 
 }

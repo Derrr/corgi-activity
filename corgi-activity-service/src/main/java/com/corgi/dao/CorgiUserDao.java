@@ -3,11 +3,15 @@ package com.corgi.dao;
 
 import com.alibaba.dubbo.config.annotation.Reference;
 import com.corgi.entity.UserMongo;
+import com.corgi.entity.UserMongoBase;
 import com.corgi.entity.UserOnlineMongo;
+import com.corgi.user.api.CorgiExtraService;
 import com.corgi.user.api.CorgiUserService;
 import com.corgi.user.entity.UserDetail;
+import com.corgi.user.entity.UserExtra;
 import com.corgi.user.entity.UserMatchItem;
 import com.corgi.user.entity.UserQuery;
+import com.fasterxml.jackson.databind.util.JSONPObject;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,6 +37,14 @@ import java.util.concurrent.TimeUnit;
 @Slf4j
 @Component
 public class CorgiUserDao {
+    final static String INTERESTS = "interests";
+    final static String NO_INTERESTS = "no_interests";
+
+    final static String FACE_INTERESTS = "face_interests";
+    final static String FACE_NO_INTERESTS = "face_no_interests";
+    final static String NO_FACE_INTERESTS = "no_face_interests";
+    final static String NO_FACE_NO_INTERESTS = "no_face_no_interests";
+
     @Autowired
     MongoTemplate mongoTemplate;
 
@@ -40,6 +52,8 @@ public class CorgiUserDao {
     private StringRedisTemplate redisTemplate;
     @Reference
     private CorgiUserService corgiUserService;
+    @Reference
+    private CorgiExtraService corgiExtraService;
 
     private final static Double RADIUS = 6371.0;
 
@@ -47,9 +61,12 @@ public class CorgiUserDao {
         if (userDetail.getLng() != null && userDetail.getLng() < 180
                 && userDetail.getLat() != null && userDetail.getLat() < 90) {
             UserMongo userMongo = new UserMongo(userDetail);
+            UserExtra userExtra = corgiExtraService.getUserExtra(userDetail.getUserId());
             UserOnlineMongo userOnlineMongo = new UserOnlineMongo(userDetail);
             BeanUtils.copyProperties(userDetail, userMongo);
             BeanUtils.copyProperties(userDetail, userOnlineMongo);
+            userMongo.setUserExtra(userExtra);
+            userOnlineMongo.setUserExtra(userExtra);
             mongoTemplate.save(userOnlineMongo);
             mongoTemplate.findAllAndRemove(new Query(Criteria.where("userId").is(userDetail.getUserId())), UserMongo.class);
             mongoTemplate.save(userMongo);
@@ -63,18 +80,88 @@ public class CorgiUserDao {
     public List<UserMatchItem> findUser(UserQuery userQuery) {
         Query query = this.getQuery(userQuery);
         List<UserOnlineMongo> onlineMongos = mongoTemplate.find(query, UserOnlineMongo.class);
-        List<String> userIds = new ArrayList<>();
+        List<UserMongo> userMongos = mongoTemplate.find(query, UserMongo.class);
+        UserDetail detail = corgiUserService.getUserDetailBasic(userQuery.getUserId());
+        if (UserDetail.VERIFIED.equals(detail.getAvatarCheckStatus()) || "normal".equals(detail.getAvatarCheckStatus())) {
+            return filterFace(userQuery, onlineMongos, userMongos);
+        } else {
+            return filterNoFace(userQuery, onlineMongos, userMongos);
+        }
+    }
+
+    private List<UserMatchItem> filterFace(UserQuery userQuery, List<UserOnlineMongo> onlineMongos, List<UserMongo> userMongos) {
+        UserExtra userExtra = corgiExtraService.getUserExtra(userQuery.getUserId());
+        List<String> interests = Arrays.asList(userExtra.getInterests().replaceAll("[\\]\\[\"'\\s]", "").split(","));
         List<UserMatchItem> items = new ArrayList<>();
-        items = this.filterUsers(onlineMongos, userQuery, items, userIds, 6);
+        List<String> userIds = new ArrayList<>();
+        if (!CollectionUtils.isEmpty(interests)) {
+            onlineMongos = (List<UserOnlineMongo>) this.filterUsers(onlineMongos, userQuery, FACE_INTERESTS, interests, items, userIds, 6);
+            if (items.size() >= 6) {
+                return items;
+            }
+            userMongos = (List<UserMongo>) this.filterUsers(userMongos, userQuery, FACE_INTERESTS, interests, items, userIds, 6 - items.size());
+            if (items.size() >= 6) {
+                return items;
+            }
+        }
+        onlineMongos = (List<UserOnlineMongo>) this.filterUsers(onlineMongos, userQuery, FACE_NO_INTERESTS, interests, items, userIds, 6 - items.size());
         if (items.size() >= 6) {
             return items;
         }
-        List<UserMongo> userMongos = mongoTemplate.find(query, UserMongo.class);
-        return this.filterUsers(userMongos, userQuery, items, userIds, 6 - items.size());
+        userMongos = (List<UserMongo>) this.filterUsers(userMongos, userQuery, FACE_NO_INTERESTS, interests, items, userIds, 6 - items.size());
+        if (items.size() >= 6) {
+            return items;
+        }
+
+        if (!CollectionUtils.isEmpty(interests)) {
+            onlineMongos = (List<UserOnlineMongo>) this.filterUsers(onlineMongos, userQuery, NO_FACE_INTERESTS, interests, items, userIds, 6);
+            if (items.size() >= 6) {
+                return items;
+            }
+            userMongos = (List<UserMongo>) this.filterUsers(userMongos, userQuery, NO_FACE_INTERESTS, interests, items, userIds, 6 - items.size());
+            if (items.size() >= 6) {
+                return items;
+            }
+        }
+        this.filterUsers(onlineMongos, userQuery, NO_FACE_NO_INTERESTS, interests, items, userIds, 6 - items.size());
+        if (items.size() >= 6) {
+            return items;
+        }
+        this.filterUsers(userMongos, userQuery, NO_FACE_NO_INTERESTS, interests, items, userIds, 6 - items.size());
+        return items;
+
+    }
+
+    private List<UserMatchItem> filterNoFace(UserQuery userQuery, List<UserOnlineMongo> onlineMongos, List<UserMongo> userMongos) {
+        UserExtra userExtra = corgiExtraService.getUserExtra(userQuery.getUserId());
+        List<String> interests = Arrays.asList(userExtra.getInterests().replaceAll("[\\]\\[\"'\\s]", "").split(","));
+        List<UserMatchItem> items = new ArrayList<>();
+        List<String> userIds = new ArrayList<>();
+        if (!CollectionUtils.isEmpty(interests)) {
+            onlineMongos = (List<UserOnlineMongo>) this.filterUsers(onlineMongos, userQuery, INTERESTS, interests, items, userIds, 6);
+            if (items.size() >= 6) {
+                return items;
+            }
+            userMongos = (List<UserMongo>) this.filterUsers(userMongos, userQuery, INTERESTS, interests, items, userIds, 6 - items.size());
+            if (items.size() >= 6) {
+                return items;
+            }
+        }
+        this.filterUsers(onlineMongos, userQuery, NO_INTERESTS, interests, items, userIds, 6 - items.size());
+        if (items.size() >= 6) {
+            return items;
+        }
+        this.filterUsers(userMongos, userQuery, NO_INTERESTS, interests, items, userIds, 6 - items.size());
+        return items;
     }
 
     private Query getQuery(UserQuery query) {
+
         Query q = new Query().limit(5000);
+        UserDetail detail = corgiUserService.getUserDetailBasic(query.getUserId());
+        if (!UserDetail.VERIFIED.equals(detail.getAvatarCheckStatus()) && !"normal".equals(detail.getAvatarCheckStatus())) {
+            q.addCriteria(new Criteria().andOperator(Criteria.where("avatarCheckStatus").ne(UserDetail.VERIFIED), Criteria.where("avatarCheckStatus").ne("normal")));
+        }
         q.addCriteria(Criteria.where("location").nearSphere(new Point(query.getLng(), query.getLat())));
         q.addCriteria(Criteria.where("userId").ne(query.getUserId()));
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy/MM/dd");
@@ -118,17 +205,24 @@ public class CorgiUserDao {
         return q;
     }
 
-    private List<UserMatchItem> filterUsers(List<? extends UserDetail> mongos, UserQuery userQuery, List<UserMatchItem> result, List<String> userIds, Integer size) {
+    private List<? extends UserMongoBase> filterUsers(List<? extends UserMongoBase> mongos,
+                                                      UserQuery userQuery,
+                                                      String filterType,
+                                                      List<String> interets,
+                                                      List<UserMatchItem> result,
+                                                      List<String> userIds,
+                                                      Integer size) {
         String userId = userQuery.getUserId();
         String dateStr = new SimpleDateFormat("yyyy-MM-dd").format(new Date());
         String viewKey = "user_match_view_" + dateStr + userId;
         String matchKey = "user_match_" + userId;
+        List<UserMongoBase> remain = new ArrayList<>();
         try {
             List<String> matchViews = redisTemplate.opsForList().range(viewKey, 0, -1);
             List<String> matchUsers = redisTemplate.opsForList().range(matchKey, 0, -1);
             Long nowTime = System.currentTimeMillis();
             Long threshold = nowTime - 14 * 24 * 3600 * 1000l;
-            for (UserDetail mongo : mongos) {
+            for (UserMongoBase mongo : mongos) {
                 if (matchViews.contains(mongo.getUserId())) {
                     continue;
                 }
@@ -157,6 +251,59 @@ public class CorgiUserDao {
                 if (contains) {
                     continue;
                 }
+                UserExtra userExtra = mongo.getUserExtra();
+                String userInterest = userExtra.getInterests();
+                boolean hasInterest = false;
+                for (String interest : interets) {
+                    if (userInterest.contains(interest)) {
+                        hasInterest = true;
+                        break;
+                    }
+                }
+                boolean hasFace = "normal".equals(mongo.getAvatarCheckStatus()) || UserDetail.VERIFIED.equals(mongo.getAvatarCheckStatus());
+                if (filterType.equals(INTERESTS)) {
+                    if (hasFace) {
+                        continue;
+                    }
+                    if (!hasInterest) {
+                        remain.add(mongo);
+                        continue;
+                    }
+                }
+                if (filterType.equals(NO_INTERESTS)) {
+                    if (hasFace) {
+                        continue;
+                    }
+                    if (hasInterest) {
+                        remain.add(mongo);
+                        continue;
+                    }
+                }
+                if (filterType.equals(FACE_INTERESTS)) {
+                    if (!hasFace || !hasInterest) {
+                        remain.add(mongo);
+                        continue;
+                    }
+                }
+                if (filterType.equals(NO_FACE_INTERESTS)) {
+                    if (hasFace || !hasInterest) {
+                        remain.add(mongo);
+                        continue;
+                    }
+                }
+                if (filterType.equals(FACE_NO_INTERESTS)) {
+                    if (!hasFace || hasInterest) {
+                        remain.add(mongo);
+                        continue;
+                    }
+                }
+                if (filterType.equals(NO_FACE_NO_INTERESTS)) {
+                    if (hasFace || hasInterest) {
+                        remain.add(mongo);
+                        continue;
+                    }
+                }
+
                 UserMatchItem item = new UserMatchItem();
 
                 BeanUtils.copyProperties(mongo, item);
@@ -196,7 +343,7 @@ public class CorgiUserDao {
             redisTemplate.delete(matchKey);
             redisTemplate.delete(viewKey);
         }
-        return result;
+        return remain;
     }
 
     private String getDistance(Double lng, Double lat, UserQuery userQuery) {
