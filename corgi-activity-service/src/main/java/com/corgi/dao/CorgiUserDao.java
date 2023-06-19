@@ -83,8 +83,10 @@ public class CorgiUserDao {
         List<UserMongo> userMongos = mongoTemplate.find(query, UserMongo.class);
         UserDetail detail = corgiUserService.getUserDetailBasic(userQuery.getUserId());
         if (UserDetail.VERIFIED.equals(detail.getAvatarCheckStatus()) || "normal".equals(detail.getAvatarCheckStatus())) {
+            log.info("has face...");
             return filterFace(userQuery, onlineMongos, userMongos);
         } else {
+            log.info("no face...");
             return filterNoFace(userQuery, onlineMongos, userMongos);
         }
     }
@@ -96,6 +98,7 @@ public class CorgiUserDao {
         List<String> userIds = new ArrayList<>();
         if (!CollectionUtils.isEmpty(interests)) {
             onlineMongos = (List<UserOnlineMongo>) this.filterUsers(onlineMongos, userQuery, FACE_INTERESTS, interests, items, userIds, 6);
+            ;
             if (items.size() >= 6) {
                 return items;
             }
@@ -251,13 +254,17 @@ public class CorgiUserDao {
                 if (contains) {
                     continue;
                 }
-                UserExtra userExtra = mongo.getUserExtra();
-                String userInterest = userExtra.getInterests();
                 boolean hasInterest = false;
-                for (String interest : interets) {
-                    if (userInterest.contains(interest)) {
-                        hasInterest = true;
-                        break;
+                UserExtra userExtra = mongo.getUserExtra();
+                if (userExtra != null) {
+                    String userInterest = userExtra.getInterests();
+                    if (!StringUtils.isEmpty(userInterest) && !"[]".equals(userInterest)) {
+                        for (String interest : interets) {
+                            if (userInterest.contains(interest)) {
+                                hasInterest = true;
+                                break;
+                            }
+                        }
                     }
                 }
                 boolean hasFace = "normal".equals(mongo.getAvatarCheckStatus()) || UserDetail.VERIFIED.equals(mongo.getAvatarCheckStatus());
@@ -334,8 +341,7 @@ public class CorgiUserDao {
                 }
                 result.add(item);
                 userIds.add(item.getUserId());
-                size--;
-                if (size <= 0) {
+                if (result.size() >= size) {
                     break;
                 }
             }
@@ -343,6 +349,7 @@ public class CorgiUserDao {
             redisTemplate.delete(matchKey);
             redisTemplate.delete(viewKey);
         }
+        log.info("type:{} size:{} remain:{}", filterType, result.size(), remain.size());
         return remain;
     }
 
