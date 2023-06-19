@@ -11,15 +11,11 @@ import com.corgi.user.entity.UserDetail;
 import com.corgi.user.entity.UserExtra;
 import com.corgi.user.entity.UserMatchItem;
 import com.corgi.user.entity.UserQuery;
-import com.fasterxml.jackson.databind.util.JSONPObject;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Sort;
 import org.springframework.data.geo.Point;
 import org.springframework.data.mongodb.core.MongoTemplate;
-import org.springframework.data.mongodb.core.index.GeospatialIndex;
-import org.springframework.data.mongodb.core.index.Index;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.redis.core.StringRedisTemplate;
@@ -178,6 +174,25 @@ public class CorgiUserDao {
         if (!CollectionUtils.isEmpty(query.getRole())) {
             q.addCriteria(Criteria.where("role").in(query.getRole()));
         }
+        if (!CollectionUtils.isEmpty(query.getAim())) {
+            q.addCriteria(Criteria.where("aim").in(query.getAim()));
+        }
+        if (!CollectionUtils.isEmpty(query.getProfession())) {
+            q.addCriteria(Criteria.where("profession").in(query.getProfession()));
+        }
+        if (!CollectionUtils.isEmpty(query.getEducation())) {
+            q.addCriteria(Criteria.where("education").in(query.getEducation()));
+        }
+        if (!CollectionUtils.isEmpty(query.getXp())) {
+            q.addCriteria(Criteria.where("xp").in(query.getXp()));
+        }
+        if (!CollectionUtils.isEmpty(query.getInterests())) {
+            q.addCriteria(Criteria.where("interestList").in(query.getInterests()));
+        }
+        if (!CollectionUtils.isEmpty(query.getTags())) {
+            q.addCriteria(Criteria.where("tagList").in(query.getTags()));
+        }
+
         String startYear = "";
         String endYear = "";
         if (query.getStartAge() != null && query.getStartAge() > 18) {
@@ -253,15 +268,12 @@ public class CorgiUserDao {
                     continue;
                 }
                 boolean hasInterest = false;
-                UserExtra userExtra = mongo.getUserExtra();
-                if (userExtra != null) {
-                    String userInterest = userExtra.getInterests();
-                    if (!StringUtils.isEmpty(userInterest) && !"[]".equals(userInterest)) {
-                        for (String interest : interets) {
-                            if (userInterest.contains(interest)) {
-                                hasInterest = true;
-                                break;
-                            }
+                List<String> userInterest = mongo.getInterestList();
+                if (!CollectionUtils.isEmpty(userInterest)) {
+                    for (String interest : interets) {
+                        if (userInterest.contains(interest)) {
+                            hasInterest = true;
+                            break;
                         }
                     }
                 }
