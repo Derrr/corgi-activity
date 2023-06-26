@@ -184,7 +184,7 @@ public class CorgiUserDao {
             q.addCriteria(Criteria.where("education").in(query.getEducation()));
         }
         if (!CollectionUtils.isEmpty(query.getXp())) {
-            q.addCriteria(Criteria.where("xp").in(query.getXp()));
+            q.addCriteria(Criteria.where("xpList").in(query.getXp()));
         }
         if (!CollectionUtils.isEmpty(query.getInterests())) {
             q.addCriteria(Criteria.where("interestList").in(query.getInterests()));

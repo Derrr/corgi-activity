@@ -26,8 +26,8 @@ public class UserMongoBase extends UserDetail {
     private String aim;
     private String profession;
     private String education;
-    private String xp;
     private String income;
+    private List<String> xpList;
     private List<String> interestList = new ArrayList<>();
     private List<String> tagList = new ArrayList<>();
 
@@ -46,6 +46,10 @@ public class UserMongoBase extends UserDetail {
         if (StringUtils.isEmpty(userExtra.getTags()) && !"[]".equals(userExtra.getTags())) {
             this.tagList = Arrays.asList(userExtra.getTags().replaceAll("[\\]\\[\"'\\s]", "").split(","));
         }
+        if (StringUtils.isEmpty(userExtra.getXp()) && !"[]".equals(userExtra.getXp())) {
+            this.xpList = Arrays.asList(userExtra.getXp().replaceAll("[\\]\\[\"'\\s]", "").split(","));
+        }
+
     }
 
     public UserDetail getUserDetail() {
