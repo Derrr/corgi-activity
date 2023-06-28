@@ -161,7 +161,7 @@ public class CorgiUserDao {
         }
         q.addCriteria(Criteria.where("location").nearSphere(new Point(query.getLng(), query.getLat())));
         if (query.getRange() != null && query.getRange() > 0 && query.getRange() < 100) {
-            q.addCriteria(Criteria.where("location").maxDistance(query.getRange()));
+            q.addCriteria(Criteria.where("location").maxDistance(query.getRange()/111.12));
         }
         q.addCriteria(Criteria.where("userId").ne(query.getUserId()));
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy/MM/dd");
