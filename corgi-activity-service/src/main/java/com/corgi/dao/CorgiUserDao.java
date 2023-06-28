@@ -160,6 +160,9 @@ public class CorgiUserDao {
             q.addCriteria(new Criteria().andOperator(Criteria.where("avatarCheckStatus").ne(UserDetail.VERIFIED), Criteria.where("avatarCheckStatus").ne("normal")));
         }
         q.addCriteria(Criteria.where("location").nearSphere(new Point(query.getLng(), query.getLat())));
+        if (query.getRange() != null && query.getRange() > 0 && query.getRange() < 100) {
+            q.addCriteria(Criteria.where("location").maxDistance(query.getRange()));
+        }
         q.addCriteria(Criteria.where("userId").ne(query.getUserId()));
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy/MM/dd");
         if (!CollectionUtils.isEmpty(query.getDateStatus())) {
