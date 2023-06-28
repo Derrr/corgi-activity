@@ -40,14 +40,14 @@ public class UserMongoBase extends UserDetail {
 
     public void setUserExtra(UserExtra userExtra) {
         BeanUtils.copyProperties(this, userExtra);
-        if (StringUtils.isEmpty(userExtra.getInterests()) && !"[]".equals(userExtra.getInterests())) {
-            this.interestList = Arrays.asList(userExtra.getInterests().replaceAll("[\\]\\[\"'\\s]", "").split(","));
+        if (StringUtils.isEmpty(userExtra.getInterests())) {
+            this.interestList = Arrays.asList(userExtra.getInterests().split(","));
         }
-        if (StringUtils.isEmpty(userExtra.getTags()) && !"[]".equals(userExtra.getTags())) {
-            this.tagList = Arrays.asList(userExtra.getTags().replaceAll("[\\]\\[\"'\\s]", "").split(","));
+        if (StringUtils.isEmpty(userExtra.getTags())) {
+            this.tagList = Arrays.asList(userExtra.getTags().split(","));
         }
-        if (StringUtils.isEmpty(userExtra.getXp()) && !"[]".equals(userExtra.getXp())) {
-            this.xpList = Arrays.asList(userExtra.getXp().replaceAll("[\\]\\[\"'\\s]", "").split(","));
+        if (StringUtils.isEmpty(userExtra.getXp())) {
+            this.xpList = Arrays.asList(userExtra.getXp().split(","));
         }
 
     }

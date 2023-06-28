@@ -87,7 +87,7 @@ public class CorgiUserDao {
 
     private List<UserMatchItem> filterFace(UserQuery userQuery, List<UserOnlineMongo> onlineMongos, List<UserMongo> userMongos) {
         UserExtra userExtra = corgiExtraService.getUserExtra(userQuery.getUserId());
-        List<String> interests = Arrays.asList(userExtra.getInterests().replaceAll("[\\]\\[\"'\\s]", "").split(","));
+        List<String> interests = Arrays.asList(userExtra.getInterests().split(","));
         List<UserMatchItem> items = new ArrayList<>();
         List<String> userIds = new ArrayList<>();
         if (!CollectionUtils.isEmpty(interests)) {
@@ -131,7 +131,7 @@ public class CorgiUserDao {
 
     private List<UserMatchItem> filterNoFace(UserQuery userQuery, List<UserOnlineMongo> onlineMongos, List<UserMongo> userMongos) {
         UserExtra userExtra = corgiExtraService.getUserExtra(userQuery.getUserId());
-        List<String> interests = Arrays.asList(userExtra.getInterests().replaceAll("[\\]\\[\"'\\s]", "").split(","));
+        List<String> interests = Arrays.asList(userExtra.getInterests().split(","));
         List<UserMatchItem> items = new ArrayList<>();
         List<String> userIds = new ArrayList<>();
         if (!CollectionUtils.isEmpty(interests)) {
