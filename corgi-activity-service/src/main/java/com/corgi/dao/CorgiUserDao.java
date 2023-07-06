@@ -14,6 +14,7 @@ import com.corgi.user.entity.UserQuery;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.geo.Point;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
@@ -26,6 +27,7 @@ import org.springframework.util.StringUtils;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 /**
  * @author tairanliu
@@ -75,93 +77,102 @@ public class CorgiUserDao {
 
     public List<UserMatchItem> findUser(UserQuery userQuery) {
         Query query = this.getQuery(userQuery);
-        List<UserOnlineMongo> onlineMongos = mongoTemplate.find(query, UserOnlineMongo.class);
+        //List<UserOnlineMongo> onlineMongos = mongoTemplate.find(query, UserOnlineMongo.class);
         List<UserMongo> userMongos = mongoTemplate.find(query, UserMongo.class);
         UserDetail detail = corgiUserService.getUserDetailBasic(userQuery.getUserId());
-        if (UserDetail.VERIFIED.equals(detail.getAvatarCheckStatus()) || "normal".equals(detail.getAvatarCheckStatus())) {
-            return filterFace(userQuery, onlineMongos, userMongos);
-        } else {
-            return filterNoFace(userQuery, onlineMongos, userMongos);
-        }
-    }
-
-    private List<UserMatchItem> filterFace(UserQuery userQuery, List<UserOnlineMongo> onlineMongos, List<UserMongo> userMongos) {
-        UserExtra userExtra = corgiExtraService.getUserExtra(userQuery.getUserId());
-        List<String> interests = Arrays.asList(userExtra.getInterests().split(","));
         List<UserMatchItem> items = new ArrayList<>();
-        List<String> userIds = new ArrayList<>();
-        if (!CollectionUtils.isEmpty(interests)) {
-            onlineMongos = (List<UserOnlineMongo>) this.filterUsers(onlineMongos, userQuery, FACE_INTERESTS, interests, items, userIds, 6);
-            ;
+        while (!CollectionUtils.isEmpty(userMongos)) {
+            List<String> userIds = items.stream().map(i -> i.getUserId()).collect(Collectors.toList());
+            if (UserDetail.VERIFIED.equals(detail.getAvatarCheckStatus()) || "normal".equals(detail.getAvatarCheckStatus())) {
+                items.addAll(filterFace(userQuery, userMongos, userIds));
+            } else {
+                items.addAll(filterNoFace(userQuery, userMongos, userIds));
+            }
             if (items.size() >= 6) {
                 return items;
             }
+            long skip = query.getSkip();
+            skip += 5000;
+            query.skip(skip);
+            userMongos = mongoTemplate.find(query, UserMongo.class);
+        }
+        return items;
+    }
+
+    private List<UserMatchItem> filterFace(UserQuery userQuery, List<UserMongo> userMongos, List<String> userIds) {
+        UserExtra userExtra = corgiExtraService.getUserExtra(userQuery.getUserId());
+        List<String> interests = Arrays.asList(userExtra.getInterests().split(","));
+        List<UserMatchItem> items = new ArrayList<>();
+        if (!CollectionUtils.isEmpty(interests)) {
+//            onlineMongos = (List<UserOnlineMongo>) this.filterUsers(onlineMongos, userQuery, FACE_INTERESTS, interests, items, userIds, 6);
+//            if (items.size() >= 6) {
+//                return items;
+//            }
             userMongos = (List<UserMongo>) this.filterUsers(userMongos, userQuery, FACE_INTERESTS, interests, items, userIds, 6 - items.size());
             if (items.size() >= 6) {
                 return items;
             }
         }
-        onlineMongos = (List<UserOnlineMongo>) this.filterUsers(onlineMongos, userQuery, FACE_NO_INTERESTS, interests, items, userIds, 6 - items.size());
-        if (items.size() >= 6) {
-            return items;
-        }
+//        onlineMongos = (List<UserOnlineMongo>) this.filterUsers(onlineMongos, userQuery, FACE_NO_INTERESTS, interests, items, userIds, 6 - items.size());
+//        if (items.size() >= 6) {
+//            return items;
+//        }
         userMongos = (List<UserMongo>) this.filterUsers(userMongos, userQuery, FACE_NO_INTERESTS, interests, items, userIds, 6 - items.size());
         if (items.size() >= 6) {
             return items;
         }
 
         if (!CollectionUtils.isEmpty(interests)) {
-            onlineMongos = (List<UserOnlineMongo>) this.filterUsers(onlineMongos, userQuery, NO_FACE_INTERESTS, interests, items, userIds, 6);
-            if (items.size() >= 6) {
-                return items;
-            }
+//            onlineMongos = (List<UserOnlineMongo>) this.filterUsers(onlineMongos, userQuery, NO_FACE_INTERESTS, interests, items, userIds, 6);
+//            if (items.size() >= 6) {
+//                return items;
+//            }
             userMongos = (List<UserMongo>) this.filterUsers(userMongos, userQuery, NO_FACE_INTERESTS, interests, items, userIds, 6 - items.size());
             if (items.size() >= 6) {
                 return items;
             }
         }
-        this.filterUsers(onlineMongos, userQuery, NO_FACE_NO_INTERESTS, interests, items, userIds, 6 - items.size());
-        if (items.size() >= 6) {
-            return items;
-        }
+//        this.filterUsers(onlineMongos, userQuery, NO_FACE_NO_INTERESTS, interests, items, userIds, 6 - items.size());
+//        if (items.size() >= 6) {
+//            return items;
+//        }
         this.filterUsers(userMongos, userQuery, NO_FACE_NO_INTERESTS, interests, items, userIds, 6 - items.size());
         return items;
 
     }
 
-    private List<UserMatchItem> filterNoFace(UserQuery userQuery, List<UserOnlineMongo> onlineMongos, List<UserMongo> userMongos) {
+    private List<UserMatchItem> filterNoFace(UserQuery userQuery, List<UserMongo> userMongos, List<String> userIds) {
         UserExtra userExtra = corgiExtraService.getUserExtra(userQuery.getUserId());
         List<String> interests = Arrays.asList(userExtra.getInterests().split(","));
         List<UserMatchItem> items = new ArrayList<>();
-        List<String> userIds = new ArrayList<>();
         if (!CollectionUtils.isEmpty(interests)) {
-            onlineMongos = (List<UserOnlineMongo>) this.filterUsers(onlineMongos, userQuery, INTERESTS, interests, items, userIds, 6);
-            if (items.size() >= 6) {
-                return items;
-            }
+//            onlineMongos = (List<UserOnlineMongo>) this.filterUsers(onlineMongos, userQuery, INTERESTS, interests, items, userIds, 6);
+//            if (items.size() >= 6) {
+//                return items;
+//            }
             userMongos = (List<UserMongo>) this.filterUsers(userMongos, userQuery, INTERESTS, interests, items, userIds, 6 - items.size());
             if (items.size() >= 6) {
                 return items;
             }
         }
-        this.filterUsers(onlineMongos, userQuery, NO_INTERESTS, interests, items, userIds, 6 - items.size());
-        if (items.size() >= 6) {
-            return items;
-        }
+//        this.filterUsers(onlineMongos, userQuery, NO_INTERESTS, interests, items, userIds, 6 - items.size());
+//        if (items.size() >= 6) {
+//            return items;
+//        }
         this.filterUsers(userMongos, userQuery, NO_INTERESTS, interests, items, userIds, 6 - items.size());
         return items;
     }
 
     private Query getQuery(UserQuery query) {
 
-        Query q = new Query().limit(5000);
+        Query q = new Query().with(Sort.by(Sort.Direction.DESC, "id")).limit(5000);
         UserDetail detail = corgiUserService.getUserDetailBasic(query.getUserId());
         if (!UserDetail.VERIFIED.equals(detail.getAvatarCheckStatus()) && !"normal".equals(detail.getAvatarCheckStatus())) {
             q.addCriteria(new Criteria().andOperator(Criteria.where("avatarCheckStatus").ne(UserDetail.VERIFIED), Criteria.where("avatarCheckStatus").ne("normal")));
         }
         q.addCriteria(Criteria.where("location").nearSphere(new Point(query.getLng(), query.getLat())));
         if (query.getRange() != null && query.getRange() > 0 && query.getRange() < 100) {
-            q.addCriteria(Criteria.where("location").maxDistance(query.getRange()/111.12));
+            q.addCriteria(Criteria.where("location").maxDistance(query.getRange() / 111.12));
         }
         q.addCriteria(Criteria.where("userId").ne(query.getUserId()));
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy/MM/dd");
