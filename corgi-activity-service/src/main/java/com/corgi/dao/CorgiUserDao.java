@@ -74,94 +74,60 @@ public class CorgiUserDao {
     }
 
     public List<UserMatchItem> findUser(UserQuery userQuery) {
-        //Query query = this.getQuery(userQuery);
-        //List<UserOnlineMongo> onlineMongos = mongoTemplate.find(query, UserOnlineMongo.class);
-        List<UserMongo> userMongos = new ArrayList<>();//mongoTemplate.find(query, UserMongo.class);
         UserDetail detail = corgiUserService.getUserDetailBasic(userQuery.getUserId());
-        List<UserMatchItem> items = new ArrayList<>();
-        //while (!CollectionUtils.isEmpty(userMongos)) {
-        List<String> userIds = items.stream().map(i -> i.getUserId()).collect(Collectors.toList());
+        UserExtra userExtra = corgiExtraService.getUserExtra(userQuery.getUserId());
+        List<String> interests = new ArrayList<>();
+        if (!StringUtils.isEmpty(userExtra.getInterests())) {
+            interests = Arrays.asList(userExtra.getInterests().split(","));
+        }
         if (UserDetail.VERIFIED.equals(detail.getAvatarCheckStatus()) || "normal".equals(detail.getAvatarCheckStatus())) {
-            items.addAll(filterFace(userQuery, userMongos, userIds));
+            return filterFace(userQuery, interests);
         } else {
-            items.addAll(filterNoFace(userQuery, userMongos, userIds));
+            return filterNoFace(userQuery, interests);
         }
-        if (items.size() >= 6) {
-            return items;
-        }
-//            long skip = query.getSkip();
-//            skip += 5000;
-//            query.skip(skip);
-//            userMongos = mongoTemplate.find(query, UserMongo.class);
-        //}
-        return items;
     }
 
-    private List<UserMatchItem> filterFace(UserQuery userQuery, List<UserMongo> userMongos, List<String> userIds) {
-        UserExtra userExtra = corgiExtraService.getUserExtra(userQuery.getUserId());
-        List<String> interests = Arrays.asList(userExtra.getInterests().split(","));
+    private List<UserMatchItem> filterFace(UserQuery userQuery, List<String> interests) {
         List<UserMatchItem> items = new ArrayList<>();
+        List<String> userIds = new ArrayList<>();
+        List<UserMongo> userMongos;
         if (!CollectionUtils.isEmpty(interests)) {
-//            onlineMongos = (List<UserOnlineMongo>) this.filterUsers(onlineMongos, userQuery, FACE_INTERESTS, interests, items, userIds, 6);
-//            if (items.size() >= 6) {
-//                return items;
-//            }
             userMongos = this.getUserMongos(userQuery, interests, FACE_INTERESTS);
-            userMongos = (List<UserMongo>) this.filterUsers(userMongos, userQuery, FACE_INTERESTS, interests, items, userIds, 6 - items.size());
+            this.filterUsers(userMongos, userQuery, FACE_INTERESTS, interests, items, userIds, 6 - items.size());
             if (items.size() >= 6) {
                 return items;
             }
         }
-//        onlineMongos = (List<UserOnlineMongo>) this.filterUsers(onlineMongos, userQuery, FACE_NO_INTERESTS, interests, items, userIds, 6 - items.size());
-//        if (items.size() >= 6) {
-//            return items;
-//        }
         userMongos = this.getUserMongos(userQuery, interests, FACE_NO_INTERESTS);
-        userMongos = (List<UserMongo>) this.filterUsers(userMongos, userQuery, FACE_NO_INTERESTS, interests, items, userIds, 6 - items.size());
+        this.filterUsers(userMongos, userQuery, FACE_NO_INTERESTS, interests, items, userIds, 6 - items.size());
         if (items.size() >= 6) {
             return items;
         }
 
         if (!CollectionUtils.isEmpty(interests)) {
-//            onlineMongos = (List<UserOnlineMongo>) this.filterUsers(onlineMongos, userQuery, NO_FACE_INTERESTS, interests, items, userIds, 6);
-//            if (items.size() >= 6) {
-//                return items;
-//            }
             userMongos = this.getUserMongos(userQuery, interests, NO_FACE_INTERESTS);
-            userMongos = (List<UserMongo>) this.filterUsers(userMongos, userQuery, NO_FACE_INTERESTS, interests, items, userIds, 6 - items.size());
+            this.filterUsers(userMongos, userQuery, NO_FACE_INTERESTS, interests, items, userIds, 6 - items.size());
             if (items.size() >= 6) {
                 return items;
             }
         }
-//        this.filterUsers(onlineMongos, userQuery, NO_FACE_NO_INTERESTS, interests, items, userIds, 6 - items.size());
-//        if (items.size() >= 6) {
-//            return items;
-//        }
         userMongos = this.getUserMongos(userQuery, interests, NO_FACE_NO_INTERESTS);
         this.filterUsers(userMongos, userQuery, NO_FACE_NO_INTERESTS, interests, items, userIds, 6 - items.size());
         return items;
 
     }
 
-    private List<UserMatchItem> filterNoFace(UserQuery userQuery, List<UserMongo> userMongos, List<String> userIds) {
-        UserExtra userExtra = corgiExtraService.getUserExtra(userQuery.getUserId());
-        List<String> interests = Arrays.asList(userExtra.getInterests().split(","));
+    private List<UserMatchItem> filterNoFace(UserQuery userQuery, List<String> interests) {
         List<UserMatchItem> items = new ArrayList<>();
+        List<String> userIds = new ArrayList<>();
+        List<UserMongo> userMongos;
         if (!CollectionUtils.isEmpty(interests)) {
-//            onlineMongos = (List<UserOnlineMongo>) this.filterUsers(onlineMongos, userQuery, INTERESTS, interests, items, userIds, 6);
-//            if (items.size() >= 6) {
-//                return items;
-//            }
             userMongos = this.getUserMongos(userQuery, interests, NO_FACE_INTERESTS);
-            userMongos = (List<UserMongo>) this.filterUsers(userMongos, userQuery, NO_FACE_INTERESTS, interests, items, userIds, 6 - items.size());
+            this.filterUsers(userMongos, userQuery, NO_FACE_INTERESTS, interests, items, userIds, 6 - items.size());
             if (items.size() >= 6) {
                 return items;
             }
         }
-//        this.filterUsers(onlineMongos, userQuery, NO_INTERESTS, interests, items, userIds, 6 - items.size());
-//        if (items.size() >= 6) {
-//            return items;
-//        }
         userMongos = this.getUserMongos(userQuery, interests, NO_FACE_NO_INTERESTS);
         this.filterUsers(userMongos, userQuery, NO_FACE_NO_INTERESTS, interests, items, userIds, 6 - items.size());
         return items;
