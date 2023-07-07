@@ -35,8 +35,6 @@ import java.util.stream.Collectors;
 @Slf4j
 @Component
 public class CorgiUserDao {
-    final static String INTERESTS = "interests";
-    final static String NO_INTERESTS = "no_interests";
 
     final static String FACE_INTERESTS = "face_interests";
     final static String FACE_NO_INTERESTS = "face_no_interests";
@@ -76,26 +74,26 @@ public class CorgiUserDao {
     }
 
     public List<UserMatchItem> findUser(UserQuery userQuery) {
-        Query query = this.getQuery(userQuery);
+        //Query query = this.getQuery(userQuery);
         //List<UserOnlineMongo> onlineMongos = mongoTemplate.find(query, UserOnlineMongo.class);
-        List<UserMongo> userMongos = mongoTemplate.find(query, UserMongo.class);
+        List<UserMongo> userMongos = new ArrayList<>();//mongoTemplate.find(query, UserMongo.class);
         UserDetail detail = corgiUserService.getUserDetailBasic(userQuery.getUserId());
         List<UserMatchItem> items = new ArrayList<>();
-        while (!CollectionUtils.isEmpty(userMongos)) {
-            List<String> userIds = items.stream().map(i -> i.getUserId()).collect(Collectors.toList());
-            if (UserDetail.VERIFIED.equals(detail.getAvatarCheckStatus()) || "normal".equals(detail.getAvatarCheckStatus())) {
-                items.addAll(filterFace(userQuery, userMongos, userIds));
-            } else {
-                items.addAll(filterNoFace(userQuery, userMongos, userIds));
-            }
-            if (items.size() >= 6) {
-                return items;
-            }
-            long skip = query.getSkip();
-            skip += 5000;
-            query.skip(skip);
-            userMongos = mongoTemplate.find(query, UserMongo.class);
+        //while (!CollectionUtils.isEmpty(userMongos)) {
+        List<String> userIds = items.stream().map(i -> i.getUserId()).collect(Collectors.toList());
+        if (UserDetail.VERIFIED.equals(detail.getAvatarCheckStatus()) || "normal".equals(detail.getAvatarCheckStatus())) {
+            items.addAll(filterFace(userQuery, userMongos, userIds));
+        } else {
+            items.addAll(filterNoFace(userQuery, userMongos, userIds));
         }
+        if (items.size() >= 6) {
+            return items;
+        }
+//            long skip = query.getSkip();
+//            skip += 5000;
+//            query.skip(skip);
+//            userMongos = mongoTemplate.find(query, UserMongo.class);
+        //}
         return items;
     }
 
@@ -108,6 +106,7 @@ public class CorgiUserDao {
 //            if (items.size() >= 6) {
 //                return items;
 //            }
+            userMongos = this.getUserMongos(userQuery, interests, FACE_INTERESTS);
             userMongos = (List<UserMongo>) this.filterUsers(userMongos, userQuery, FACE_INTERESTS, interests, items, userIds, 6 - items.size());
             if (items.size() >= 6) {
                 return items;
@@ -117,6 +116,7 @@ public class CorgiUserDao {
 //        if (items.size() >= 6) {
 //            return items;
 //        }
+        userMongos = this.getUserMongos(userQuery, interests, FACE_NO_INTERESTS);
         userMongos = (List<UserMongo>) this.filterUsers(userMongos, userQuery, FACE_NO_INTERESTS, interests, items, userIds, 6 - items.size());
         if (items.size() >= 6) {
             return items;
@@ -127,6 +127,7 @@ public class CorgiUserDao {
 //            if (items.size() >= 6) {
 //                return items;
 //            }
+            userMongos = this.getUserMongos(userQuery, interests, NO_FACE_INTERESTS);
             userMongos = (List<UserMongo>) this.filterUsers(userMongos, userQuery, NO_FACE_INTERESTS, interests, items, userIds, 6 - items.size());
             if (items.size() >= 6) {
                 return items;
@@ -136,6 +137,7 @@ public class CorgiUserDao {
 //        if (items.size() >= 6) {
 //            return items;
 //        }
+        userMongos = this.getUserMongos(userQuery, interests, NO_FACE_NO_INTERESTS);
         this.filterUsers(userMongos, userQuery, NO_FACE_NO_INTERESTS, interests, items, userIds, 6 - items.size());
         return items;
 
@@ -150,7 +152,8 @@ public class CorgiUserDao {
 //            if (items.size() >= 6) {
 //                return items;
 //            }
-            userMongos = (List<UserMongo>) this.filterUsers(userMongos, userQuery, INTERESTS, interests, items, userIds, 6 - items.size());
+            userMongos = this.getUserMongos(userQuery, interests, NO_FACE_INTERESTS);
+            userMongos = (List<UserMongo>) this.filterUsers(userMongos, userQuery, NO_FACE_INTERESTS, interests, items, userIds, 6 - items.size());
             if (items.size() >= 6) {
                 return items;
             }
@@ -159,11 +162,29 @@ public class CorgiUserDao {
 //        if (items.size() >= 6) {
 //            return items;
 //        }
-        this.filterUsers(userMongos, userQuery, NO_INTERESTS, interests, items, userIds, 6 - items.size());
+        userMongos = this.getUserMongos(userQuery, interests, NO_FACE_NO_INTERESTS);
+        this.filterUsers(userMongos, userQuery, NO_FACE_NO_INTERESTS, interests, items, userIds, 6 - items.size());
         return items;
     }
 
-    private Query getQuery(UserQuery query) {
+    private List<UserMongo> getUserMongos(UserQuery userQuery, List<String> interests, String filterType) {
+        Query query = new Query();
+        if (FACE_INTERESTS.equals(filterType)) {
+            query = this.getQuery(userQuery, true, true, interests);
+        }
+        if (FACE_NO_INTERESTS.equals(filterType)) {
+            query = this.getQuery(userQuery, true, false, interests);
+        }
+        if (NO_FACE_INTERESTS.equals(filterType)) {
+            query = this.getQuery(userQuery, false, true, interests);
+        }
+        if (NO_FACE_NO_INTERESTS.equals(filterType)) {
+            query = this.getQuery(userQuery, false, false, interests);
+        }
+        return mongoTemplate.find(query, UserMongo.class);
+    }
+
+    private Query getQuery(UserQuery query, boolean hasFace, boolean hasInterests, List<String> interests) {
 
         Query q = new Query().with(Sort.by(Sort.Direction.DESC, "id")).limit(5000);
         UserDetail detail = corgiUserService.getUserDetailBasic(query.getUserId());
@@ -200,8 +221,20 @@ public class CorgiUserDao {
         if (!CollectionUtils.isEmpty(query.getXp())) {
             q.addCriteria(Criteria.where("xpList").in(query.getXp()));
         }
-        if (!CollectionUtils.isEmpty(query.getInterests())) {
-            q.addCriteria(Criteria.where("interestList").in(query.getInterests()));
+        if (hasInterests) {
+            List<String> i = query.getInterests();
+            if (i == null) {
+                i = new ArrayList<>();
+            }
+            i.addAll(interests);
+            q.addCriteria(Criteria.where("interestList").in(i));
+        } else {
+            if (!CollectionUtils.isEmpty(query.getInterests())) {
+                q.addCriteria(Criteria.where("interestList").in(query.getInterests()));
+            }
+            if (!CollectionUtils.isEmpty(interests)) {
+                q.addCriteria(Criteria.where("interestList").nin(interests));
+            }
         }
         if (!CollectionUtils.isEmpty(query.getTags())) {
             q.addCriteria(Criteria.where("tagList").in(query.getTags()));
@@ -231,6 +264,10 @@ public class CorgiUserDao {
         }
         if ("verify".equals(query.getType())) {
             q.addCriteria(Criteria.where("avatarCheckStatus").is("verified"));
+        } else if (hasFace) {
+            q.addCriteria(new Criteria().orOperator(Criteria.where("avatarCheckStatus").is("verified"), Criteria.where("avatarCheckStatus").is("normal")));
+        } else {
+            q.addCriteria(new Criteria().andOperator(Criteria.where("avatarCheckStatus").ne("verified"), Criteria.where("avatarCheckStatus").ne("normal")));
         }
         return q;
     }
@@ -238,7 +275,7 @@ public class CorgiUserDao {
     private List<? extends UserMongoBase> filterUsers(List<? extends UserMongoBase> mongos,
                                                       UserQuery userQuery,
                                                       String filterType,
-                                                      List<String> interets,
+                                                      List<String> interests,
                                                       List<UserMatchItem> result,
                                                       List<String> userIds,
                                                       Integer size) {
@@ -281,59 +318,41 @@ public class CorgiUserDao {
                 if (contains) {
                     continue;
                 }
-                boolean hasInterest = false;
-                List<String> userInterest = mongo.getInterestList();
-                if (!CollectionUtils.isEmpty(userInterest)) {
-                    for (String interest : interets) {
-                        if (userInterest.contains(interest)) {
-                            hasInterest = true;
-                            break;
-                        }
-                    }
-                }
-                boolean hasFace = "normal".equals(mongo.getAvatarCheckStatus()) || UserDetail.VERIFIED.equals(mongo.getAvatarCheckStatus());
-                if (filterType.equals(INTERESTS)) {
-                    if (hasFace) {
-                        continue;
-                    }
-                    if (!hasInterest) {
-                        remain.add(mongo);
-                        continue;
-                    }
-                }
-                if (filterType.equals(NO_INTERESTS)) {
-                    if (hasFace) {
-                        continue;
-                    }
-                    if (hasInterest) {
-                        remain.add(mongo);
-                        continue;
-                    }
-                }
-                if (filterType.equals(FACE_INTERESTS)) {
-                    if (!hasFace || !hasInterest) {
-                        remain.add(mongo);
-                        continue;
-                    }
-                }
-                if (filterType.equals(NO_FACE_INTERESTS)) {
-                    if (hasFace || !hasInterest) {
-                        remain.add(mongo);
-                        continue;
-                    }
-                }
-                if (filterType.equals(FACE_NO_INTERESTS)) {
-                    if (!hasFace || hasInterest) {
-                        remain.add(mongo);
-                        continue;
-                    }
-                }
-                if (filterType.equals(NO_FACE_NO_INTERESTS)) {
-                    if (hasFace || hasInterest) {
-                        remain.add(mongo);
-                        continue;
-                    }
-                }
+//                boolean hasInterest = false;
+//                List<String> userInterest = mongo.getInterestList();
+//                if (!CollectionUtils.isEmpty(userInterest)) {
+//                    for (String interest : interests) {
+//                        if (userInterest.contains(interest)) {
+//                            hasInterest = true;
+//                            break;
+//                        }
+//                    }
+//                }
+//                boolean hasFace = "normal".equals(mongo.getAvatarCheckStatus()) || UserDetail.VERIFIED.equals(mongo.getAvatarCheckStatus());
+//                if (filterType.equals(FACE_INTERESTS)) {
+//                    if (!hasFace || !hasInterest) {
+//                        remain.add(mongo);
+//                        continue;
+//                    }
+//                }
+//                if (filterType.equals(NO_FACE_INTERESTS)) {
+//                    if (hasFace || !hasInterest) {
+//                        remain.add(mongo);
+//                        continue;
+//                    }
+//                }
+//                if (filterType.equals(FACE_NO_INTERESTS)) {
+//                    if (!hasFace || hasInterest) {
+//                        remain.add(mongo);
+//                        continue;
+//                    }
+//                }
+//                if (filterType.equals(NO_FACE_NO_INTERESTS)) {
+//                    if (hasFace || hasInterest) {
+//                        remain.add(mongo);
+//                        continue;
+//                    }
+//                }
 
                 UserMatchItem item = new UserMatchItem();
 
