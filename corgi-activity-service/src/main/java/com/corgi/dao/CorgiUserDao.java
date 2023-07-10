@@ -154,9 +154,6 @@ public class CorgiUserDao {
 
         Query q = new Query().with(Sort.by(Sort.Direction.DESC, "id")).limit(5000);
         UserDetail detail = corgiUserService.getUserDetailBasic(query.getUserId());
-        if (!UserDetail.VERIFIED.equals(detail.getAvatarCheckStatus()) && !"normal".equals(detail.getAvatarCheckStatus())) {
-            q.addCriteria(new Criteria().andOperator(Criteria.where("avatarCheckStatus").ne(UserDetail.VERIFIED), Criteria.where("avatarCheckStatus").ne("normal")));
-        }
         q.addCriteria(Criteria.where("location").nearSphere(new Point(query.getLng(), query.getLat())));
         if (query.getRange() != null && query.getRange() > 0 && query.getRange() < 100) {
             q.addCriteria(Criteria.where("location").maxDistance(query.getRange() / 111.12));
