@@ -68,7 +68,7 @@ public class CorgiUserDao {
             //userOnlineMongo.setUserExtra(userExtra);
             //userDetailMongo.setUserExtra(userExtra);
             //mongoTemplate.save(userOnlineMongo);
-
+            log.info("userMongo:{} ", userMongo);
             mongoTemplate.findAllAndRemove(new Query(Criteria.where("userId").is(userDetail.getUserId())), UserMongo.class);
             mongoTemplate.save(userMongo);
         }
