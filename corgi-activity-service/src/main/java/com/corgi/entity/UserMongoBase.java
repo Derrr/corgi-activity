@@ -43,13 +43,13 @@ public class UserMongoBase extends UserDetail {
         this.profession = userExtra.getProfession();
         this.aim = userExtra.getAim();
         this.education = userExtra.getEducation();
-        if (StringUtils.isEmpty(userExtra.getInterests())) {
+        if (!StringUtils.isEmpty(userExtra.getInterests())) {
             this.interestList = Arrays.asList(userExtra.getInterests().split(","));
         }
-        if (StringUtils.isEmpty(userExtra.getTags())) {
+        if (!StringUtils.isEmpty(userExtra.getTags())) {
             this.tagList = Arrays.asList(userExtra.getTags().split(","));
         }
-        if (StringUtils.isEmpty(userExtra.getXp())) {
+        if (!StringUtils.isEmpty(userExtra.getXp())) {
             this.xpList = Arrays.asList(userExtra.getXp().split(","));
         }
 
