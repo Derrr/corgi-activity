@@ -22,11 +22,8 @@ public class UserDetailMongo extends UserMongoBase {
 
     private GeoJsonPoint location;
 
-    private Long time;
-
     public UserDetailMongo(UserDetail detail) {
         this.location = new GeoJsonPoint(detail.getLng(), detail.getLat());
-        this.time = System.currentTimeMillis();
     }
 
 }
