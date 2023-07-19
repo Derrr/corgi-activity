@@ -1,6 +1,7 @@
 package com.corgi.dao;
 
 
+import com.alibaba.dubbo.common.json.JSONObject;
 import com.alibaba.dubbo.config.annotation.Reference;
 import com.corgi.entity.UserDetailMongo;
 import com.corgi.entity.UserMongo;
@@ -12,6 +13,8 @@ import com.corgi.user.entity.UserDetail;
 import com.corgi.user.entity.UserExtra;
 import com.corgi.user.entity.UserMatchItem;
 import com.corgi.user.entity.UserQuery;
+import com.fasterxml.jackson.databind.util.JSONPObject;
+import com.rabbitmq.tools.json.JSONUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -240,7 +243,7 @@ public class CorgiUserDao {
         return q;
     }
 
-    private List<? extends UserMongoBase> filterUsers(List<? extends UserMongoBase> mongos,
+    private List<? extends UserMongoBase> filterUsers(List<UserMongo> mongos,
                                                       UserQuery userQuery,
                                                       String filterType,
                                                       List<String> interests,
@@ -258,7 +261,7 @@ public class CorgiUserDao {
             List<String> matchUsers = redisTemplate.opsForList().range(matchKey, 0, -1);
             Long nowTime = System.currentTimeMillis();
             Long threshold = nowTime - 14 * 24 * 3600 * 1000l;
-            for (UserMongoBase mongo : mongos) {
+            for (UserMongo mongo : mongos) {
                 if (matchViews.contains(mongo.getUserId())) {
                     continue;
                 }
