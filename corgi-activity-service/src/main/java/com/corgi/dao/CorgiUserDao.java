@@ -59,21 +59,18 @@ public class CorgiUserDao {
                 && userDetail.getLat() != null && userDetail.getLat() < 90) {
             UserMongo userMongo = new UserMongo(userDetail);
             UserExtra userExtra = corgiExtraService.getUserExtra(userDetail.getUserId());
-            UserOnlineMongo userOnlineMongo = new UserOnlineMongo(userDetail);
-            UserDetailMongo userDetailMongo = new UserDetailMongo(userDetail);
+            //UserOnlineMongo userOnlineMongo = new UserOnlineMongo(userDetail);
+            //UserDetailMongo userDetailMongo = new UserDetailMongo(userDetail);
             BeanUtils.copyProperties(userDetail, userMongo);
-            BeanUtils.copyProperties(userDetail, userOnlineMongo);
-            BeanUtils.copyProperties(userDetail, userDetailMongo);
+            //BeanUtils.copyProperties(userDetail, userOnlineMongo);
+            //BeanUtils.copyProperties(userDetail, userDetailMongo);
             userMongo.setUserExtra(userExtra);
-            userOnlineMongo.setUserExtra(userExtra);
-            userDetailMongo.setUserExtra(userExtra);
-            mongoTemplate.save(userOnlineMongo);
+            //userOnlineMongo.setUserExtra(userExtra);
+            //userDetailMongo.setUserExtra(userExtra);
+            //mongoTemplate.save(userOnlineMongo);
 
             mongoTemplate.findAllAndRemove(new Query(Criteria.where("userId").is(userDetail.getUserId())), UserMongo.class);
             mongoTemplate.save(userMongo);
-
-            mongoTemplate.findAllAndRemove(new Query(Criteria.where("userId").is(userDetail.getUserId())), UserDetail.class);
-            mongoTemplate.save(userDetailMongo);
         }
     }
 
