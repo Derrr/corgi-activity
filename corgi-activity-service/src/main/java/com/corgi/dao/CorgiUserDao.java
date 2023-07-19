@@ -2,6 +2,7 @@ package com.corgi.dao;
 
 
 import com.alibaba.dubbo.config.annotation.Reference;
+import com.corgi.entity.UserDetailMongo;
 import com.corgi.entity.UserMongo;
 import com.corgi.entity.UserMongoBase;
 import com.corgi.entity.UserOnlineMongo;
@@ -59,13 +60,20 @@ public class CorgiUserDao {
             UserMongo userMongo = new UserMongo(userDetail);
             UserExtra userExtra = corgiExtraService.getUserExtra(userDetail.getUserId());
             UserOnlineMongo userOnlineMongo = new UserOnlineMongo(userDetail);
+            UserDetailMongo userDetailMongo = new UserDetailMongo(userDetail);
             BeanUtils.copyProperties(userDetail, userMongo);
             BeanUtils.copyProperties(userDetail, userOnlineMongo);
+            BeanUtils.copyProperties(userDetail, userDetailMongo);
             userMongo.setUserExtra(userExtra);
             userOnlineMongo.setUserExtra(userExtra);
+            userDetailMongo.setUserExtra(userExtra);
             mongoTemplate.save(userOnlineMongo);
+
             mongoTemplate.findAllAndRemove(new Query(Criteria.where("userId").is(userDetail.getUserId())), UserMongo.class);
             mongoTemplate.save(userMongo);
+
+            mongoTemplate.findAllAndRemove(new Query(Criteria.where("userId").is(userDetail.getUserId())), UserDetail.class);
+            mongoTemplate.save(userDetailMongo);
         }
     }
 
@@ -242,6 +250,7 @@ public class CorgiUserDao {
                                                       List<UserMatchItem> result,
                                                       List<String> userIds,
                                                       Integer size) {
+        log.info("item size:{},mongo size:{}, userIds size:{}", result.size(), mongos.size(), userIds.size());
         String userId = userQuery.getUserId();
         String dateStr = new SimpleDateFormat("yyyy-MM-dd").format(new Date());
         String viewKey = "user_match_view_" + dateStr + userId;
@@ -355,6 +364,7 @@ public class CorgiUserDao {
             redisTemplate.delete(matchKey);
             redisTemplate.delete(viewKey);
         }
+        log.info("item size:{}, userIds size:{}", result.size(), userIds.size());
         return remain;
     }
 
