@@ -39,7 +39,10 @@ public class UserMongoBase extends UserDetail {
     }
 
     public void setUserExtra(UserExtra userExtra) {
-        BeanUtils.copyProperties(this, userExtra);
+        this.income = userExtra.getIncome();
+        this.profession = userExtra.getProfession();
+        this.aim = userExtra.getAim();
+        this.education = userExtra.getEducation();
         if (StringUtils.isEmpty(userExtra.getInterests())) {
             this.interestList = Arrays.asList(userExtra.getInterests().split(","));
         }
