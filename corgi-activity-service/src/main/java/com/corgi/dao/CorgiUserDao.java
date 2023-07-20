@@ -55,7 +55,6 @@ public class CorgiUserDao {
         if (userDetail.getLng() != null && userDetail.getLng() < 180
                 && userDetail.getLat() != null && userDetail.getLat() < 90) {
             UserExtra userExtra = corgiExtraService.getUserExtra(userDetail.getUserId());
-
             UserMongo userMongo = new UserMongo(userDetail);
             BeanUtils.copyProperties(userDetail, userMongo);
             userMongo.setUserExtra(userExtra);
@@ -158,9 +157,13 @@ public class CorgiUserDao {
         Query q = new Query().with(Sort.by(Sort.Direction.DESC, "id")).limit(5000);
         if (interests == null) {
             q = new Query().limit(200);
+            q.addCriteria(Criteria.where("location").nearSphere(new Point(query.getLng(), query.getLat())));
         }
-        q.addCriteria(Criteria.where("location").nearSphere(new Point(query.getLng(), query.getLat())));
+
         if (query.getRange() != null && query.getRange() > 0 && query.getRange() < 100) {
+            if (interests != null) {
+                q.addCriteria(Criteria.where("location").nearSphere(new Point(query.getLng(), query.getLat())));
+            }
             q.addCriteria(Criteria.where("location").maxDistance(query.getRange() / 111.12));
         }
         q.addCriteria(Criteria.where("userId").ne(query.getUserId()));
