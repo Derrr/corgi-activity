@@ -1,20 +1,12 @@
 package com.corgi.dao;
 
 
-import com.alibaba.dubbo.common.json.JSONObject;
 import com.alibaba.dubbo.config.annotation.Reference;
-import com.corgi.entity.UserDetailMongo;
 import com.corgi.entity.UserMongo;
 import com.corgi.entity.UserMongoBase;
-import com.corgi.entity.UserOnlineMongo;
 import com.corgi.user.api.CorgiExtraService;
 import com.corgi.user.api.CorgiUserService;
-import com.corgi.user.entity.UserDetail;
-import com.corgi.user.entity.UserExtra;
-import com.corgi.user.entity.UserMatchItem;
-import com.corgi.user.entity.UserQuery;
-import com.fasterxml.jackson.databind.util.JSONPObject;
-import com.rabbitmq.tools.json.JSONUtil;
+import com.corgi.user.entity.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,6 +24,7 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
+
 
 /**
  * @author tairanliu
@@ -60,18 +53,11 @@ public class CorgiUserDao {
     public void updateUser(UserDetail userDetail) {
         if (userDetail.getLng() != null && userDetail.getLng() < 180
                 && userDetail.getLat() != null && userDetail.getLat() < 90) {
-            UserMongo userMongo = new UserMongo(userDetail);
             UserExtra userExtra = corgiExtraService.getUserExtra(userDetail.getUserId());
-            //UserOnlineMongo userOnlineMongo = new UserOnlineMongo(userDetail);
-            //UserDetailMongo userDetailMongo = new UserDetailMongo(userDetail);
+
+            UserMongo userMongo = new UserMongo(userDetail);
             BeanUtils.copyProperties(userDetail, userMongo);
-            //BeanUtils.copyProperties(userDetail, userOnlineMongo);
-            //BeanUtils.copyProperties(userDetail, userDetailMongo);
             userMongo.setUserExtra(userExtra);
-            //userOnlineMongo.setUserExtra(userExtra);
-            //userDetailMongo.setUserExtra(userExtra);
-            //mongoTemplate.save(userOnlineMongo);
-            log.info("userMongo:{} ", userMongo);
             mongoTemplate.findAllAndRemove(new Query(Criteria.where("userId").is(userDetail.getUserId())), UserMongo.class);
             mongoTemplate.save(userMongo);
         }
@@ -79,6 +65,15 @@ public class CorgiUserDao {
 
     public void deleteUser(String userId) {
         mongoTemplate.findAllAndRemove(new Query(Criteria.where("userId").is(userId)), UserMongo.class);
+    }
+
+    public List<String> getNearbyUserIds(UserQuery userQuery) {
+        Query query = this.getQuery(userQuery, false, false, null);
+        List<UserMongo> userMongos = mongoTemplate.find(query, UserMongo.class);
+        if (!CollectionUtils.isEmpty(userMongos)) {
+            return userMongos.stream().map(u -> u.getUserId()).collect(Collectors.toList());
+        }
+        return new ArrayList<>();
     }
 
     public List<UserMatchItem> findUser(UserQuery userQuery) {
@@ -161,7 +156,9 @@ public class CorgiUserDao {
     private Query getQuery(UserQuery query, boolean hasFace, boolean hasInterests, List<String> interests) {
 
         Query q = new Query().with(Sort.by(Sort.Direction.DESC, "id")).limit(5000);
-        UserDetail detail = corgiUserService.getUserDetailBasic(query.getUserId());
+        if (interests == null) {
+            q = new Query().limit(200);
+        }
         q.addCriteria(Criteria.where("location").nearSphere(new Point(query.getLng(), query.getLat())));
         if (query.getRange() != null && query.getRange() > 0 && query.getRange() < 100) {
             q.addCriteria(Criteria.where("location").maxDistance(query.getRange() / 111.12));
@@ -192,19 +189,21 @@ public class CorgiUserDao {
         if (!CollectionUtils.isEmpty(query.getXp())) {
             q.addCriteria(Criteria.where("xpList").in(query.getXp()));
         }
-        if (hasInterests) {
-            List<String> i = query.getInterests();
-            if (i == null) {
-                i = new ArrayList<>();
-            }
-            i.addAll(interests);
-            q.addCriteria(Criteria.where("interestList").in(i));
-        } else {
-            if (!CollectionUtils.isEmpty(query.getInterests())) {
-                q.addCriteria(Criteria.where("interestList").in(query.getInterests()));
-            }
-            if (!CollectionUtils.isEmpty(interests)) {
-                q.addCriteria(Criteria.where("interestList").nin(interests));
+        if (interests != null) {
+            if (hasInterests) {
+                List<String> i = query.getInterests();
+                if (i == null) {
+                    i = new ArrayList<>();
+                }
+                i.addAll(interests);
+                q.addCriteria(Criteria.where("interestList").in(i));
+            } else {
+                if (!CollectionUtils.isEmpty(query.getInterests())) {
+                    q.addCriteria(Criteria.where("interestList").in(query.getInterests()));
+                }
+                if (!CollectionUtils.isEmpty(interests)) {
+                    q.addCriteria(Criteria.where("interestList").nin(interests));
+                }
             }
         }
         if (!CollectionUtils.isEmpty(query.getTags())) {
@@ -237,7 +236,7 @@ public class CorgiUserDao {
             q.addCriteria(Criteria.where("avatarCheckStatus").is("verified"));
         } else if (hasFace) {
             q.addCriteria(new Criteria().orOperator(Criteria.where("avatarCheckStatus").is("verified"), Criteria.where("avatarCheckStatus").is("normal")));
-        } else {
+        } else if (interests != null) {
             q.addCriteria(new Criteria().andOperator(Criteria.where("avatarCheckStatus").ne("verified"), Criteria.where("avatarCheckStatus").ne("normal")));
         }
         return q;

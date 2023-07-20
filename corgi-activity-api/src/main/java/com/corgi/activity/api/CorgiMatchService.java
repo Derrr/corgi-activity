@@ -18,5 +18,7 @@ public interface CorgiMatchService {
 
     List<UserMatchItem> getMatchItems(UserQuery userQuery);
 
+    List<String> getNearbyUserIds(UserQuery userQuery);
+
     void deleteUser(String userId);
 }
