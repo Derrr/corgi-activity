@@ -51,6 +51,7 @@ public class CorgiUserDao {
     private final static Double RADIUS = 6371.0;
 
     public void updateUser(UserDetail userDetail) {
+        mongoTemplate.findAllAndRemove(new Query(Criteria.where("userId").is(userDetail.getUserId())), UserMongo.class);
         if (userDetail.getLng() != null && userDetail.getLng() < 180
                 && userDetail.getLat() != null && userDetail.getLat() < 90) {
             UserExtra userExtra = corgiExtraService.getUserExtra(userDetail.getUserId());
@@ -58,7 +59,6 @@ public class CorgiUserDao {
             UserMongo userMongo = new UserMongo(userDetail);
             BeanUtils.copyProperties(userDetail, userMongo);
             userMongo.setUserExtra(userExtra);
-            mongoTemplate.findAllAndRemove(new Query(Criteria.where("userId").is(userDetail.getUserId())), UserMongo.class);
             mongoTemplate.save(userMongo);
         }
     }
