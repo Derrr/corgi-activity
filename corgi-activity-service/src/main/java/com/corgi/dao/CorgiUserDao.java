@@ -156,7 +156,7 @@ public class CorgiUserDao {
 
         Query q = new Query().with(Sort.by(Sort.Direction.DESC, "id")).limit(5000);
         if (query.getRange() == null || query.getRange() <= 0 || query.getRange() > 100) {
-            query.setRange(1000.0);
+            query.setRange(5000.0);
         }
         if (interests == null) {
             q = new Query().limit(200);
