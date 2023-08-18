@@ -4,6 +4,7 @@ package com.corgi.dao;
 import com.alibaba.dubbo.config.annotation.Reference;
 import com.corgi.entity.UserMongo;
 import com.corgi.entity.UserMongoBase;
+import com.corgi.user.api.CorgiBlacklistService;
 import com.corgi.user.api.CorgiExtraService;
 import com.corgi.user.api.CorgiUserService;
 import com.corgi.user.entity.*;
@@ -47,6 +48,8 @@ public class CorgiUserDao {
     private CorgiUserService corgiUserService;
     @Reference
     private CorgiExtraService corgiExtraService;
+    @Reference
+    private CorgiBlacklistService corgiBlacklistService;
 
     private final static Double RADIUS = 6371.0;
 
@@ -258,6 +261,7 @@ public class CorgiUserDao {
         try {
             List<String> matchViews = redisTemplate.opsForList().range(viewKey, 0, -1);
             List<String> matchUsers = redisTemplate.opsForList().range(matchKey, 0, -1);
+            List<String> blackIds = getBlackIds(userId);
             Long nowTime = System.currentTimeMillis();
             Long threshold = nowTime - 14 * 24 * 3600 * 1000l;
             for (UserMongo mongo : mongos) {
@@ -387,6 +391,38 @@ public class CorgiUserDao {
             log.error(e.getMessage(), e);
         }
         return distance;
+    }
+
+    private List<String> getBlackIds(String userId) {
+        String blackKey = "black_cache_" + userId;
+        List<String> blackUserIds = new ArrayList<>();
+        if (!redisTemplate.hasKey(blackKey)) {
+            List<UserBasic> basicList = corgiBlacklistService.getBlackUser(userId);
+            List<String> beBlackedIds = corgiBlacklistService.getBeBlacked(userId);
+            if (!CollectionUtils.isEmpty(basicList)) {
+                for (UserBasic basic : basicList) {
+                    blackUserIds.add(basic.getUserId());
+                }
+            }
+            if (!CollectionUtils.isEmpty(beBlackedIds)) {
+                blackUserIds.addAll(beBlackedIds);
+            }
+            Calendar calendar = Calendar.getInstance();
+            calendar.add(Calendar.DATE, -30);
+            if (CollectionUtils.isEmpty(blackUserIds)) {
+                redisTemplate.delete(blackKey);
+                redisTemplate.opsForList().leftPush(blackKey, "null");
+            } else {
+                redisTemplate.opsForList().leftPushAll(blackKey, blackUserIds);
+            }
+            redisTemplate.expire(blackKey, 1L, TimeUnit.DAYS);
+        } else {
+            blackUserIds = redisTemplate.opsForList().range(blackKey, 0, -1);
+            if (blackUserIds.size() == 1 && "null".equals(blackUserIds.get(0))) {
+                return new ArrayList<>();
+            }
+        }
+        return blackUserIds;
     }
 
     private static double rad(double d) {
