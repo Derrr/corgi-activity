@@ -82,7 +82,7 @@ public class CorgiUserDao {
     }
 
     public List<UserMatchItem> findUser(UserQuery userQuery) {
-        UserDetail detail = corgiUserService.getUserDetailBasic(userQuery.getUserId());
+//        UserDetail detail = corgiUserService.getUserDetailBasic(userQuery.getUserId());
         UserExtra userExtra = corgiExtraService.getUserExtra(userQuery.getUserId());
         List<String> interests = new ArrayList<>();
         if (!StringUtils.isEmpty(userExtra.getInterests())) {
