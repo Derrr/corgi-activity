@@ -88,11 +88,11 @@ public class CorgiUserDao {
         if (!StringUtils.isEmpty(userExtra.getInterests())) {
             interests = Arrays.asList(userExtra.getInterests().split(","));
         }
-        if (UserDetail.VERIFIED.equals(detail.getAvatarCheckStatus()) || "normal".equals(detail.getAvatarCheckStatus())) {
-            return filterFace(userQuery, interests);
-        } else {
-            return filterNoFace(userQuery, interests);
-        }
+        //if (UserDetail.VERIFIED.equals(detail.getAvatarCheckStatus()) || "normal".equals(detail.getAvatarCheckStatus())) {
+        return filterFace(userQuery, interests);
+//        } else {
+//            return filterNoFace(userQuery, interests);
+//        }
     }
 
     private List<UserMatchItem> filterFace(UserQuery userQuery, List<String> interests) {
