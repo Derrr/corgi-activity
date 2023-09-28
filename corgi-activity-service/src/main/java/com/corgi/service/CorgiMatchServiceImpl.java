@@ -35,6 +35,11 @@ public class CorgiMatchServiceImpl implements CorgiMatchService {
     }
 
     @Override
+    public List<String> getNearbyUserIds(UserQuery userQuery) {
+        return corgiUserDao.getNearbyUserIds(userQuery);
+    }
+
+    @Override
     public void deleteUser(String userId) {
         corgiUserDao.deleteUser(userId);
     }
