@@ -158,13 +158,13 @@ public class CorgiUserDao {
     private Query getQuery(UserQuery query, boolean hasFace, boolean hasInterests, List<String> interests) {
 
         Query q = new Query().with(Sort.by(Sort.Direction.DESC, "id")).limit(5000);
+        if (interests == null) {
+            q = new Query().limit(200);
+        }
         if (query.getRange() == null || query.getRange() <= 0 || query.getRange() > 100) {
             q.addCriteria(Criteria.where("location").nearSphere(new Point(query.getLng(), query.getLat())));
         } else {
             q.addCriteria(Criteria.where("location").nearSphere(new Point(query.getLng(), query.getLat())).maxDistance(query.getRange() / 6371.0));
-        }
-        if (interests == null) {
-            q = new Query().limit(200);
         }
         q.addCriteria(Criteria.where("userId").ne(query.getUserId()));
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy/MM/dd");
