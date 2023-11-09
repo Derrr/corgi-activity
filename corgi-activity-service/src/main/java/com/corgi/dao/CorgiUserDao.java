@@ -159,9 +159,9 @@ public class CorgiUserDao {
 
         Query q = new Query().with(Sort.by(Sort.Direction.DESC, "id")).limit(5000);
         if (query.getRange() == null || query.getRange() <= 0 || query.getRange() > 100) {
-            q.addCriteria(Criteria.where("location").nearSphere(new Point(query.getLat(), query.getLng())));
+            q.addCriteria(Criteria.where("location").nearSphere(new Point(query.getLng(), query.getLat())));
         } else {
-            q.addCriteria(Criteria.where("location").nearSphere(new Point(query.getLat(), query.getLng())).maxDistance(query.getRange() / 6371.0));
+            q.addCriteria(Criteria.where("location").nearSphere(new Point(query.getLng(), query.getLat())).maxDistance(query.getRange() / 6371.0));
         }
         if (interests == null) {
             q = new Query().limit(200);
