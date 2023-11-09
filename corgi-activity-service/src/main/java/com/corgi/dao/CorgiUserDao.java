@@ -171,7 +171,7 @@ public class CorgiUserDao {
         if (!CollectionUtils.isEmpty(query.getDateStatus())) {
             query.getDateStatus().add("");
             q.addCriteria(Criteria.where("dateStatus").in(query.getDateStatus()));
-        } else {
+        } else if(interests != null){
             q.addCriteria(Criteria.where("dateStatus").ne("免打扰"));
         }
         if (!CollectionUtils.isEmpty(query.getGroup())) {
@@ -237,7 +237,7 @@ public class CorgiUserDao {
         }
         if ("verify".equals(query.getType())) {
             q.addCriteria(Criteria.where("avatarCheckStatus").is("verified"));
-        } else if (hasFace) {
+        } else if (hasFace && interests != null) {
             q.addCriteria(new Criteria().orOperator(Criteria.where("avatarCheckStatus").is("verified"), Criteria.where("avatarCheckStatus").is("normal")));
         } else if (interests != null) {
             q.addCriteria(new Criteria().andOperator(Criteria.where("avatarCheckStatus").ne("verified"), Criteria.where("avatarCheckStatus").ne("normal")));
