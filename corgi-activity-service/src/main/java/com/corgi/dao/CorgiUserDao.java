@@ -271,6 +271,9 @@ public class CorgiUserDao {
                 if (userIds.contains(mongo.getUserId())) {
                     continue;
                 }
+                if (blackIds.contains(mongo.getUserId())) {
+                    continue;
+                }
                 boolean contains = false;
                 for (String matchStr : matchUsers) {
                     String[] matchArr = matchStr.split("-");
@@ -293,42 +296,6 @@ public class CorgiUserDao {
                 if (contains) {
                     continue;
                 }
-//                boolean hasInterest = false;
-//                List<String> userInterest = mongo.getInterestList();
-//                if (!CollectionUtils.isEmpty(userInterest)) {
-//                    for (String interest : interests) {
-//                        if (userInterest.contains(interest)) {
-//                            hasInterest = true;
-//                            break;
-//                        }
-//                    }
-//                }
-//                boolean hasFace = "normal".equals(mongo.getAvatarCheckStatus()) || UserDetail.VERIFIED.equals(mongo.getAvatarCheckStatus());
-//                if (filterType.equals(FACE_INTERESTS)) {
-//                    if (!hasFace || !hasInterest) {
-//                        remain.add(mongo);
-//                        continue;
-//                    }
-//                }
-//                if (filterType.equals(NO_FACE_INTERESTS)) {
-//                    if (hasFace || !hasInterest) {
-//                        remain.add(mongo);
-//                        continue;
-//                    }
-//                }
-//                if (filterType.equals(FACE_NO_INTERESTS)) {
-//                    if (!hasFace || hasInterest) {
-//                        remain.add(mongo);
-//                        continue;
-//                    }
-//                }
-//                if (filterType.equals(NO_FACE_NO_INTERESTS)) {
-//                    if (hasFace || hasInterest) {
-//                        remain.add(mongo);
-//                        continue;
-//                    }
-//                }
-
                 UserMatchItem item = new UserMatchItem();
 
                 BeanUtils.copyProperties(mongo, item);
