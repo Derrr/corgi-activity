@@ -699,8 +699,10 @@ public class CorgiActivityDao {
                     } else if ("updateTime".equals(fieldName)) {
                         criteriaList.add(Criteria.where("updateTime").regex("^" + value + ".*"));
                     } else if ("startTime".equals(fieldName)) {
+                        value = value.toString().replaceAll("-", "/");
                         criteriaList.add(Criteria.where("createTime").gte(value));
                     } else if ("endTime".equals(fieldName)) {
+                        value = value.toString().replaceAll("-", "/");
                         criteriaList.add(Criteria.where("createTime").lte(value));
                     } else if (LIKE_FIELDS.contains(fieldName)) {
                         criteriaList.add(Criteria.where(field.getName()).regex("^.*" + value + ".*$"));
