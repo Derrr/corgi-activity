@@ -698,8 +698,10 @@ public class CorgiActivityDao {
                         criteriaList.add(Criteria.where("createTime").regex("^" + value + ".*"));
                     } else if ("updateTime".equals(fieldName)) {
                         criteriaList.add(Criteria.where("updateTime").regex("^" + value + ".*"));
-                    } else if (ActivityMongo.SIGN_UP_TIME.equals(fieldName)) {
-                        criteriaList.add(Criteria.where(ActivityMongo.SIGN_UP_TIME).lte(value));
+                    } else if ("startTime".equals(fieldName)) {
+                        criteriaList.add(Criteria.where("createTime").gte(value));
+                    } else if ("endTime".equals(fieldName)) {
+                        criteriaList.add(Criteria.where("createTime").lte(value));
                     } else if (LIKE_FIELDS.contains(fieldName)) {
                         criteriaList.add(Criteria.where(field.getName()).regex("^.*" + value + ".*$"));
                     } else if ("category".equals(fieldName) && CorgiActivity.CAT_BUSINESS.equals(value)) {
