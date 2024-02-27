@@ -2,10 +2,12 @@ package com.corgi.dao;
 
 
 import com.alibaba.dubbo.config.annotation.Reference;
+import com.corgi.activity.api.CorgiMatchService;
 import com.corgi.entity.UserMongo;
 import com.corgi.entity.UserMongoBase;
 import com.corgi.user.api.CorgiBlacklistService;
 import com.corgi.user.api.CorgiExtraService;
+import com.corgi.user.api.CorgiUserMatchService;
 import com.corgi.user.api.CorgiUserService;
 import com.corgi.user.entity.*;
 import lombok.extern.slf4j.Slf4j;
@@ -50,6 +52,8 @@ public class CorgiUserDao {
     private CorgiExtraService corgiExtraService;
     @Reference
     private CorgiBlacklistService corgiBlacklistService;
+    @Reference
+    private CorgiUserMatchService corgiUserMatchService;
 
     private final static Double RADIUS = 6371.0;
 
@@ -61,6 +65,7 @@ public class CorgiUserDao {
             UserMongo userMongo = new UserMongo(userDetail);
             BeanUtils.copyProperties(userDetail, userMongo);
             userMongo.setUserExtra(userExtra);
+            userMongo.setQuery(corgiUserMatchService.getUserQuery(userDetail.getUserId()));
             mongoTemplate.save(userMongo);
         }
     }

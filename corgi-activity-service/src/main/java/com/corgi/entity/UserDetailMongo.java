@@ -2,6 +2,7 @@ package com.corgi.entity;
 
 import com.corgi.user.entity.UserDetail;
 import com.corgi.user.entity.UserExtra;
+import com.corgi.user.entity.UserQuery;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.bson.types.ObjectId;
@@ -35,6 +36,7 @@ public class UserDetailMongo extends UserDetail {
     private List<String> xpList;
     private List<String> interestList = new ArrayList<>();
     private List<String> tagList = new ArrayList<>();
+    private UserQuery query;
 
     private Date createAt = new Date();
     private String vipExpire;
