@@ -176,7 +176,7 @@ public class CorgiUserDao {
         if (!CollectionUtils.isEmpty(query.getDateStatus())) {
             query.getDateStatus().add("");
             q.addCriteria(Criteria.where("dateStatus").in(query.getDateStatus()));
-        } else if(interests != null){
+        } else if (interests != null) {
             q.addCriteria(Criteria.where("dateStatus").ne("免打扰"));
         }
         if (!CollectionUtils.isEmpty(query.getGroup())) {
