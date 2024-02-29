@@ -103,26 +103,26 @@ public class CorgiUserDao {
         List<UserMongo> userMongos;
         if (!CollectionUtils.isEmpty(interests)) {
             userMongos = this.getUserMongos(userQuery, interests, FACE_INTERESTS);
-            this.filterUsers(userMongos, userQuery, FACE_INTERESTS, interests, items, userIds, 6 - items.size());
-            if (items.size() >= 6) {
+            this.filterUsers(userMongos, userQuery, FACE_INTERESTS, interests, items, userIds, 20 - items.size());
+            if (items.size() >= 20) {
                 return items;
             }
         }
         userMongos = this.getUserMongos(userQuery, interests, FACE_NO_INTERESTS);
-        this.filterUsers(userMongos, userQuery, FACE_NO_INTERESTS, interests, items, userIds, 6 - items.size());
-        if (items.size() >= 6) {
+        this.filterUsers(userMongos, userQuery, FACE_NO_INTERESTS, interests, items, userIds, 20 - items.size());
+        if (items.size() >= 20) {
             return items;
         }
 
         if (!CollectionUtils.isEmpty(interests)) {
             userMongos = this.getUserMongos(userQuery, interests, NO_FACE_INTERESTS);
-            this.filterUsers(userMongos, userQuery, NO_FACE_INTERESTS, interests, items, userIds, 6 - items.size());
-            if (items.size() >= 6) {
+            this.filterUsers(userMongos, userQuery, NO_FACE_INTERESTS, interests, items, userIds, 20 - items.size());
+            if (items.size() >= 20) {
                 return items;
             }
         }
         userMongos = this.getUserMongos(userQuery, interests, NO_FACE_NO_INTERESTS);
-        this.filterUsers(userMongos, userQuery, NO_FACE_NO_INTERESTS, interests, items, userIds, 6 - items.size());
+        this.filterUsers(userMongos, userQuery, NO_FACE_NO_INTERESTS, interests, items, userIds, 20 - items.size());
         return items;
 
     }
@@ -133,13 +133,13 @@ public class CorgiUserDao {
         List<UserMongo> userMongos;
         if (!CollectionUtils.isEmpty(interests)) {
             userMongos = this.getUserMongos(userQuery, interests, NO_FACE_INTERESTS);
-            this.filterUsers(userMongos, userQuery, NO_FACE_INTERESTS, interests, items, userIds, 6 - items.size());
-            if (items.size() >= 6) {
+            this.filterUsers(userMongos, userQuery, NO_FACE_INTERESTS, interests, items, userIds, 20 - items.size());
+            if (items.size() >= 20) {
                 return items;
             }
         }
         userMongos = this.getUserMongos(userQuery, interests, NO_FACE_NO_INTERESTS);
-        this.filterUsers(userMongos, userQuery, NO_FACE_NO_INTERESTS, interests, items, userIds, 6 - items.size());
+        this.filterUsers(userMongos, userQuery, NO_FACE_NO_INTERESTS, interests, items, userIds, 20 - items.size());
         return items;
     }
 
