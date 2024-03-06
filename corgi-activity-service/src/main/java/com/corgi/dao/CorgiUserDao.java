@@ -79,17 +79,21 @@ public class CorgiUserDao {
     }
 
     public List<UserMatchItem> findUser(UserQuery userQuery) {
-//        UserDetail detail = corgiUserService.getUserDetailBasic(userQuery.getUserId());
         UserExtra userExtra = corgiExtraService.getUserExtra(userQuery.getUserId());
         List<String> interests = new ArrayList<>();
         if (!StringUtils.isEmpty(userExtra.getInterests())) {
             interests = Arrays.asList(userExtra.getInterests().split(","));
         }
-        //if (UserDetail.VERIFIED.equals(detail.getAvatarCheckStatus()) || "normal".equals(detail.getAvatarCheckStatus())) {
-        return filterFace(userQuery, interests);
-//        } else {
-//            return filterNoFace(userQuery, interests);
-//        }
+        List<UserMatchItem> items = filterFace(userQuery, interests);
+        if (items != null) {
+            for (UserMatchItem userMatchItem : items) {
+                if (userMatchItem.getAvatar() == null) {
+                    continue;
+                }
+                userMatchItem.setAvatar(userMatchItem.getAvatar().replaceAll("corgi-pic\\.oss-cn-beijing\\.aliyuncs\\.com", "image.corgi.org.cn"));
+            }
+        }
+        return items;
     }
 
     private List<UserMatchItem> filterFace(UserQuery userQuery, List<String> interests) {
