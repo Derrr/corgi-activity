@@ -64,6 +64,9 @@ public class CorgiActivityFeedServiceImpl implements CorgiActivityFeedService {
             for (ActivityMongo mongo : activityMongoList) {
                 CorgiActivity activity = mongo.getActivity();
                 List<ActivityPic> activityPics = corgiPicService.getActivityPic(activity.getId());
+                if(StringUtils.isNotEmpty(activity.getCoverUrl())){
+                    activity.setCoverUrl(activity.getCoverUrl().replaceAll("corgi-pic\\.oss-cn-beijing\\.aliyuncs\\.com", "image.corgi.org.cn"));
+                }
                 if (CorgiActivity.CAT_IMAGE.equals(mongo.getCategory()) && CollectionUtils.isEmpty(activityPics)) {
                     continue;
                 }
