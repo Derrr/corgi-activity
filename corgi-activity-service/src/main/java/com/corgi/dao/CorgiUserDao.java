@@ -95,7 +95,7 @@ public class CorgiUserDao {
                 if (userMatchItem.getAvatar() == null) {
                     continue;
                 }
-                userMatchItem.setAvatar(userMatchItem.getAvatar().replaceAll("corgi-pic\\.oss-cn-beijing\\.aliyuncs\\.com", "image.corgi.org.cn"));
+                userMatchItem.setAvatar(userMatchItem.getAvatar().replaceAll("https://corgi-pic\\.oss-cn-beijing\\.aliyuncs\\.com", "http://image.corgi.org.cn"));
             }
         }
         return items;
