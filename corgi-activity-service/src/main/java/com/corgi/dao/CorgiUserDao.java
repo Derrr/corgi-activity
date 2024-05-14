@@ -244,11 +244,9 @@ public class CorgiUserDao {
         if ("verify".equals(query.getType())) {
             q.addCriteria(Criteria.where("avatarCheckStatus").is("verified"));
         } else if (hasFace && interests != null) {
-            q.addCriteria(Criteria.where("avatarCheckStatus").ne("check"));
-            q.addCriteria(Criteria.where("avatarCheckStatus").ne("no_face"));
+            q.addCriteria(Criteria.where("avatarCheckStatus").ne("check").ne("no_face"));
         } else if (interests != null) {
-            q.addCriteria(Criteria.where("avatarCheckStatus").ne("verified"));
-            q.addCriteria(Criteria.where("avatarCheckStatus").ne("normal"));
+            q.addCriteria(Criteria.where("avatarCheckStatus").ne("verified").ne("normal"));
         }
         return q;
     }
