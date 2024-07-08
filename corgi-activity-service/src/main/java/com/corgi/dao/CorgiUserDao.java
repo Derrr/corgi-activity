@@ -93,6 +93,7 @@ public class CorgiUserDao {
         if (items != null) {
             for (UserMatchItem userMatchItem : items) {
                 if (userMatchItem.getAvatar() == null) {
+                    log.info("user avatar is null");
                     continue;
                 }
                 userMatchItem.setAvatar(userMatchItem.getAvatar().replaceAll("https://corgi-pic\\.oss-cn-beijing\\.aliyuncs\\.com", "http://image.corgi.org.cn"));
